@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCem – Hồ sơ mộ phần</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--ink:#1a1a2e;--gold:#c9a84c;--jade:#2e7d6b;--jade-pale:#d4ede8;--cream:#faf7f0;--muted:#7a7a96;--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh}
+.header{background:var(--ink);padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:3px solid rgba(201,168,76,.3)}
+.header-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),#e8c97a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.header h1{font-family:'Playfair Display',serif;font-size:18px;color:#e8c97a}
+.header span{font-size:11px;color:rgba(255,255,255,.45);display:block;margin-top:1px}
+.container{max-width:720px;margin:0 auto;padding:24px 16px}
+.card{background:#fff;border-radius:var(--r);padding:24px;box-shadow:0 2px 16px rgba(26,26,46,.08);border:1px solid rgba(26,26,46,.07);margin-bottom:16px}
+.grave-hero{display:flex;gap:18px;align-items:flex-start;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(26,26,46,.07)}
+.grave-avatar{width:76px;height:76px;border-radius:14px;background:linear-gradient(135deg,#f5ead0,var(--gold));display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+.grave-name{font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);margin-bottom:4px;font-weight:700}
+.grave-years{font-size:14px;color:var(--muted);margin-bottom:8px}
+.grave-lot{display:inline-flex;align-items:center;gap:6px;background:var(--jade-pale);color:var(--jade);padding:5px 14px;border-radius:99px;font-size:12.5px;font-weight:700}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-item{padding:12px;background:#f8f7f3;border-radius:9px}
+.info-label{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.info-value{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.badge.active{background:rgba(46,125,107,.12);color:var(--jade)}
+.badge.pending{background:rgba(201,168,76,.15);color:#7a6020}
+.badge.archived{background:rgba(26,26,46,.08);color:var(--muted)}
+.qr-section{text-align:center;padding:16px 0}
+.qr-img{width:160px;height:160px;border-radius:10px;border:3px solid var(--jade-pale);display:block;margin:0 auto 12px}
+.action-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.sky{background:#2563a8;color:#fff}
+.btn.dark:hover,.btn.sky:hover{opacity:.88}
+.error-box{text-align:center;padding:48px 24px;color:var(--muted)}
+@media(max-width:540px){.info-grid{grid-template-columns:1fr}.grave-hero{flex-direction:column;align-items:center;text-align:center}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">⛩</div>
+  <div><h1>SmartCem 4.0</h1><span>Hệ thống Quản lý Nghĩa trang Thông minh</span></div>
+</div>
+<div class="container">
+  <div id="content">
+    <div class="card"><div class="error-box"><i class="fas fa-spinner fa-spin"></i><p style="margin-top:8px">Đang tải hồ sơ mộ phần…</p></div></div>
+  </div>
+  <div class="action-btns" id="action-bar" style="display:none">
+    <a href="/" class="btn dark"><i class="fas fa-home"></i> Về trang quản lý</a>
+    <a id="btn-map" href="#" target="_blank" class="btn sky"><i class="fas fa-map-location-dot"></i> Xem vị trí trên bản đồ Lô</a>
+  </div>
+</div>
+<script>
+async function load() {
+  const params = new URLSearchParams(window.location.search);
+  let id = params.get('id');
+  if (!id) {
+    const m = window.location.pathname.match(/\/ho-so\/(\d+)/);
+    if (m) id = m[1];
+  }
+  if (!id) {
+    showError('Không tìm thấy mã hồ sơ trong đường dẫn.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/graves/${id}`);
+    if (!res.ok) throw new Error('Hồ sơ không tồn tại (mã #' + id + ')');
+    const g = await res.json();
+    render(g);
+  } catch (e) {
+    showError(e.message);
+  }
+}
+
+function render(g) {
+  const zoneNames = { A:'Khu Thiên Ân', B:'Khu Vĩnh Phúc', C:'Khu Bình An', D:'Khu Thiên Thần', E:'Khu Phúc Lộc' };
+  const statusLabel = { Active:'Đang quản lý', Pending:'Chờ xác nhận', Archived:'Lưu trữ' };
+  document.title = `SmartCem – ${g.fullName}`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="grave-hero">
+        ${g.photoPath
+          ? `<img src="${g.photoPath}" style="width:76px;height:76px;border-radius:14px;object-fit:cover;flex-shrink:0">`
+          : `<div class="grave-avatar">⛩</div>`}
+        <div>
+          <div class="grave-name">${esc(g.fullName)}${g.alias ? ` <span style="font-size:16px;color:var(--muted)">(${esc(g.alias)})</span>` : ''}</div>
+          <div class="grave-years">Năm sinh – mất: <b>${g.bornYear || '?'} – ${g.diedYear || '?'}</b>${g.bornYear && g.diedYear ? ` · Hưởng thọ ${g.diedYear - g.bornYear} tuổi` : ''}</div>
+          <div class="grave-lot"><i class="fas fa-location-dot"></i> ${zoneNames[g.zone] || ('Khu ' + g.zone)} · Lô ${esc(g.lotCode)} (${g.graveType || 'Mộ đơn'}, ${g.areaM2} m²)</div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Ngày giỗ Âm lịch</div>
+          <div class="info-value" style="color:var(--gold);font-weight:700">${esc(g.lunarDeathDate || 'Chưa ghi nhận')}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Ngày mất (Dương lịch)</div>
+          <div class="info-value">${fmtDate(g.diedDate)}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Thời hạn hợp đồng</div>
+          <div class="info-value">${esc(g.contractType || 'Vĩnh viễn')}${g.contractEndDate ? ` (hết hạn: ${fmtDate(g.contractEndDate)})` : ''}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Trạng thái quản lý</div>
+          <div class="info-value"><span class="badge ${(g.status||'').toLowerCase()}">${statusLabel[g.status] || g.status}</span></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Thân nhân đại diện</div>
+          <div class="info-value">${esc(g.contactName || '—')} ${g.contactRelation ? `(${esc(g.contactRelation)})` : ''}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Điện thoại liên hệ</div>
+          <div class="info-value">${esc(g.contactPhone || '—')}</div>
+        </div>
+        <div class="info-item" style="grid-column:1/-1">
+          <div class="info-label">Quê quán / Địa chỉ thân nhân</div>
+          <div class="info-value">${esc(g.hometown || '—')} ${g.contactAddress ? `· Đ/c: ${esc(g.contactAddress)}` : ''}</div>
+        </div>
+        ${g.notes ? `<div class="info-item" style="grid-column:1/-1"><div class="info-label">Ghi chú & Dặn dò</div><div class="info-value" style="font-size:13px;line-height:1.6">${esc(g.notes)}</div></div>` : ''}
+      </div>
+    </div>
+
+    ${g.qrImagePath ? `
+    <div class="card">
+      <div style="font-family:'Playfair Display',serif;font-size:15px;margin-bottom:12px;color:var(--ink)"><i class="fas fa-qrcode" style="color:var(--gold);margin-right:6px"></i>Mã QR Tra cứu hồ sơ</div>
+      <div class="qr-section">
+        <img src="${g.qrImagePath}" class="qr-img" alt="QR Code">
+        <p style="font-size:12px;color:var(--muted)">Quét mã QR bằng camera điện thoại để truy cập hồ sơ này bất cứ lúc nào</p>
+      </div>
+    </div>` : ''}`;
+
+  document.getElementById('action-bar').style.display = 'flex';
+  document.getElementById('btn-map').href = `/lotmap.html?lot=${encodeURIComponent(g.lotCode)}`;
+}
+
+function showError(msg) {
+  document.getElementById('content').innerHTML = `
+    <div class="card"><div class="error-box">
+      <i class="fas fa-circle-exclamation" style="font-size:36px;color:var(--rose)"></i>
+      <p style="font-size:16px;font-weight:700;color:var(--ink);margin:10px 0 6px">Không tìm thấy hồ sơ</p>
+      <p style="font-size:13px">${esc(msg)}</p>
+    </div></div>`;
+  document.getElementById('action-bar').style.display = 'flex';
+  document.getElementById('btn-map').style.display = 'none';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+load();
+</script>
+</body>
+</html>

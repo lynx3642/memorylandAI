@@ -1,0 +1,31 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Database & Cache
+*.db-shm
+*.db-wal
+
+## Uploaded user content (keep folder via .gitkeep, ignore user files)
+wwwroot/uploads/photos/*
+!wwwroot/uploads/photos/.gitkeep
+wwwroot/uploads/service/*
+!wwwroot/uploads/service/.gitkeep
+wwwroot/qrcodes/*
+!wwwroot/qrcodes/.gitkeep
+
+## OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+

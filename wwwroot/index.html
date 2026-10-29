@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCem 4.0 – Quản lý Nghĩa trang Thông minh</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#1a1a2e;--ink-soft:#2d2d4e;--ink-faint:#3d3d60;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5ead0;
+  --jade:#2e7d6b;--jade-light:#4caf91;--jade-pale:#d4ede8;
+  --rose:#8b3a52;--rose-light:#c45e78;
+  --sky:#2563a8;--sky-light:#4a90d9;
+  --cream:#faf7f0;--white:#fff;
+  --muted:#7a7a96;--border:rgba(201,168,76,.22);
+  --shadow:0 8px 40px rgba(26,26,46,.14);--shadow-sm:0 2px 12px rgba(26,26,46,.08);
+  --r:12px;--rsm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px}
+
+/* APP SHELL */
+#app{display:flex;height:100vh}
+.sidebar{width:250px;background:rgba(20,20,38,.98);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:all .3s;z-index:999}
+.sb-brand{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-brand h2{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold-light);line-height:1.2}
+.sb-brand span{font-size:10px;color:var(--muted)}
+.sb-nav{flex:1;padding:8px 10px;overflow-y:auto}
+.nav-sec{font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:12px 8px 4px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rsm);cursor:pointer;transition:all .18s;color:#9494b8;font-size:13px;margin-bottom:2px;user-select:none}
+.nav-item:hover{background:rgba(201,168,76,.08);color:var(--cream)}
+.nav-item.active{background:rgba(201,168,76,.15);color:var(--gold-light);font-weight:600}
+.nav-item i{width:16px;text-align:center;font-size:13px}
+.nav-badge{margin-left:auto;font-size:9px;background:var(--rose);color:#fff;padding:2px 7px;border-radius:99px;font-weight:700}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.u-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0}
+.u-info p{font-size:12px;font-weight:600;line-height:1.2}
+.u-info span{font-size:10px;color:var(--muted)}
+
+/* MAIN CONTENT */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--cream);color:var(--ink)}
+.topbar{height:56px;background:#fff;border-bottom:1px solid rgba(26,26,46,.08);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;box-shadow:0 1px 4px rgba(26,26,46,.06)}
+.topbar-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink);flex:1;font-weight:700}
+.content{flex:1;overflow-y:auto;padding:22px;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page{display:none}
+.page.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--rsm);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;transition:all .18s;outline:none;text-decoration:none}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--ink);box-shadow:0 2px 8px rgba(201,168,76,.25)}
+.btn.primary:hover{opacity:.92;transform:translateY(-1px)}
+.btn.jade{background:var(--jade);color:#fff}
+.btn.jade:hover{background:var(--jade-light)}
+.btn.danger{background:var(--rose);color:#fff}
+.btn.danger:hover{opacity:.9}
+.btn.sky{background:var(--sky);color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid rgba(26,26,46,.15);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* CARDS & STATS */
+.card{background:#fff;border-radius:var(--r);padding:20px;border:1px solid rgba(26,26,46,.07);box-shadow:var(--shadow-sm);margin-bottom:16px}
+.card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;color:var(--ink)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:var(--r);padding:18px;border:1px solid rgba(26,26,46,.06);position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3.5px}
+.stat-card.gold::before{background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.stat-card.jade::before{background:linear-gradient(90deg,var(--jade),var(--jade-light))}
+.stat-card.rose::before{background:linear-gradient(90deg,var(--rose),var(--rose-light))}
+.stat-card.sky::before{background:linear-gradient(90deg,var(--sky),var(--sky-light))}
+.stat-icon{position:absolute;top:16px;right:16px;font-size:22px;opacity:.15}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.stat-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--ink);line-height:1.1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.stat-sub.up{color:var(--jade);font-weight:600}
+
+/* SMART ALERTS WIDGETS */
+.alert-strip{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.alert-card{background:#fff;border-radius:var(--r);padding:16px;border:1.5px solid rgba(26,26,46,.08);box-shadow:var(--shadow-sm)}
+.alert-card.anniv{border-left:4px solid var(--gold)}
+.alert-card.contract{border-left:4px solid var(--rose)}
+.alert-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.alert-head h4{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#fcfbf8;border:1px solid rgba(26,26,46,.05);margin-bottom:6px}
+.alert-item:hover{background:rgba(201,168,76,.05)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;padding:11px 14px;background:#f8f7f3;color:var(--muted);font-weight:700;font-size:10px;letter-spacing:.7px;text-transform:uppercase;border-bottom:1.5px solid rgba(26,26,46,.08)}
+td{padding:12px 14px;border-bottom:1px solid rgba(26,26,46,.06);vertical-align:middle}
+tr:hover td{background:rgba(201,168,76,.03)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.badge.active{background:rgba(46,125,107,.12);color:var(--jade)}
+.badge.pending{background:rgba(201,168,76,.15);color:#7a6020}
+.badge.archived{background:rgba(26,26,46,.08);color:var(--muted)}
+.badge.tag-anniv{background:#fff3d6;color:#8f6300;border:1px solid #ebd08d}
+.badge.tag-expire{background:#ffe3ea;color:#a82247;border:1px solid #f7b2c3}
+
+/* SEARCH & FILTERS */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-input-wrap{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid rgba(26,26,46,.12);border-radius:var(--rsm);padding:8px 12px}
+.search-input-wrap:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.search-input-wrap i{color:var(--muted);font-size:12px}
+.search-input-wrap input{flex:1;border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;background:transparent}
+.filter-select{padding:8px 12px;border:1.5px solid rgba(26,26,46,.12);border-radius:var(--rsm);font-size:12.5px;font-family:'DM Sans',sans-serif;background:#fff;cursor:pointer;outline:none}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fc{display:flex;flex-direction:column;gap:5px}
+.fc.full{grid-column:1/-1}
+.fc label{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-faint)}
+.fc input,.fc select,.fc textarea{padding:9px 12px;background:#f8f7f3;border:1.5px solid rgba(26,26,46,.1);border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.fc input:focus,.fc select:focus,.fc textarea:focus{border-color:var(--gold);background:#fff}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(26,26,46,.65);display:none;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(3px)}
+.modal-ov.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;width:650px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);color:var(--ink)}
+.modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-h h3{font-family:'Playfair Display',serif;font-size:18px}
+.modal-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px}
+.modal-x:hover{color:var(--rose)}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid rgba(26,26,46,.08)}
+
+/* SERVICE PACKAGES & ORDERS */
+.svc-stat-card{background:#fff;border-radius:var(--r);padding:14px;border:1px solid rgba(26,26,46,.06);position:relative;overflow:hidden}
+.pkg-card{background:#fff;border-radius:var(--r);border:1.5px solid rgba(26,26,46,.07);overflow:hidden;transition:all .2s;display:flex;flex-direction:column;justify-content:space-between}
+.pkg-card:hover{box-shadow:0 6px 20px rgba(26,26,46,.08);transform:translateY(-2px)}
+.pkg-card-top{padding:16px}
+.pkg-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px}
+.pkg-name{font-weight:700;font-size:14px;margin-bottom:4px}
+.pkg-desc{font-size:11.5px;color:var(--muted);line-height:1.4}
+.pkg-card-foot{padding:10px 16px;background:rgba(26,26,46,.02);border-top:1px solid rgba(26,26,46,.06);display:flex;align-items:center;justify-content:space-between}
+.pkg-price{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+
+/* PRINT RECEIPT STYLING */
+#receipt-content{background:#fff;color:#111;padding:24px;border-radius:8px;border:1px solid #ddd;font-family:'DM Sans',sans-serif}
+.receipt-header{text-align:center;border-bottom:2px dashed #bbb;padding-bottom:14px;margin-bottom:14px}
+.receipt-title{font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.receipt-table{width:100%;margin:14px 0;border-collapse:collapse}
+.receipt-table th,.receipt-table td{padding:8px;border:1px solid #ccc;font-size:12px}
+.receipt-sigs{display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:center;margin-top:24px;padding-top:10px}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);background:#fff;border-left:4px solid var(--sky);color:var(--ink)}
+.toast.ok{border-color:var(--jade)}.toast.err{border-color:var(--rose)}
+
+/* RESPONSIVE */
+.sidebar-toggle{display:none;background:none;border:none;cursor:pointer;font-size:18px;color:var(--ink)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:998}
+@media(max-width:1024px){
+  .alert-strip{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:250px}
+  .sidebar.open{left:0}
+  .sidebar-toggle{display:block}
+  .sidebar-overlay.show{display:block}
+  .hide-mobile{display:none!important}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-icon">⛩</div>
+      <div><h2>SmartCem</h2><span>v4.0 · Pro Edition</span></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-sec">Tổng quan</div>
+      <div class="nav-item active" data-page="dashboard" onclick="nav(this)"><i class="fas fa-gauge-high"></i> Dashboard</div>
+
+      <div class="nav-sec">Hồ sơ & Bản đồ</div>
+      <div class="nav-item" onclick="window.open('/lotmap.html','_blank')"><i class="fas fa-map-location-dot"></i> Bản đồ phân lô <span class="nav-badge" style="background:var(--jade)">GIS</span></div>
+      <div class="nav-item" data-page="graves" onclick="nav(this)"><i class="fas fa-headstone"></i> Danh sách mộ phần</div>
+      <div class="nav-item" data-page="import" onclick="nav(this)"><i class="fas fa-upload"></i> Import dữ liệu</div>
+      <div class="nav-item" onclick="window.open('/import-live.html','_blank')"><i class="fas fa-satellite-dish"></i> Live Stream</div>
+
+      <div class="nav-sec">Dịch vụ & Vận hành</div>
+      <div class="nav-item" data-page="orders" onclick="nav(this)"><i class="fas fa-concierge-bell"></i> Đơn & Gói dịch vụ</div>
+      <div class="nav-item" data-page="logs" onclick="nav(this)"><i class="fas fa-clock-rotate-left"></i> Nhật ký hệ thống</div>
+
+      <div class="nav-sec">Hệ thống</div>
+      <div class="nav-item" onclick="window.open('/swagger','_blank')"><i class="fas fa-code"></i> Swagger API Docs</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="u-av">AD</div>
+      <div class="u-info"><p>Ban Quản Lý</p><span>admin@smartcem.vn</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div style="display:flex;gap:8px" id="topbar-actions"></div>
+    </div>
+    <div class="content">
+
+      <!-- ── PAGE: DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <!-- Stats Strip -->
+        <div class="stats-grid" id="dash-stats"></div>
+
+        <!-- Smart Alerts: Anniversaries & Expiring Contracts -->
+        <div class="alert-strip">
+          <div class="alert-card anniv">
+            <div class="alert-head">
+              <h4><i class="fas fa-calendar-check" style="color:var(--gold)"></i> Ngày giỗ sắp tới (30 ngày)</h4>
+              <button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="filterAnniversaryGraves()">Xem tất cả</button>
+            </div>
+            <div id="dash-anniv-list"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
+          </div>
+          <div class="alert-card contract">
+            <div class="alert-head">
+              <h4><i class="fas fa-clock" style="color:var(--rose)"></i> Hợp đồng sắp hết hạn (60 ngày)</h4>
+              <button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="filterExpiringGraves()">Xem tất cả</button>
+            </div>
+            <div id="dash-contract-list"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+          <div class="card">
+            <div class="card-title">Tỷ lệ lấp đầy theo phân khu <small style="font-size:11px;color:var(--muted)">Đồng bộ bản đồ</small></div>
+            <div id="dash-zones"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Hoạt động quản trị gần đây</div>
+            <div id="dash-logs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: GRAVES LIST ── -->
+      <div class="page" id="page-graves">
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input id="search-q" placeholder="Tìm tên cụ, số lô, quê quán, tên/sđt thân nhân…" oninput="debouncedSearch()">
+          </div>
+          <select class="filter-select" id="filter-zone" onchange="loadGraves()">
+            <option value="">Tất cả phân khu</option>
+          </select>
+          <select class="filter-select" id="filter-contract" onchange="loadGraves()">
+            <option value="">Mọi loại hợp đồng</option>
+            <option value="Vĩnh viễn">Vĩnh viễn</option>
+            <option value="Thuê 20 năm">Thuê 20 năm</option>
+            <option value="Thuê 30 năm">Thuê 30 năm</option>
+            <option value="Thuê 50 năm">Thuê 50 năm</option>
+          </select>
+          <select class="filter-select" id="filter-status" onchange="loadGraves()">
+            <option value="">Mọi trạng thái</option>
+            <option value="Active">Đang quản lý</option>
+            <option value="Pending">Chờ xác nhận</option>
+            <option value="Archived">Lưu trữ</option>
+          </select>
+          <select class="filter-select" id="filter-smart" onchange="loadGraves()">
+            <option value="">Lọc thông minh</option>
+            <option value="anniv">🔔 Ngày giỗ sắp tới</option>
+            <option value="expire">⚠️ Hợp đồng sắp hết hạn</option>
+          </select>
+        </div>
+
+        <div class="card" style="padding:0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ và tên</th>
+                  <th class="hide-mobile">Sinh - Mất</th>
+                  <th>Khu / Lô</th>
+                  <th class="hide-mobile">Ngày giỗ (ÂL / DL)</th>
+                  <th class="hide-mobile">Thân nhân & SĐT</th>
+                  <th>Hợp đồng</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="graves-tbody"></tbody>
+            </table>
+          </div>
+          <div id="graves-pagination" style="padding:12px 16px;border-top:1px solid rgba(26,26,46,.06)"></div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: SERVICES & ORDERS ── -->
+      <div class="page" id="page-orders">
+        <!-- Service Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid rgba(26,26,46,.08);padding-bottom:10px">
+          <button class="btn svc-tab active" data-tab="orders" onclick="switchSvcTab(this,'orders')"><i class="fas fa-list-check"></i> Đơn dịch vụ</button>
+          <button class="btn svc-tab" data-tab="packages" onclick="switchSvcTab(this,'packages')"><i class="fas fa-cubes"></i> Gói dịch vụ</button>
+          <button class="btn svc-tab" data-tab="revenue" onclick="switchSvcTab(this,'revenue')"><i class="fas fa-chart-line"></i> Doanh thu & Thống kê</button>
+        </div>
+
+        <!-- Stats Strip for Service -->
+        <div class="stats-grid" id="svc-stats-strip" style="margin-bottom:16px"></div>
+
+        <!-- Tab 1: Orders -->
+        <div id="svc-tab-orders">
+          <div class="search-bar">
+            <div class="search-input-wrap">
+              <i class="fas fa-search"></i>
+              <input id="svc-search" placeholder="Tìm theo mã đơn, tên mộ, nhân viên phụ trách…" oninput="debouncedSvcSearch()">
+            </div>
+            <select class="filter-select" id="svc-filter-status" onchange="loadOrders()">
+              <option value="">Tất cả trạng thái</option>
+              <option value="Pending">Chờ xác nhận</option>
+              <option value="Confirmed">Đã xác nhận</option>
+              <option value="InProgress">Đang thực hiện</option>
+              <option value="Done">Hoàn thành</option>
+              <option value="Cancelled">Đã hủy</option>
+            </select>
+            <button class="btn ghost" onclick="exportOrdersExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+          </div>
+          <div class="card" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Hồ sơ mộ</th>
+                    <th>Dịch vụ</th>
+                    <th>Thành tiền</th>
+                    <th class="hide-mobile">Lịch hẹn</th>
+                    <th class="hide-mobile">Phụ trách</th>
+                    <th>Trạng thái</th>
+                    <th>Thanh toán</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-tbody"></tbody>
+              </table>
+            </div>
+            <div id="orders-pagination" style="padding:12px 16px;border-top:1px solid rgba(26,26,46,.06)"></div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Packages -->
+        <div id="svc-tab-packages" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+            <button class="btn primary" onclick="openAddPackageModal()"><i class="fas fa-plus"></i> Thêm gói dịch vụ mới</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="packages-grid"></div>
+        </div>
+
+        <!-- Tab 3: Revenue -->
+        <div id="svc-tab-revenue" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card">
+              <div class="card-title">Doanh thu 6 tháng gần nhất</div>
+              <div style="height:260px"><canvas id="revenue-chart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title">Cơ cấu doanh thu theo nhóm dịch vụ</div>
+              <div style="height:260px"><canvas id="category-chart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: IMPORT ── -->
+      <div class="page" id="page-import">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:16px">
+          <div>
+            <div class="card">
+              <div class="card-title">Nhập dữ liệu mộ phần hàng loạt</div>
+              <div class="upload-zone" id="drop-zone">
+                <input type="file" id="import-file" accept=".xlsx,.xls,.csv,.json" onchange="onFileSelected(this)">
+                <div class="uz-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                <div class="uz-title">Kéo thả file vào đây hoặc bấm để chọn</div>
+                <div class="uz-sub">Hỗ trợ Excel (.xlsx, .xls), CSV UTF-8 hoặc JSON</div>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+                <button class="btn primary" id="btn-upload" onclick="doImport()"><i class="fas fa-upload"></i> Bắt đầu Import</button>
+                <a href="/api/import/template" class="btn ghost"><i class="fas fa-file-excel"></i> Tải file Excel mẫu</a>
+              </div>
+              <div id="prog-section" style="display:none;margin-top:16px">
+                <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+                <span id="prog-label" style="font-size:12px;color:var(--muted)">Đang xử lý...</span>
+              </div>
+              <div id="import-result"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">Lịch sử Import gần đây</div>
+              <div id="jobs-mini-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: AUDIT LOGS ── -->
+      <div class="page" id="page-logs">
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input id="log-search" placeholder="Tìm theo nội dung, người thực hiện…" oninput="loadLogs()">
+          </div>
+          <select class="filter-select" id="log-filter-action" onchange="loadLogs()">
+            <option value="">Mọi hành động</option>
+            <option value="add">Thêm hồ sơ</option>
+            <option value="edit">Chỉnh sửa</option>
+            <option value="delete">Xóa hồ sơ</option>
+            <option value="service">Dịch vụ</option>
+            <option value="payment">Thanh toán</option>
+            <option value="import">Import dữ liệu</option>
+            <option value="qr">Mã QR</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Hành động</th>
+                  <th>Nội dung chi tiết</th>
+                  <th>Người thực hiện</th>
+                </tr>
+              </thead>
+              <tbody id="logs-tbody"></tbody>
+            </table>
+          </div>
+          <div id="logs-pagination" style="padding:12px 16px;border-top:1px solid rgba(26,26,46,.06)"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- ── MODAL: ADD / EDIT GRAVE ── -->
+<div class="modal-ov" id="modal-grave">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 id="modal-grave-title">Thêm hồ sơ mộ phần</h3>
+      <button class="modal-x" onclick="closeModal('modal-grave')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="fc"><label>Họ và tên người quá cố *</label><input id="g-name" placeholder="Nguyễn Văn A"></div>
+      <div class="fc"><label>Tên gọi / Pháp danh</label><input id="g-alias" placeholder="Cụ Ba, Thích Tâm An..."></div>
+      <div class="fc"><label>Năm sinh</label><input id="g-born" type="number" placeholder="1940"></div>
+      <div class="fc"><label>Năm mất</label><input id="g-died" type="number" placeholder="2020"></div>
+      <div class="fc"><label>Ngày mất chi tiết (Dương lịch)</label><input id="g-died-date" type="date"></div>
+      <div class="fc"><label>Ngày giỗ Âm lịch</label><input id="g-lunar-date" placeholder="Ví dụ: 15/07 Âm lịch"></div>
+      <div class="fc"><label>Phân khu *</label><select id="g-zone"></select></div>
+      <div class="fc"><label>Số hiệu Lô *</label><input id="g-lot" placeholder="A-01-05"></div>
+      <div class="fc"><label>Kiểu mộ</label>
+        <select id="g-type">
+          <option value="Mộ đơn">Mộ đơn</option>
+          <option value="Mộ đôi">Mộ đôi</option>
+          <option value="Mộ gia tộc">Mộ gia tộc</option>
+          <option value="Cải táng">Cải táng</option>
+        </select>
+      </div>
+      <div class="fc"><label>Diện tích (m²)</label><input id="g-area" type="number" step="0.1" value="3.5"></div>
+      <div class="fc full"><label>Quê quán nguyên quán</label><input id="g-hometown" placeholder="Quê quán"></div>
+
+      <div class="fc full" style="border-top:1px solid rgba(26,26,46,.08);padding-top:10px;margin-top:4px">
+        <span style="font-weight:700;font-size:12px;color:var(--jade)">Thông tin thân nhân / người đại diện liên hệ:</span>
+      </div>
+      <div class="fc"><label>Họ tên thân nhân</label><input id="g-contact" placeholder="Nguyễn Thế B"></div>
+      <div class="fc"><label>Mối quan hệ</label><input id="g-relation" placeholder="Con trưởng, Vợ, Chồng, Cháu..."></div>
+      <div class="fc"><label>Số điện thoại</label><input id="g-phone" placeholder="0912 345 678"></div>
+      <div class="fc"><label>Địa chỉ thân nhân</label><input id="g-address" placeholder="Địa chỉ liên hệ"></div>
+
+      <div class="fc full" style="border-top:1px solid rgba(26,26,46,.08);padding-top:10px;margin-top:4px">
+        <span style="font-weight:700;font-size:12px;color:var(--gold)">Hợp đồng & thời hạn sử dụng mộ:</span>
+      </div>
+      <div class="fc"><label>Loại hợp đồng</label>
+        <select id="g-contract-type">
+          <option value="Vĩnh viễn">Vĩnh viễn</option>
+          <option value="Thuê 20 năm">Thuê 20 năm</option>
+          <option value="Thuê 30 năm">Thuê 30 năm</option>
+          <option value="Thuê 50 năm">Thuê 50 năm</option>
+        </select>
+      </div>
+      <div class="fc"><label>Trạng thái hồ sơ</label>
+        <select id="g-status">
+          <option value="Active">Đang quản lý</option>
+          <option value="Pending">Chờ xác nhận</option>
+          <option value="Archived">Lưu trữ</option>
+        </select>
+      </div>
+      <div class="fc"><label>Ngày bắt đầu hợp đồng</label><input id="g-contract-start" type="date"></div>
+      <div class="fc"><label>Ngày hết hạn hợp đồng</label><input id="g-contract-end" type="date"></div>
+
+      <div class="fc full"><label>Ghi chú đặc biệt</label><textarea id="g-note" placeholder="Dặn dò gia đình, phong tục..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modal-grave')">Hủy</button>
+      <button class="btn primary" onclick="saveGrave()"><i class="fas fa-save"></i> Lưu hồ sơ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: GRAVE DETAIL ── -->
+<div class="modal-ov" id="modal-detail">
+  <div class="modal" style="width:680px">
+    <div class="modal-h">
+      <h3 id="detail-title">Chi tiết hồ sơ mộ phần</h3>
+      <button class="modal-x" onclick="closeModal('modal-detail')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="detail-body"></div>
+    <div class="modal-foot" id="detail-footer"></div>
+  </div>
+</div>
+
+<!-- ── MODAL: PACKAGE (ADD / EDIT) ── -->
+<div class="modal-ov" id="modal-package">
+  <div class="modal" style="width:520px">
+    <div class="modal-h">
+      <h3 id="pkg-modal-title">Gói dịch vụ</h3>
+      <button class="modal-x" onclick="closeModal('modal-package')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="fc full"><label>Tên gói dịch vụ *</label><input id="pkg-name" placeholder="Ví dụ: Dâng hoa ngày rằm"></div>
+      <div class="fc"><label>Mã gói</label><input id="pkg-code" placeholder="Tự sinh nếu để trống"></div>
+      <div class="fc"><label>Nhóm dịch vụ</label>
+        <select id="pkg-cat">
+          <option value="cleaning">Vệ sinh & Cắt cỏ</option>
+          <option value="flower">Dâng hoa & Nhang đèn</option>
+          <option value="maintenance">Bảo trì & Chăm sóc</option>
+          <option value="ceremony">Lễ cúng giỗ</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+      <div class="fc"><label>Đơn giá (VNĐ) *</label><input id="pkg-price" type="number" placeholder="350000"></div>
+      <div class="fc"><label>Đơn vị tính</label><input id="pkg-unit" placeholder="lần / tháng / năm" value="lần"></div>
+      <div class="fc full"><label>Mô tả dịch vụ</label><textarea id="pkg-desc" placeholder="Các công việc cụ thể bao gồm..."></textarea></div>
+      <div class="fc"><label>Định kỳ</label>
+        <select id="pkg-recurring">
+          <option value="false">Dịch vụ 1 lần</option>
+          <option value="true">Dịch vụ lặp lại định kỳ</option>
+        </select>
+      </div>
+      <div class="fc"><label>Chu kỳ lặp (ngày)</label><input id="pkg-recdays" type="number" placeholder="30"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modal-package')">Hủy</button>
+      <button class="btn primary" onclick="savePackage()"><i class="fas fa-save"></i> Lưu gói dịch vụ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: CREATE SERVICE ORDER ── -->
+<div class="modal-ov" id="modal-create-order">
+  <div class="modal" style="width:540px">
+    <div class="modal-h">
+      <h3>Tạo đơn dịch vụ mới</h3>
+      <button class="modal-x" onclick="closeModal('modal-create-order')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="fc full"><label>Gói dịch vụ đã chọn</label><input id="ord-pkg-name" readonly style="background:#eee;font-weight:700;color:var(--jade)"></div>
+      <div class="fc full"><label>Mộ phần thực hiện *</label>
+        <select id="ord-grave-select" style="padding:10px"></select>
+      </div>
+      <div class="fc"><label>Giá dịch vụ (VNĐ)</label><input id="ord-price" type="number"></div>
+      <div class="fc"><label>Giảm giá (VNĐ)</label><input id="ord-discount" type="number" value="0"></div>
+      <div class="fc"><label>Nhân viên thực hiện</label><input id="ord-assigned" placeholder="NV. Bảo, NV. Lan..."></div>
+      <div class="fc"><label>Lịch hẹn thực hiện</label><input id="ord-scheduled" type="datetime-local"></div>
+      <div class="fc full"><label>Ghi chú của gia quyến</label><textarea id="ord-notes" placeholder="Yêu cầu riêng về hoa, giờ cúng..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modal-create-order')">Hủy</button>
+      <button class="btn primary" onclick="submitNewOrder()"><i class="fas fa-check"></i> Tạo đơn ngay</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: SERVICE RECEIPT / INVOICE (PRINTABLE) ── -->
+<div class="modal-ov" id="modal-receipt">
+  <div class="modal" style="width:640px">
+    <div class="modal-h">
+      <h3>Phiếu thu / Hóa đơn dịch vụ</h3>
+      <button class="modal-x" onclick="closeModal('modal-receipt')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="receipt-print-area">
+      <div id="receipt-content"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('modal-receipt')">Đóng</button>
+      <button class="btn primary" onclick="doPrintReceipt()"><i class="fas fa-print"></i> In phiếu thu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+const API = '';
+let currentPage = 1, totalPages = 1;
+let currentLogPage = 1, totalLogPages = 1;
+let editingGraveId = null;
+let editingPkgId = null;
+let currentCreatingPkgId = null;
+let selectedFile = null;
+let searchTimer = null;
+let svcSearchTimer = null;
+let zoneList = [];
+let allGravesForSelect = [];
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function nav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const page = el.dataset.page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+
+  const titles = {
+    dashboard: 'Dashboard Tổng Quan',
+    graves: 'Quản Lý Hồ Sơ Mộ Phần',
+    orders: 'Đơn Dịch Vụ & Chăm Sóc Mộ',
+    import: 'Nhập Dữ Liệu Hàng Loạt',
+    logs: 'Nhật Ký Hoạt Động Hệ Thống'
+  };
+  document.getElementById('page-title').textContent = titles[page] || 'SmartCem';
+
+  // Topbar actions
+  const act = document.getElementById('topbar-actions');
+  act.innerHTML = '';
+  if (page === 'graves') {
+    act.innerHTML = `
+      <button class="btn ghost" onclick="exportGravesExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+      <button class="btn primary" onclick="openAddModal()"><i class="fas fa-plus"></i> Thêm mộ phần</button>`;
+  } else if (page === 'orders') {
+    act.innerHTML = `
+      <button class="btn ghost" onclick="exportOrdersExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>`;
+  }
+
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'graves') loadGraves();
+  if (page === 'orders') { loadOrders(); loadSvcStats(); }
+  if (page === 'import') loadJobs();
+  if (page === 'logs') loadLogs();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════ */
+async function loadDashboard() {
+  const data = await apiFetch('/api/dashboard');
+  if (!data) return;
+
+  // Stats
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card gold"><div class="stat-icon"><i class="fas fa-headstone"></i></div>
+      <div class="stat-label">Tổng hồ sơ mộ</div>
+      <div class="stat-value">${(data.totalGraves||0).toLocaleString('vi')}</div>
+      <div class="stat-sub">Đã số hóa trong hệ thống</div></div>
+    <div class="stat-card jade"><div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+      <div class="stat-label">Lô đất đã cấp</div>
+      <div class="stat-value">${(data.occupiedLots||0).toLocaleString('vi')}</div>
+      <div class="stat-sub up">Trống: ${(data.emptyLots||0).toLocaleString('vi')} lô</div></div>
+    <div class="stat-card rose"><div class="stat-icon"><i class="fas fa-bell"></i></div>
+      <div class="stat-label">Đơn dịch vụ chờ</div>
+      <div class="stat-value">${data.pendingOrders||0}</div>
+      <div class="stat-sub">Cần xử lý</div></div>
+    <div class="stat-card sky"><div class="stat-icon"><i class="fas fa-coins"></i></div>
+      <div class="stat-label">Doanh thu tháng</div>
+      <div class="stat-value">${fmtVnd(data.monthRevenue||0)}đ</div>
+      <div class="stat-sub up">Tổng: ${fmtVnd(data.totalRevenue||0)}đ</div></div>`;
+
+  // Anniversaries alert list
+  const annivList = data.upcomingAnniversaries || [];
+  if (annivList.length === 0) {
+    document.getElementById('dash-anniv-list').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">Không có ngày giỗ trong 30 ngày tới</div>';
+  } else {
+    document.getElementById('dash-anniv-list').innerHTML = annivList.map(a => `
+      <div class="alert-item">
+        <div>
+          <div style="font-weight:700;font-size:13px">${esc(a.fullName)} <span style="font-size:11px;color:var(--jade);font-weight:600">(${a.zone} · ${esc(a.lotCode)})</span></div>
+          <div style="font-size:11px;color:var(--muted)">Giỗ ÂL: <b>${esc(a.lunarDeathDate||'—')}</b> · DL: ${fmtDate(a.diedDate)}</div>
+          <div style="font-size:11px;color:var(--muted)">Thân nhân: ${esc(a.contactName||'—')} (${esc(a.contactPhone||'—')})</div>
+        </div>
+        <div style="text-align:right">
+          <span class="badge tag-anniv">${a.daysUntil === 0 ? 'HÔM NAY' : 'Còn ' + a.daysUntil + ' ngày'}</span>
+          <div style="margin-top:4px">
+            <button class="btn jade" style="padding:3px 7px;font-size:10px" onclick="quickOrderForGrave(${a.graveId},'${esc(a.fullName)}')"><i class="fas fa-hands-praying"></i> Đặt cúng/hoa</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Expiring contracts alert list
+  const expireList = data.expiringContracts || [];
+  if (expireList.length === 0) {
+    document.getElementById('dash-contract-list').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">Không có hợp đồng nào sắp hết hạn</div>';
+  } else {
+    document.getElementById('dash-contract-list').innerHTML = expireList.map(c => `
+      <div class="alert-item">
+        <div>
+          <div style="font-weight:700;font-size:13px">${esc(c.fullName)} <span style="font-size:11px;color:var(--rose);font-weight:600">(${c.zone} · ${esc(c.lotCode)})</span></div>
+          <div style="font-size:11px;color:var(--muted)">Loại HĐ: <b>${esc(c.contractType)}</b> · Hết hạn: ${fmtDate(c.contractEndDate)}</div>
+          <div style="font-size:11px;color:var(--muted)">Liên hệ: ${esc(c.contactName||'—')} (${esc(c.contactPhone||'—')})</div>
+        </div>
+        <div style="text-align:right">
+          <span class="badge tag-expire">${c.isExpired ? 'ĐÃ QUÁ HẠN' : 'Còn ' + c.daysRemaining + ' ngày'}</span>
+          <div style="margin-top:4px">
+            <button class="btn ghost" style="padding:3px 7px;font-size:10px" onclick="openDetail(${c.graveId})"><i class="fas fa-phone"></i> Chi tiết</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Zone Bars
+  const zoneColors = { A:'var(--jade)', B:'var(--sky)', C:'var(--rose)', D:'var(--gold)', E:'#5b3fa8' };
+  document.getElementById('dash-zones').innerHTML = (data.zoneSummaries||[]).map(z => {
+    const pct = (z.total||0) > 0 ? Math.round((z.occupied||0) / z.total * 100) : 0;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <b>${esc(z.name || z.zone)}</b>
+        <span>${z.occupied}/${z.total} lô <b style="color:${zoneColors[z.zone]||'var(--jade)'}">(${pct}%)</b></span>
+      </div>
+      <div style="height:7px;background:rgba(26,26,46,.08);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${zoneColors[z.zone]||'var(--jade)'};border-radius:99px;transition:width .8s ease"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted)">Chưa có dữ liệu</div>';
+
+  // Activity logs
+  document.getElementById('dash-logs').innerHTML = (data.recentActivity||[]).map(l => `
+    <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(26,26,46,.05);font-size:12.5px">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div>${esc(l.content)}</div>
+        <div style="font-size:10.5px;color:var(--muted);font-family:'DM Mono',monospace">${esc(l.by||'Admin')} · ${fmtDateTime(l.at)}</div>
+      </div>
+    </div>`).join('') || '<div style="color:var(--muted)">Chưa có hoạt động</div>';
+}
+
+/* ═══════════════════════════════════════════
+   ZONES DYNAMIC LOADER
+═══════════════════════════════════════════ */
+async function loadZoneDropdowns() {
+  const zones = await apiFetch('/api/zones');
+  if (!zones) return;
+  zoneList = zones;
+  const fZone = document.getElementById('filter-zone');
+  const gZone = document.getElementById('g-zone');
+  if (fZone) {
+    fZone.innerHTML = '<option value="">Tất cả phân khu</option>' +
+      zones.map(z => `<option value="${z.code}">${z.code} - ${z.name}</option>`).join('');
+  }
+  if (gZone) {
+    gZone.innerHTML = zones.map(z => `<option value="${z.code}">${z.code} - ${z.name}</option>`).join('');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GRAVES LIST
+═══════════════════════════════════════════ */
+function debouncedSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadGraves(1), 350);
+}
+
+function filterAnniversaryGraves() {
+  document.querySelector('.nav-item[data-page="graves"]').click();
+  document.getElementById('filter-smart').value = 'anniv';
+  loadGraves(1);
+}
+
+function filterExpiringGraves() {
+  document.querySelector('.nav-item[data-page="graves"]').click();
+  document.getElementById('filter-smart').value = 'expire';
+  loadGraves(1);
+}
+
+async function loadGraves(page = 1) {
+  currentPage = page;
+  const q = document.getElementById('search-q').value;
+  const zone = document.getElementById('filter-zone').value;
+  const contract = document.getElementById('filter-contract').value;
+  const status = document.getElementById('filter-status').value;
+  const smart = document.getElementById('filter-smart').value;
+
+  const annivSoon = smart === 'anniv';
+  const expiringSoon = smart === 'expire';
+
+  const tbody = document.getElementById('graves-tbody');
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
+
+  let url = `/api/graves?q=${encodeURIComponent(q)}&zone=${zone}&status=${status}&contractType=${encodeURIComponent(contract)}&anniversarySoon=${annivSoon}&expiringSoon=${expiringSoon}&page=${page}&pageSize=12`;
+  const data = await apiFetch(url);
+  if (!data) return;
+
+  totalPages = data.totalPages || 1;
+  allGravesForSelect = data.items || [];
+
+  if (!data.items.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)"><i class="fas fa-search" style="font-size:24px;display:block;margin-bottom:10px;opacity:.3"></i>Không tìm thấy hồ sơ mộ phần nào</td></tr>`;
+    document.getElementById('graves-pagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = data.items.map(g => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--sky)">#${g.id}</span></td>
+      <td>
+        <div style="font-weight:700;font-size:13px">${esc(g.fullName)}</div>
+        ${g.alias ? `<div style="font-size:11px;color:var(--muted)">${esc(g.alias)}</div>` : ''}
+        ${g.isAnniversarySoon ? `<span class="badge tag-anniv" style="margin-top:2px"><i class="fas fa-bell"></i> Sắp đến ngày giỗ</span>` : ''}
+        ${g.isContractExpiringSoon ? `<span class="badge tag-expire" style="margin-top:2px"><i class="fas fa-triangle-exclamation"></i> Sắp hết hạn HĐ</span>` : ''}
+      </td>
+      <td class="hide-mobile" style="font-family:'DM Mono',monospace;font-size:12px">${g.bornYear||'?'} – ${g.diedYear||'?'}</td>
+      <td>
+        <span style="font-weight:700;color:var(--jade)">Khu ${g.zone}</span>
+        <div style="color:var(--muted);font-size:11px;font-family:'DM Mono',monospace">${esc(g.lotCode)}</div>
+      </td>
+      <td class="hide-mobile">
+        <div style="font-weight:600;font-size:12px">${esc(g.lunarDeathDate||'—')}</div>
+        <div style="font-size:11px;color:var(--muted)">DL: ${fmtDate(g.diedDate)}</div>
+      </td>
+      <td class="hide-mobile">
+        <div style="font-size:12px">${esc(g.contactName||'—')}${g.contactRelation ? ` <span style="color:var(--muted)">(${esc(g.contactRelation)})</span>` : ''}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${esc(g.contactPhone||'')}</div>
+      </td>
+      <td>
+        <span style="font-size:11.5px;font-weight:600">${esc(g.contractType||'Vĩnh viễn')}</span>
+        ${g.contractEndDate ? `<div style="font-size:10px;color:var(--muted)">Hết hạn: ${fmtDate(g.contractEndDate)}</div>` : ''}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn sky" style="padding:5px 8px;font-size:11px" onclick="openDetail(${g.id})" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+          <button class="btn ghost" style="padding:5px 8px;font-size:11px" onclick="openEditModal(${g.id})" title="Chỉnh sửa"><i class="fas fa-pen"></i></button>
+          <button class="btn jade" style="padding:5px 8px;font-size:11px" title="Tải mã QR" onclick="downloadQr(${g.id},'${esc(g.fullName)}')"><i class="fas fa-qrcode"></i></button>
+          <button class="btn danger" style="padding:5px 8px;font-size:11px" onclick="deleteGrave(${g.id},'${esc(g.fullName)}')" title="Xóa"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const el = document.getElementById('graves-pagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  let html = `<div style="display:flex;gap:4px;align-items:center;justify-content:center">`;
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadGraves(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Trước</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2)
+      html += `<button class="btn ${i===currentPage?'primary':'ghost'}" style="padding:4px 10px;font-size:11px" onclick="loadGraves(${i})">${i}</button>`;
+  }
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadGraves(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Sau ›</button>`;
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   GRAVE MODAL: CREATE / EDIT
+═══════════════════════════════════════════ */
+function openAddModal() {
+  editingGraveId = null;
+  document.getElementById('modal-grave-title').textContent = 'Thêm hồ sơ mộ phần mới';
+  document.getElementById('g-name').value = '';
+  document.getElementById('g-alias').value = '';
+  document.getElementById('g-born').value = '';
+  document.getElementById('g-died').value = '';
+  document.getElementById('g-died-date').value = '';
+  document.getElementById('g-lunar-date').value = '';
+  document.getElementById('g-lot').value = '';
+  document.getElementById('g-type').value = 'Mộ đơn';
+  document.getElementById('g-area').value = '3.5';
+  document.getElementById('g-hometown').value = '';
+  document.getElementById('g-contact').value = '';
+  document.getElementById('g-relation').value = '';
+  document.getElementById('g-phone').value = '';
+  document.getElementById('g-address').value = '';
+  document.getElementById('g-contract-type').value = 'Vĩnh viễn';
+  document.getElementById('g-contract-start').value = '';
+  document.getElementById('g-contract-end').value = '';
+  document.getElementById('g-status').value = 'Active';
+  document.getElementById('g-note').value = '';
+  openModal('modal-grave');
+}
+
+async function openEditModal(id) {
+  editingGraveId = id;
+  const g = await apiFetch(`/api/graves/${id}`);
+  if (!g) return;
+
+  document.getElementById('modal-grave-title').textContent = 'Chỉnh sửa hồ sơ: ' + g.fullName;
+  document.getElementById('g-name').value = g.fullName || '';
+  document.getElementById('g-alias').value = g.alias || '';
+  document.getElementById('g-born').value = g.bornYear || '';
+  document.getElementById('g-died').value = g.diedYear || '';
+  document.getElementById('g-died-date').value = g.diedDate ? g.diedDate.substring(0, 10) : '';
+  document.getElementById('g-lunar-date').value = g.lunarDeathDate || '';
+  document.getElementById('g-zone').value = g.zone || 'A';
+  document.getElementById('g-lot').value = g.lotCode || '';
+  document.getElementById('g-type').value = g.graveType || 'Mộ đơn';
+  document.getElementById('g-area').value = g.areaM2 || 3.5;
+  document.getElementById('g-hometown').value = g.hometown || '';
+  document.getElementById('g-contact').value = g.contactName || '';
+  document.getElementById('g-relation').value = g.contactRelation || '';
+  document.getElementById('g-phone').value = g.contactPhone || '';
+  document.getElementById('g-address').value = g.contactAddress || '';
+  document.getElementById('g-contract-type').value = g.contractType || 'Vĩnh viễn';
+  document.getElementById('g-contract-start').value = g.contractStartDate ? g.contractStartDate.substring(0, 10) : '';
+  document.getElementById('g-contract-end').value = g.contractEndDate ? g.contractEndDate.substring(0, 10) : '';
+  document.getElementById('g-status').value = g.status || 'Active';
+  document.getElementById('g-note').value = g.notes || '';
+
+  openModal('modal-grave');
+}
+
+async function saveGrave() {
+  const name = document.getElementById('g-name').value.trim();
+  const zone = document.getElementById('g-zone').value.trim();
+  const lot = document.getElementById('g-lot').value.trim();
+
+  if (!name || !zone || !lot) {
+    toast('Vui lòng nhập Họ tên, Phân khu và Số hiệu Lô', 'err');
+    return;
+  }
+
+  const payload = {
+    fullName: name,
+    alias: document.getElementById('g-alias').value.trim() || null,
+    bornYear: +document.getElementById('g-born').value || null,
+    diedYear: +document.getElementById('g-died').value || null,
+    diedDate: document.getElementById('g-died-date').value || null,
+    lunarDeathDate: document.getElementById('g-lunar-date').value.trim() || null,
+    zone: zone,
+    lotCode: lot,
+    graveType: document.getElementById('g-type').value,
+    areaM2: +document.getElementById('g-area').value || 3.5,
+    hometown: document.getElementById('g-hometown').value.trim() || null,
+    contactName: document.getElementById('g-contact').value.trim() || null,
+    contactRelation: document.getElementById('g-relation').value.trim() || null,
+    contactPhone: document.getElementById('g-phone').value.trim() || null,
+    contactAddress: document.getElementById('g-address').value.trim() || null,
+    contractType: document.getElementById('g-contract-type').value,
+    contractStartDate: document.getElementById('g-contract-start').value || null,
+    contractEndDate: document.getElementById('g-contract-end').value || null,
+    notes: document.getElementById('g-note').value.trim() || null,
+    status: document.getElementById('g-status').value
+  };
+
+  const url = editingGraveId ? `/api/graves/${editingGraveId}` : '/api/graves';
+  const method = editingGraveId ? 'PUT' : 'POST';
+
+  const res = await apiFetch(url, method, payload);
+  if (res) {
+    toast(editingGraveId ? 'Cập nhật hồ sơ thành công ✓' : 'Tạo hồ sơ mộ phần thành công ✓', 'ok');
+    closeModal('modal-grave');
+    loadGraves(currentPage);
+  }
+}
+
+async function deleteGrave(id, name) {
+  if (!confirm(`Bạn chắc chắn muốn xóa hồ sơ: "${name}" (#${id})?\nÔ đất trên bản đồ sẽ tự động được giải phóng về trạng thái trống.`)) return;
+  const res = await apiFetch(`/api/graves/${id}`, 'DELETE');
+  if (res) {
+    toast('Đã xóa hồ sơ và giải phóng lô đất', 'ok');
+    loadGraves(currentPage);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GRAVE DETAIL VIEW
+═══════════════════════════════════════════ */
+async function openDetail(id) {
+  const g = await apiFetch(`/api/graves/${id}`);
+  if (!g) return;
+
+  document.getElementById('detail-title').textContent = g.fullName;
+  document.getElementById('detail-body').innerHTML = `
+    <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(26,26,46,.08)">
+      <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,var(--gold-pale),var(--gold));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">⛩</div>
+      <div style="flex:1">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700">${esc(g.fullName)} ${g.alias ? `<small style="font-size:14px;color:var(--muted)">(${esc(g.alias)})</small>` : ''}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Năm sinh - mất: <b>${g.bornYear||'?'} – ${g.diedYear||'?'}</b></div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="badge active"><i class="fas fa-location-dot"></i> Khu ${g.zone} · Lô ${esc(g.lotCode)}</span>
+          <span class="badge" style="background:#eee">${esc(g.graveType)} (${g.areaM2} m²)</span>
+          <span class="badge ${g.status.toLowerCase()}">${g.status}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+      <div style="padding:10px;background:#f9f8f4;border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Ngày giỗ & Cúng tế</div>
+        <div style="font-weight:600;margin-top:2px">${esc(g.lunarDeathDate||'Chưa ghi nhận')}</div>
+        <div style="font-size:11px;color:var(--muted)">Dương lịch: ${fmtDate(g.diedDate)}</div>
+      </div>
+      <div style="padding:10px;background:#f9f8f4;border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Hợp đồng quản lý</div>
+        <div style="font-weight:600;margin-top:2px">${esc(g.contractType)}</div>
+        <div style="font-size:11px;color:var(--muted)">Hết hạn: ${fmtDate(g.contractEndDate)}</div>
+      </div>
+      <div style="padding:10px;background:#f9f8f4;border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Thân nhân liên hệ</div>
+        <div style="font-weight:600;margin-top:2px">${esc(g.contactName||'—')} (${esc(g.contactRelation||'Đại diện')})</div>
+        <div style="font-size:11px;color:var(--muted)">SĐT: ${esc(g.contactPhone||'—')}</div>
+      </div>
+      <div style="padding:10px;background:#f9f8f4;border-radius:8px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Địa chỉ & Quê quán</div>
+        <div style="font-weight:600;margin-top:2px">${esc(g.hometown||'—')}</div>
+        <div style="font-size:11px;color:var(--muted)">Địa chỉ: ${esc(g.contactAddress||'—')}</div>
+      </div>
+      ${g.notes ? `<div style="grid-column:1/-1;padding:10px;background:rgba(201,168,76,.07);border-radius:8px;font-size:12px;color:var(--ink-soft)"><b>Ghi chú:</b> ${esc(g.notes)}</div>` : ''}
+    </div>`;
+
+  document.getElementById('detail-footer').innerHTML = `
+    <button class="btn ghost" onclick="closeModal('modal-detail')">Đóng</button>
+    <button class="btn sky" onclick="window.open('/lotmap.html?lot=${encodeURIComponent(g.lotCode)}','_blank')"><i class="fas fa-map-location-dot"></i> Xem trên bản đồ</button>
+    <button class="btn jade" onclick="quickOrderForGrave(${g.id},'${esc(g.fullName)}')"><i class="fas fa-concierge-bell"></i> Đặt dịch vụ</button>
+    <button class="btn primary" onclick="closeModal('modal-detail');openEditModal(${g.id})"><i class="fas fa-pen"></i> Chỉnh sửa</button>`;
+
+  openModal('modal-detail');
+}
+
+/* ═══════════════════════════════════════════
+   QR CODE
+═══════════════════════════════════════════ */
+async function downloadQr(id, name) {
+  window.open(`/api/graves/${id}/qr/download`, '_blank');
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT EXCEL
+═══════════════════════════════════════════ */
+function exportGravesExcel() {
+  window.open('/api/graves/export-excel', '_blank');
+}
+function exportOrdersExcel() {
+  window.open('/api/service-orders/export-excel', '_blank');
+}
+
+/* ═══════════════════════════════════════════
+   SERVICE ORDERS & PACKAGES MODULE
+═══════════════════════════════════════════ */
+let svcPage = 1, svcTotal = 1;
+let revenueChart = null, catChart = null;
+
+function switchSvcTab(btn, tab) {
+  document.querySelectorAll('.svc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('svc-tab-orders').style.display = tab === 'orders' ? '' : 'none';
+  document.getElementById('svc-tab-packages').style.display = tab === 'packages' ? '' : 'none';
+  document.getElementById('svc-tab-revenue').style.display = tab === 'revenue' ? '' : 'none';
+
+  if (tab === 'orders') loadOrders();
+  if (tab === 'packages') loadPackages();
+  if (tab === 'revenue') loadRevenueCharts();
+}
+
+async function loadSvcStats() {
+  const data = await apiFetch('/api/service-orders/stats');
+  if (!data) return;
+  document.getElementById('svc-stats-strip').innerHTML = `
+    <div class="svc-stat-card"><div class="stat-label">Tổng đơn</div><div class="stat-value">${data.totalOrders}</div></div>
+    <div class="svc-stat-card"><div class="stat-label">Chờ xử lý</div><div class="stat-value" style="color:#7a6020">${data.pendingOrders}</div></div>
+    <div class="svc-stat-card"><div class="stat-label">Đang thực hiện</div><div class="stat-value" style="color:var(--sky)">${data.inProgressOrders}</div></div>
+    <div class="svc-stat-card"><div class="stat-label">Hoàn thành</div><div class="stat-value" style="color:var(--jade)">${data.doneOrders}</div></div>
+    <div class="svc-stat-card"><div class="stat-label">Doanh thu tháng</div><div class="stat-value" style="color:var(--gold)">${fmtVnd(data.monthRevenue)}đ</div></div>`;
+}
+
+function debouncedSvcSearch() {
+  clearTimeout(svcSearchTimer);
+  svcSearchTimer = setTimeout(() => loadOrders(1), 350);
+}
+
+async function loadOrders(page = 1) {
+  svcPage = page;
+  const q = document.getElementById('svc-search')?.value || '';
+  const status = document.getElementById('svc-filter-status')?.value || '';
+  const tbody = document.getElementById('orders-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
+
+  const data = await apiFetch(`/api/service-orders?page=${page}&pageSize=12&search=${encodeURIComponent(q)}&status=${status}`);
+  if (!data) return;
+  svcTotal = data.totalPages || 1;
+
+  if (!data.items.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--muted)">Không có đơn dịch vụ nào</td></tr>';
+    document.getElementById('orders-pagination').innerHTML = '';
+    return;
+  }
+
+  const stMap = {
+    Pending: { lbl:'Chờ xác nhận', cls:'pending' },
+    Confirmed: { lbl:'Đã xác nhận', cls:'active' },
+    InProgress: { lbl:'Đang làm', cls:'active' },
+    Done: { lbl:'Hoàn thành', cls:'active' },
+    Cancelled: { lbl:'Đã hủy', cls:'archived' }
+  };
+
+  tbody.innerHTML = data.items.map(o => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--sky);font-weight:700">${esc(o.orderCode)}</td>
+      <td>
+        <div style="font-weight:700;font-size:13px">${esc(o.graveName)}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${esc(o.graveLot)}</div>
+      </td>
+      <td>
+        <div style="font-weight:600;font-size:12.5px">${esc(o.serviceName)}</div>
+        ${o.packageName ? `<div style="font-size:10.5px;color:var(--muted)">Gói: ${esc(o.packageName)}</div>` : ''}
+      </td>
+      <td>
+        <div style="font-weight:700;font-size:13px">${fmtVnd(o.finalPrice)}đ</div>
+      </td>
+      <td class="hide-mobile" style="font-size:11px">${o.scheduledAt ? fmtDateTime(o.scheduledAt) : '—'}</td>
+      <td class="hide-mobile" style="font-size:12px">${esc(o.assignedTo||'—')}</td>
+      <td><span class="badge ${stMap[o.status]?.cls||'pending'}">${stMap[o.status]?.lbl||o.status}</span></td>
+      <td>
+        ${o.isPaid ? `<span style="color:var(--jade);font-weight:700;font-size:11px"><i class="fas fa-check-circle"></i> Đã TT (${(o.paymentMethod||'').toUpperCase()})</span>` : `<button class="btn jade" style="padding:3px 7px;font-size:10.5px" onclick="quickPay(${o.id})"><i class="fas fa-money-bill"></i> Thu tiền</button>`}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn ghost" style="padding:4px 7px;font-size:11px" onclick="printReceipt(${o.id})" title="In phiếu thu"><i class="fas fa-print"></i></button>
+          ${o.status === 'Pending' ? `<button class="btn sky" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'Confirmed')" title="Xác nhận"><i class="fas fa-check"></i></button>` : ''}
+          ${o.status === 'Confirmed' ? `<button class="btn jade" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'InProgress')" title="Bắt đầu"><i class="fas fa-play"></i></button>` : ''}
+          ${o.status === 'InProgress' ? `<button class="btn jade" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'Done')" title="Hoàn thành"><i class="fas fa-flag-checkered"></i></button>` : ''}
+          ${o.status !== 'Done' && o.status !== 'Cancelled' ? `<button class="btn danger" style="padding:4px 7px;font-size:11px" onclick="cancelOrder(${o.id})" title="Hủy đơn"><i class="fas fa-ban"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  renderOrdersPagination();
+}
+
+function renderOrdersPagination() {
+  const el = document.getElementById('orders-pagination');
+  if (svcTotal <= 1) { el.innerHTML = ''; return; }
+  let html = `<div style="display:flex;gap:4px;align-items:center;justify-content:center">`;
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadOrders(${svcPage-1})" ${svcPage===1?'disabled':''}>‹ Trước</button>`;
+  for (let i = 1; i <= svcTotal; i++) {
+    html += `<button class="btn ${i===svcPage?'primary':'ghost'}" style="padding:4px 10px;font-size:11px" onclick="loadOrders(${i})">${i}</button>`;
+  }
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadOrders(${svcPage+1})" ${svcPage===svcTotal?'disabled':''}>Sau ›</button>`;
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+async function updateOrderStatus(id, status) {
+  const res = await apiFetch(`/api/service-orders/${id}/status`, 'PATCH', { status });
+  if (res) { toast('Đã cập nhật trạng thái đơn ✓', 'ok'); loadOrders(svcPage); loadSvcStats(); }
+}
+
+async function quickPay(id) {
+  const method = prompt('Nhập hình thức thanh toán (cash / bank / qr):', 'bank');
+  if (!method) return;
+  const res = await apiFetch(`/api/service-orders/${id}/pay`, 'POST', { paymentMethod: method });
+  if (res) { toast('Đã ghi nhận thanh toán ✓', 'ok'); loadOrders(svcPage); loadSvcStats(); }
+}
+
+async function cancelOrder(id) {
+  const reason = prompt('Lý do hủy đơn dịch vụ này:');
+  if (reason === null) return;
+  const res = await apiFetch(`/api/service-orders/${id}/cancel?reason=${encodeURIComponent(reason)}`, 'DELETE');
+  if (res) { toast('Đã hủy đơn dịch vụ', 'ok'); loadOrders(svcPage); loadSvcStats(); }
+}
+
+/* ═══════════════════════════════════════════
+   PRINT RECEIPT / INVOICE
+═══════════════════════════════════════════ */
+async function printReceipt(orderId) {
+  const r = await apiFetch(`/api/service-orders/${orderId}/receipt`);
+  if (!r) return;
+
+  document.getElementById('receipt-content').innerHTML = `
+    <div class="receipt-header">
+      <div style="font-size:14px;font-weight:700;color:var(--jade)">BAN QUẢN LÝ NGHĨA TRANG THÔNG MINH SMARTCEM</div>
+      <div style="font-size:11px;color:#555">Địa chỉ: Km 15 Đại Lộ Thăng Long, Hà Nội · Hotline: 1900 6868</div>
+      <div class="receipt-title" style="margin-top:10px">PHIẾU THU DỊCH VỤ NGHĨA TRANG</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:#666">Số phiếu: <b>${esc(r.orderCode)}</b> · Ngày lập: ${fmtDateTime(r.orderedAt)}</div>
+    </div>
+
+    <div style="font-size:13px;line-height:1.6;margin-bottom:12px">
+      <div>Người nộp tiền / Thân nhân: <b>${esc(r.contactName || 'Gia quyến')}</b></div>
+      <div>Số điện thoại: <b>${esc(r.contactPhone || '—')}</b> · Địa chỉ: ${esc(r.contactAddress || '—')}</div>
+      <div>Chăm sóc mộ phần cụ: <b style="color:var(--jade)">${esc(r.graveName)}</b> (Khu: <b>${esc(r.zone)}</b>, Lô: <b>${esc(r.graveLot)}</b>)</div>
+    </div>
+
+    <table class="receipt-table">
+      <thead>
+        <tr style="background:#f2f2f2">
+          <th>Nội dung dịch vụ</th>
+          <th style="text-align:right">Đơn giá</th>
+          <th style="text-align:right">Giảm giá</th>
+          <th style="text-align:right">Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <b>${esc(r.serviceName)}</b>
+            ${r.packageName ? `<div style="font-size:11px;color:#666">(${esc(r.packageName)})</div>` : ''}
+            ${r.notes ? `<div style="font-size:10.5px;color:#777">Ghi chú: ${esc(r.notes)}</div>` : ''}
+          </td>
+          <td style="text-align:right">${fmtVnd(r.price)} đ</td>
+          <td style="text-align:right">${r.discount ? fmtVnd(r.discount) + ' đ' : '0 đ'}</td>
+          <td style="text-align:right;font-weight:700">${fmtVnd(r.finalPrice)} đ</td>
+        </tr>
+        <tr style="background:#fafafa;font-weight:700">
+          <td colspan="3" style="text-align:right">TỔNG CỘNG THANH TOÁN:</td>
+          <td style="text-align:right;font-size:14px;color:var(--jade)">${fmtVnd(r.finalPrice)} đ</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:12px;font-style:italic;margin-top:6px">
+      Trạng thái thanh toán: <b>${r.isPaid ? 'ĐÃ THANH TOÁN (' + (r.paymentMethod||'').toUpperCase() + ')' : 'CHƯA THANH TOÁN'}</b>
+      ${r.paidAt ? ` vào lúc ${fmtDateTime(r.paidAt)}` : ''}
+    </div>
+
+    <div class="receipt-sigs">
+      <div>
+        <b>Người nộp tiền</b>
+        <div style="font-size:11px;color:#777">(Ký, ghi rõ họ tên)</div>
+        <div style="height:60px"></div>
+        <div>${esc(r.contactName || '')}</div>
+      </div>
+      <div>
+        <b>Thủ quỹ / Ban Quản Lý</b>
+        <div style="font-size:11px;color:#777">(Ký, đóng dấu)</div>
+        <div style="height:60px"></div>
+        <div>${esc(r.assignedTo || 'Kế toán viên')}</div>
+      </div>
+    </div>`;
+
+  openModal('modal-receipt');
+}
+
+function doPrintReceipt() {
+  const content = document.getElementById('receipt-print-area').innerHTML;
+  const w = window.open('', '_blank');
+  w.document.write(`
+    <html>
+    <head>
+      <title>In Phiếu Thu SmartCem</title>
+      <style>
+        body{font-family:'Arial',sans-serif;padding:20px;color:#111}
+        .receipt-header{text-align:center;border-bottom:2px dashed #888;padding-bottom:12px;margin-bottom:12px}
+        .receipt-title{font-size:18px;font-weight:bold;margin:8px 0}
+        .receipt-table{width:100%;border-collapse:collapse;margin:12px 0}
+        .receipt-table th,.receipt-table td{border:1px solid #999;padding:6px;font-size:12px}
+        .receipt-sigs{display:flex;justify-content:space-between;margin-top:20px;text-align:center}
+        .receipt-sigs > div{width:45%}
+      </style>
+    </head>
+    <body onload="window.print();window.close();">
+      ${content}
+    </body>
+    </html>`);
+  w.document.close();
+}
+
+/* ═══════════════════════════════════════════
+   PACKAGES CRUD
+═══════════════════════════════════════════ */
+async function loadPackages() {
+  const pkgs = await apiFetch('/api/service-packages');
+  if (!pkgs) return;
+  const grid = document.getElementById('packages-grid');
+  grid.innerHTML = pkgs.map(p => `
+    <div class="pkg-card">
+      <div class="pkg-card-top">
+        <div class="pkg-icon" style="background:rgba(201,168,76,.15);color:var(--gold)"><i class="fas ${p.iconClass||'fa-star'}"></i></div>
+        <div class="pkg-name">${esc(p.name)}</div>
+        <div class="pkg-desc">${esc(p.description||'—')}</div>
+        <div style="margin-top:8px">
+          <span class="badge" style="background:#eee">${p.isRecurring ? 'Định kỳ' : 'Dịch vụ 1 lần'}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:6px">${p.totalOrders} đơn</span>
+        </div>
+      </div>
+      <div class="pkg-card-foot">
+        <div>
+          <div class="pkg-price">${fmtVnd(p.price)}đ</div>
+          <span style="font-size:11px;color:var(--muted)">/ ${esc(p.unit||'lần')}</span>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn ghost" style="padding:5px 8px;font-size:11px" onclick="openEditPackageModal(${p.id})"><i class="fas fa-pen"></i> Sửa</button>
+          <button class="btn jade" style="padding:5px 9px;font-size:11px" onclick="openOrderModalForPackage(${p.id},'${esc(p.name)}',${p.price})"><i class="fas fa-plus"></i> Đặt</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openAddPackageModal() {
+  editingPkgId = null;
+  document.getElementById('pkg-modal-title').textContent = 'Thêm gói dịch vụ mới';
+  document.getElementById('pkg-name').value = '';
+  document.getElementById('pkg-code').value = '';
+  document.getElementById('pkg-cat').value = 'cleaning';
+  document.getElementById('pkg-price').value = '';
+  document.getElementById('pkg-unit').value = 'lần';
+  document.getElementById('pkg-desc').value = '';
+  document.getElementById('pkg-recurring').value = 'false';
+  document.getElementById('pkg-recdays').value = '';
+  openModal('modal-package');
+}
+
+async function openEditPackageModal(id) {
+  editingPkgId = id;
+  const p = await apiFetch(`/api/service-packages/${id}`);
+  if (!p) return;
+  document.getElementById('pkg-modal-title').textContent = 'Chỉnh sửa gói: ' + p.name;
+  document.getElementById('pkg-name').value = p.name;
+  document.getElementById('pkg-code').value = p.code;
+  document.getElementById('pkg-cat').value = p.category;
+  document.getElementById('pkg-price').value = p.price;
+  document.getElementById('pkg-unit').value = p.unit;
+  document.getElementById('pkg-desc').value = p.description || '';
+  document.getElementById('pkg-recurring').value = p.isRecurring ? 'true' : 'false';
+  document.getElementById('pkg-recdays').value = p.recurringDays || '';
+  openModal('modal-package');
+}
+
+async function savePackage() {
+  const name = document.getElementById('pkg-name').value.trim();
+  const price = +document.getElementById('pkg-price').value || 0;
+  if (!name) { toast('Vui lòng nhập tên gói dịch vụ', 'err'); return; }
+
+  const payload = {
+    name,
+    code: document.getElementById('pkg-code').value.trim(),
+    category: document.getElementById('pkg-cat').value,
+    price,
+    unit: document.getElementById('pkg-unit').value.trim(),
+    description: document.getElementById('pkg-desc').value.trim(),
+    isRecurring: document.getElementById('pkg-recurring').value === 'true',
+    recurringDays: +document.getElementById('pkg-recdays').value || null
+  };
+
+  const url = editingPkgId ? `/api/service-packages/${editingPkgId}` : '/api/service-packages';
+  const method = editingPkgId ? 'PUT' : 'POST';
+  const res = await apiFetch(url, method, payload);
+  if (res) {
+    toast('Đã lưu gói dịch vụ thành công ✓', 'ok');
+    closeModal('modal-package');
+    loadPackages();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   CREATE SERVICE ORDER MODAL
+═══════════════════════════════════════════ */
+async function openOrderModalForPackage(pkgId, pkgName, price) {
+  currentCreatingPkgId = pkgId;
+  document.getElementById('ord-pkg-name').value = pkgName;
+  document.getElementById('ord-price').value = price;
+  document.getElementById('ord-discount').value = 0;
+  document.getElementById('ord-assigned').value = 'NV. Bảo';
+  document.getElementById('ord-scheduled').value = '';
+  document.getElementById('ord-notes').value = '';
+
+  // Load graves into select
+  const gSelect = document.getElementById('ord-grave-select');
+  const graves = await apiFetch('/api/graves?pageSize=100');
+  if (graves && graves.items) {
+    gSelect.innerHTML = graves.items.map(g => `<option value="${g.id}">#${g.id} - ${g.fullName} (${g.zone} · ${g.lotCode})</option>`).join('');
+  }
+  openModal('modal-create-order');
+}
+
+async function quickOrderForGrave(graveId, graveName) {
+  closeModal('modal-detail');
+  document.querySelector('.nav-item[data-page="orders"]').click();
+  const pkgs = await apiFetch('/api/service-packages');
+  if (pkgs && pkgs.length > 0) {
+    const pkg = pkgs[0];
+    await openOrderModalForPackage(pkg.id, pkg.name, pkg.price);
+    document.getElementById('ord-grave-select').value = graveId;
+  }
+}
+
+async function submitNewOrder() {
+  const graveId = +document.getElementById('ord-grave-select').value;
+  if (!graveId) { toast('Vui lòng chọn hồ sơ mộ phần', 'err'); return; }
+
+  const payload = {
+    graveId: graveId,
+    packageId: currentCreatingPkgId,
+    serviceName: document.getElementById('ord-pkg-name').value,
+    price: +document.getElementById('ord-price').value || 0,
+    discount: +document.getElementById('ord-discount').value || 0,
+    assignedTo: document.getElementById('ord-assigned').value.trim() || null,
+    scheduledAt: document.getElementById('ord-scheduled').value || null,
+    notes: document.getElementById('ord-notes').value.trim() || null
+  };
+
+  const res = await apiFetch('/api/service-orders', 'POST', payload);
+  if (res) {
+    toast(`Tạo đơn ${res.orderCode} thành công ✓`, 'ok');
+    closeModal('modal-create-order');
+    loadOrders(1);
+    loadSvcStats();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REVENUE CHARTS
+═══════════════════════════════════════════ */
+async function loadRevenueCharts() {
+  const stats = await apiFetch('/api/service-orders/stats');
+  if (!stats) return;
+
+  const rCtx = document.getElementById('revenue-chart').getContext('2d');
+  if (revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(rCtx, {
+    type: 'bar',
+    data: {
+      labels: stats.monthlyRevenues.map(m => m.month),
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: stats.monthlyRevenues.map(m => m.revenue),
+        backgroundColor: 'rgba(201,168,76,.8)',
+        borderRadius: 6
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  const cCtx = document.getElementById('category-chart').getContext('2d');
+  if (catChart) catChart.destroy();
+  catChart = new Chart(cCtx, {
+    type: 'doughnut',
+    data: {
+      labels: stats.byCategory.map(c => c.label),
+      datasets: [{
+        data: stats.byCategory.map(c => c.count),
+        backgroundColor: ['#2E7D6B', '#C9A84C', '#2563A8', '#8B3A52', '#7A7A96']
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+/* ═══════════════════════════════════════════
+   AUDIT LOGS
+═══════════════════════════════════════════ */
+async function loadLogs(page = 1) {
+  currentLogPage = page;
+  const search = document.getElementById('log-search')?.value || '';
+  const action = document.getElementById('log-filter-action')?.value || '';
+  const tbody = document.getElementById('logs-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
+  const data = await apiFetch(`/api/audit-logs?search=${encodeURIComponent(search)}&action=${action}&page=${page}&pageSize=15`);
+  if (!data) return;
+  totalLogPages = data.totalPages || 1;
+
+  if (!data.items.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:36px;color:var(--muted)">Chưa có nhật ký hoạt động nào</td></tr>';
+    document.getElementById('logs-pagination').innerHTML = '';
+    return;
+  }
+
+  const actMap = {
+    add: { lbl:'Thêm mới', cls:'active' },
+    edit: { lbl:'Chỉnh sửa', cls:'pending' },
+    delete: { lbl:'Xóa bỏ', cls:'tag-expire' },
+    service: { lbl:'Dịch vụ', cls:'active' },
+    payment: { lbl:'Thanh toán', cls:'tag-anniv' },
+    import: { lbl:'Import', cls:'sky' },
+    qr: { lbl:'Mã QR', cls:'ghost' }
+  };
+
+  tbody.innerHTML = data.items.map(l => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap">${fmtDateTime(l.at)}</td>
+      <td><span class="badge ${actMap[l.action]?.cls||''}">${actMap[l.action]?.lbl||l.action}</span></td>
+      <td style="font-size:13px">${esc(l.content)}</td>
+      <td style="font-size:12px;font-weight:600;color:var(--ink-soft)">${esc(l.performedBy||'Admin')}</td>
+    </tr>`).join('');
+
+  renderLogsPagination();
+}
+
+function renderLogsPagination() {
+  const el = document.getElementById('logs-pagination');
+  if (totalLogPages <= 1) { el.innerHTML = ''; return; }
+  let html = `<div style="display:flex;gap:4px;align-items:center;justify-content:center">`;
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadLogs(${currentLogPage-1})" ${currentLogPage===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= totalLogPages; i++) {
+    html += `<button class="btn ${i===currentLogPage?'primary':'ghost'}" style="padding:4px 10px;font-size:11px" onclick="loadLogs(${i})">${i}</button>`;
+  }
+  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadLogs(${currentLogPage+1})" ${currentLogPage===totalLogPages?'disabled':''}>›</button>`;
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   IMPORT MODULE
+═══════════════════════════════════════════ */
+function onFileSelected(input) {
+  selectedFile = input.files[0];
+  if (selectedFile) toast(`Đã chọn: ${selectedFile.name}`, 'ok');
+}
+
+async function doImport() {
+  if (!selectedFile) { toast('Vui lòng chọn file dữ liệu', 'err'); return; }
+  const btn = document.getElementById('btn-upload');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang Import...';
+
+  const pSec = document.getElementById('prog-section');
+  const pBar = document.getElementById('prog-bar');
+  const pLbl = document.getElementById('prog-label');
+  pSec.style.display = 'block';
+
+  let prog = 10;
+  const timer = setInterval(() => {
+    prog = Math.min(prog + 15, 90);
+    pBar.style.width = prog + '%';
+  }, 200);
+
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+
+  try {
+    const res = await fetch('/api/import/upload', { method: 'POST', body: fd });
+    clearInterval(timer);
+    pBar.style.width = '100%';
+    pLbl.textContent = 'Hoàn tất!';
+    const result = await res.json();
+    if (res.ok) {
+      toast(`Import thành công: ${result.imported} hồ sơ ✓`, 'ok');
+      document.getElementById('import-result').innerHTML = `
+        <div style="margin-top:14px;padding:12px;background:rgba(46,125,107,.1);border-radius:8px;color:var(--jade)">
+          <b>Kết quả:</b> Đã nhập thành công <b>${result.imported}</b> hồ sơ (Lỗi: ${result.failed}).
+        </div>`;
+      loadJobs();
+    } else {
+      toast(result.message || 'Lỗi khi import', 'err');
+    }
+  } catch (e) {
+    clearInterval(timer);
+    toast('Lỗi kết nối: ' + e.message, 'err');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-upload"></i> Bắt đầu Import';
+}
+
+async function loadJobs() {
+  const jobs = await apiFetch('/api/import/jobs?count=10');
+  const mini = document.getElementById('jobs-mini-list');
+  if (!mini) return;
+  if (!jobs || !jobs.length) {
+    mini.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">Chưa có lịch sử import nào</div>';
+    return;
+  }
+  mini.innerHTML = jobs.map(j => `
+    <div style="padding:8px 0;border-bottom:1px solid rgba(26,26,46,.06);font-size:12px">
+      <div style="font-weight:700">${esc(j.fileName)}</div>
+      <div style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
+        <span>Nhập: <b style="color:var(--jade)">${j.imported}</b>/${j.total}</span>
+        <span class="badge ${j.status.toLowerCase()}">${j.status}</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL HELPERS
+═══════════════════════════════════════════ */
+async function apiFetch(url, method = 'GET', body = null) {
+  try {
+    const opts = { method, headers: {} };
+    if (body !== null) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(API + url, opts);
+    if (res.status === 204) return true;
+    if (!res.ok) {
+      let errMsg = res.statusText;
+      try { const j = await res.json(); errMsg = j.message || j.title || JSON.stringify(j); } catch {}
+      throw new Error(errMsg);
+    }
+    return await res.json();
+  } catch (e) {
+    toast(e.message, 'err');
+    return null;
+  }
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function toast(msg, type = '') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${type==='ok'?'fa-circle-check':type==='err'?'fa-circle-exclamation':'fa-circle-info'}"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'all .3s'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtVnd(n) { return (+n||0).toLocaleString('vi-VN'); }
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+}
+function fmtDateTime(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-ov').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show'); });
+});
+
+// INITIALIZE
+loadZoneDropdowns();
+loadDashboard();
+</script>
+</body>
+</html>

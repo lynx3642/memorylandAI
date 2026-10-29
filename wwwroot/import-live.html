@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCem – Import & Live Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --ink:#1a1a2e;--ink-soft:#2d2d4e;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5ead0;
+  --jade:#2e7d6b;--jade-light:#4caf91;--jade-pale:#d4ede8;
+  --sky:#2563a8;--sky-pale:#d6e8f7;
+  --rose:#8b3a52;--rose-pale:#f8e4ea;
+  --violet:#5b3fa8;--amber:#7a6020;
+  --cream:#faf7f0;--white:#fff;--muted:#7a7a96;
+  --border:rgba(26,26,46,.09);
+  --r:12px;--rsm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f0ede6;color:var(--ink);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ─── TOPBAR ─── */
+.topbar{height:52px;background:var(--ink);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;border-bottom:2px solid rgba(201,168,76,.25)}
+.tb-brand{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold-light);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.tb-title{font-size:13px;color:rgba(255,255,255,.5);flex:1}
+.tb-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--jade-light);padding:5px 12px;background:rgba(46,125,107,.15);border-radius:99px;border:1px solid rgba(46,125,107,.25)}
+.tb-live .dot{width:7px;height:7px;border-radius:50%;background:var(--jade-light);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-live.offline{color:var(--muted);background:rgba(26,26,46,.3);border-color:rgba(255,255,255,.1)}
+.tb-live.offline .dot{background:var(--muted);animation:none}
+.btn{padding:7px 13px;border-radius:var(--rsm);font-size:12px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;border:none;font-family:'DM Sans',sans-serif;transition:all .18s}
+.btn.ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}.btn.ghost:hover{background:rgba(255,255,255,.18)}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--ink)}
+.btn.primary:hover{box-shadow:0 4px 14px rgba(201,168,76,.4);transform:translateY(-1px)}
+
+/* ─── LAYOUT ─── */
+.layout{flex:1;display:flex;overflow:hidden}
+
+/* ─── LEFT: UPLOAD PANEL ─── */
+.upload-panel{width:340px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--border)}
+.up-section{padding:16px;border-bottom:1px solid var(--border)}
+.up-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.up-title i{color:var(--gold)}
+
+/* Upload zone */
+.drop-zone{border:2.5px dashed rgba(201,168,76,.35);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .22s;background:rgba(201,168,76,.02);position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--gold);background:rgba(201,168,76,.06);box-shadow:0 0 0 4px rgba(201,168,76,.08)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{font-size:32px;color:var(--gold);margin-bottom:10px}
+.dz-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.dz-sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.dz-types{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.dz-type{padding:2px 9px;background:rgba(201,168,76,.1);color:var(--gold);border-radius:99px;font-size:10px;font-weight:700;border:1px solid rgba(201,168,76,.2)}
+
+/* File selected */
+.file-info{display:none;margin-top:12px;padding:12px;background:rgba(201,168,76,.05);border-radius:var(--rsm);border:1.5px solid rgba(201,168,76,.18)}
+.fi-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.fi-icon-wrap{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fi-name{font-weight:700;font-size:13px;line-height:1.2}
+.fi-size{font-size:11px;color:var(--muted)}
+
+/* Progress */
+.prog-wrap{height:6px;background:rgba(26,26,46,.08);border-radius:99px;overflow:hidden;margin:8px 0}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--jade),var(--jade-light));border-radius:99px;transition:width .4s ease;min-width:4px}
+.prog-label{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:3px}
+
+/* Import result */
+.import-result{border-radius:var(--rsm);padding:14px;margin-top:12px;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.import-result.success{background:rgba(46,125,107,.07);border:1.5px solid rgba(46,125,107,.2)}
+.import-result.partial{background:rgba(201,168,76,.07);border:1.5px solid rgba(201,168,76,.2)}
+.import-result.fail{background:rgba(139,58,82,.07);border:1.5px solid rgba(139,58,82,.2)}
+.ir-head{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13px;margin-bottom:9px}
+.ir-stats{display:flex;gap:14px}
+.ir-stat strong{display:block;font-family:'Playfair Display',serif;font-size:20px;line-height:1}
+.ir-stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.ir-log{margin-top:9px;padding:8px;background:rgba(26,26,46,.04);border-radius:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:pre-wrap;max-height:100px;overflow-y:auto;line-height:1.6}
+
+/* Live events feed */
+.event-feed{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto}
+.ev-item{display:flex;gap:8px;padding:7px 10px;border-radius:7px;background:rgba(26,26,46,.02);animation:fadeIn .3s}
+.ev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ev-content{font-size:11px;color:var(--ink-soft);line-height:1.5;flex:1}
+.ev-time{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;margin-top:2px}
+
+/* Zone cards */
+.zone-cards{display:flex;flex-direction:column;gap:8px;padding:14px 16px}
+
+.zone-card{border-radius:var(--r);overflow:hidden;background:#fff;border:1.5px solid var(--border);transition:all .25s;position:relative}
+.zone-card:hover{box-shadow:0 4px 16px rgba(26,26,46,.1);transform:translateY(-1px)}
+.zone-card-img{height:72px;object-fit:cover;width:100%;display:block;transition:transform .3s}
+.zone-card:hover .zone-card-img{transform:scale(1.04)}
+.zone-card-body{padding:9px 12px}
+.zone-card-label{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:5px;display:flex;align-items:center;justify-content:space-between}
+.zone-card-pct{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;transition:all .5s}
+.zone-bar-track{height:5px;background:rgba(26,26,46,.08);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.zone-bar-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+.zone-card-stats{display:flex;gap:10px}
+.zone-cs{font-size:10px;color:var(--muted)}
+.zone-cs strong{color:var(--ink);font-weight:700}
+
+/* Flash animation on update */
+.zone-card.updated{animation:flash .6s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(46,125,107,.5)}50%{box-shadow:0 0 0 8px rgba(46,125,107,.12)}100%{box-shadow:0 0 0 0 rgba(46,125,107,.0)}}
+
+/* ─── CENTER: MINI MAP ─── */
+.map-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#e8e4db;position:relative}
+.map-header{height:40px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;font-size:12px;color:var(--muted)}
+.map-header strong{color:var(--ink);font-size:13px}
+.map-wrap{flex:1;position:relative;overflow:hidden}
+#map-canvas{position:absolute;transform-origin:0 0;background:linear-gradient(135deg,#ede9e0,#e5e1d8)}
+
+.zone-ov{position:absolute;border-radius:3px;border:2px solid;pointer-events:none;transition:all .3s}
+.zone-ov-label{position:absolute;top:-16px;left:0;font-size:8.5px;font-weight:700;color:#fff;padding:1px 5px;border-radius:3px;white-space:nowrap}
+
+.lot{position:absolute;border-radius:2px;cursor:pointer;border:1px solid rgba(255,255,255,.4);transition:background .5s,transform .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lot:hover{transform:scale(1.1);box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:10;border-color:rgba(255,255,255,.9)}
+.lot.empty{background:rgba(220,216,208,.55)}
+.lot.occupied{background:linear-gradient(135deg,rgba(46,125,107,.9),rgba(76,175,145,.9))}
+.lot.reserved{background:linear-gradient(135deg,rgba(201,168,76,.85),rgba(232,201,122,.85))}
+.lot.unavailable{background:linear-gradient(135deg,rgba(139,58,82,.75),rgba(196,94,120,.75))}
+.lot-lbl{font-size:4.5px;color:rgba(255,255,255,.92);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none;text-align:center;line-height:1.2;padding:1px}
+
+/* Newly imported lots flash GREEN */
+.lot.just-imported{animation:greenFlash 2s ease-out}
+@keyframes greenFlash{
+  0%{background:rgba(46,200,100,.98);box-shadow:0 0 0 0 rgba(46,200,100,.7);transform:scale(1.2)}
+  40%{box-shadow:0 0 0 8px rgba(46,200,100,.0);transform:scale(1.15)}
+  100%{background:linear-gradient(135deg,rgba(46,125,107,.9),rgba(76,175,145,.9));transform:scale(1)}
+}
+
+/* Minimap */
+.minimap{position:absolute;bottom:10px;right:10px;background:rgba(26,26,46,.88);border-radius:8px;padding:5px;border:1px solid rgba(201,168,76,.2);z-index:100;backdrop-filter:blur(4px)}
+
+/* Tooltip */
+.lot-tooltip{position:fixed;background:rgba(26,26,46,.95);color:#fff;padding:8px 12px;border-radius:8px;font-size:11px;pointer-events:none;z-index:9999;line-height:1.7;border:1px solid rgba(201,168,76,.2);backdrop-filter:blur(4px);display:none;max-width:200px}
+.lot-tooltip strong{color:var(--gold-light);display:block;margin-bottom:2px}
+
+/* ─── RIGHT: STATS ─── */
+.stats-panel{width:240px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);overflow-y:auto}
+.sp-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.sp-title{font-family:'Playfair Display',serif;font-size:13px;color:var(--ink);margin-bottom:12px}
+.big-stat{text-align:center;margin-bottom:14px}
+.big-stat .val{font-family:'Playfair Display',serif;font-size:38px;color:var(--ink);display:block;line-height:1;transition:all .5s}
+.big-stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+
+/* Donut chart */
+.donut-wrap{position:relative;width:120px;height:120px;margin:0 auto 12px}
+.donut-wrap svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.donut-pct{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink)}
+.donut-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* Legend */
+.leg-item{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:12px}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.leg-val{margin-left:auto;font-weight:700;font-family:'DM Mono',monospace;font-size:11px}
+
+/* Bar chart per zone */
+.zone-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.zb-label{font-size:11px;font-weight:700;color:var(--ink);width:44px}
+.zb-track{flex:1;height:6px;background:rgba(26,26,46,.07);border-radius:99px;overflow:hidden}
+.zb-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+.zb-pct{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);width:36px;text-align:right}
+
+/* Updated timestamp */
+.ts-bar{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;padding:10px 16px;border-top:1px solid var(--border);text-align:center;margin-top:auto}
+.ts-bar span{color:var(--jade);font-weight:700}
+
+/* ─── TOAST ─── */
+#toast-c{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:toastIn .3s ease;background:#fff;white-space:nowrap}
+.toast.ok{border-left:4px solid var(--jade)}.toast.ok i{color:var(--jade)}
+.toast.err{border-left:4px solid var(--rose)}.toast.err i{color:var(--rose)}
+.toast.info{border-left:4px solid var(--sky)}.toast.info i{color:var(--sky)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE IMPORT-LIVE ── */
+@media(max-width:900px){
+  .layout{flex-direction:column;overflow:auto}
+  .upload-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:none;flex-shrink:0}
+  .map-area{min-height:400px;flex-shrink:0}
+  .stats-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
+  .zone-cards{flex-direction:row;flex-wrap:wrap;gap:8px;padding:10px}
+  .zone-card{width:calc(50% - 4px);min-width:140px}
+  .zone-card-img{height:50px}
+  .up-section{padding:12px}
+  .map-wrap{min-height:350px}
+}
+@media(max-width:600px){
+  .topbar{padding:0 10px;gap:8px}
+  .tb-title{font-size:11px}
+  .upload-panel{order:1}
+  .map-area{order:2;min-height:300px}
+  .stats-panel{order:3}
+  .zone-cards{gap:6px}
+  .zone-card{width:calc(50% - 3px)}
+  .minimap{bottom:5px;right:5px}
+  .minimap canvas{width:80px;height:56px}
+  .donut-wrap{width:100px;height:100px}
+  .donut-wrap svg{width:100px;height:100px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">⛩ <span>SmartCem</span></div>
+  <div class="tb-title">Import Dữ Liệu & Bản đồ Phân lô Thời gian thực</div>
+  <div class="tb-live offline" id="live-indicator">
+    <div class="dot"></div>
+    <span id="live-text">Đang kết nối…</span>
+  </div>
+  <div style="margin-left:10px;display:flex;gap:6px">
+    <button class="btn ghost" onclick="window.location='/'"><i class="fas fa-home"></i></button>
+    <button class="btn ghost" onclick="window.location='/lotmap.html'"><i class="fas fa-map"></i> Bản đồ đầy đủ</button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- ─── LEFT PANEL ─── -->
+<aside class="upload-panel">
+  <!-- UPLOAD CARD -->
+  <div class="up-section">
+    <div class="up-title"><i class="fas fa-cloud-upload-alt"></i> Import dữ liệu</div>
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="import-file" accept=".xlsx,.xls,.csv,.json" onchange="onFileSelected(this)">
+      <div class="dz-icon"><i class="fas fa-file-arrow-up"></i></div>
+      <div class="dz-title">Kéo thả file vào đây</div>
+      <div class="dz-sub">hoặc click để chọn</div>
+      <div class="dz-types">
+        <span class="dz-type">Excel</span>
+        <span class="dz-type">CSV</span>
+        <span class="dz-type">JSON</span>
+      </div>
+    </div>
+
+    <div class="file-info" id="file-info">
+      <div class="fi-top">
+        <div class="fi-icon-wrap" id="fi-icon-wrap"><i class="fas fa-file-excel" id="fi-icon" style="color:var(--jade)"></i></div>
+        <div><div class="fi-name" id="fi-name"></div><div class="fi-size" id="fi-size"></div></div>
+        <button onclick="clearFile()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="prog-section" style="display:none">
+        <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+        <div class="prog-label"><span id="prog-label">Đang xử lý…</span><span id="prog-pct">0%</span></div>
+      </div>
+      <button class="btn primary" id="btn-upload" onclick="doImport()" style="width:100%;justify-content:center;margin-top:8px">
+        <i class="fas fa-upload"></i> Bắt đầu Import & Cập nhật bản đồ
+      </button>
+    </div>
+    <div id="import-result"></div>
+
+    <div style="margin-top:10px">
+      <button onclick="downloadTemplate()" style="width:100%;background:rgba(26,26,46,.05);border:1.5px solid rgba(26,26,46,.1);border-radius:var(--rsm);padding:8px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all .18s">
+        <i class="fas fa-download" style="color:var(--gold)"></i> Tải file Excel mẫu
+      </button>
+    </div>
+  </div>
+
+  <!-- LIVE EVENTS -->
+  <div class="up-section">
+    <div class="up-title"><i class="fas fa-satellite-dish" style="color:var(--jade)"></i> Sự kiện thời gian thực</div>
+    <div class="event-feed" id="event-feed">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">
+        <i class="fas fa-signal" style="font-size:20px;opacity:.2;display:block;margin-bottom:6px"></i>
+        Chờ kết nối SSE…
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE CARDS WITH IMAGES -->
+  <div style="padding:12px 16px 6px;font-family:'Playfair Display',serif;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px">
+    <i class="fas fa-layer-group" style="color:var(--gold);font-size:12px"></i> Tỉ lệ lấp đầy theo khu
+  </div>
+  <div class="zone-cards" id="zone-cards">
+    <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Đang tải…</div>
+  </div>
+</aside>
+
+<!-- ─── CENTER MAP ─── -->
+<div class="map-area">
+  <div class="map-header">
+    <strong>Bản đồ phân lô trực tiếp</strong>
+    <span>· Màu xanh = đã có chủ · Xanh nhấp nháy = vừa import</span>
+    <span id="map-lot-count" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink)"></span>
+    <button onclick="fitView()" style="background:rgba(26,26,46,.06);border:none;padding:4px 9px;border-radius:5px;cursor:pointer;font-size:11px;color:var(--muted)"><i class="fas fa-expand"></i></button>
+  </div>
+  <div class="map-wrap" id="map-wrap">
+    <div id="map-canvas" style="width:2000px;height:1400px"></div>
+    <div class="minimap">
+      <canvas id="minimap-c" width="120" height="84"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ─── RIGHT STATS ─── -->
+<aside class="stats-panel">
+  <div class="sp-section">
+    <div class="sp-title">Tổng quan hệ thống</div>
+    <div class="big-stat">
+      <span class="val" id="s-total">—</span>
+      <span class="lbl">Tổng lô trên bản đồ</span>
+    </div>
+    <!-- Donut chart -->
+    <div class="donut-wrap">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <circle id="donut-bg" cx="60" cy="60" r="48" fill="none" stroke="rgba(26,26,46,.07)" stroke-width="16"/>
+        <circle id="donut-occ" cx="60" cy="60" r="48" fill="none" stroke="#2E7D6B" stroke-width="16" stroke-dasharray="0 301.6" stroke-linecap="round" style="transition:stroke-dasharray 1.2s cubic-bezier(.34,1.56,.64,1)"/>
+        <circle id="donut-res" cx="60" cy="60" r="48" fill="none" stroke="#C9A84C" stroke-width="16" stroke-dasharray="0 301.6" stroke-linecap="round" style="transition:stroke-dasharray 1.2s .1s cubic-bezier(.34,1.56,.64,1)"/>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-pct" id="donut-pct">0%</div>
+        <div class="donut-sub">Lấp đầy</div>
+      </div>
+    </div>
+    <div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--jade)"></div>Đã có chủ<span class="leg-val" id="s-occ" style="color:var(--jade)">—</span></div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>Đặt trước<span class="leg-val" id="s-res" style="color:var(--amber)">—</span></div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(220,216,208,.9);border:1px solid rgba(26,26,46,.12)"></div>Còn trống<span class="leg-val" id="s-empty">—</span></div>
+    </div>
+  </div>
+
+  <!-- Zone bars -->
+  <div class="sp-section">
+    <div class="sp-title">Tỉ lệ theo khu</div>
+    <div id="zone-bars"></div>
+  </div>
+
+  <!-- Last import info -->
+  <div class="sp-section" id="last-import-section" style="display:none">
+    <div class="sp-title">Import gần nhất</div>
+    <div id="last-import-info" style="font-size:12px;line-height:1.8;color:var(--ink-soft)"></div>
+  </div>
+
+  <div class="ts-bar">Cập nhật lúc <span id="update-ts">—</span></div>
+</aside>
+</div>
+
+<!-- Tooltip -->
+<div class="lot-tooltip" id="lot-tooltip"></div>
+<div id="toast-c"></div>
+
+<script>
+const API = '';
+const CW = 2000, CH = 1400;
+let state = { zoom: 1, panX: 0, panY: 0, lots: [], zones: [], isPanning: false, panStart: null };
+let es = null; // EventSource
+let selectedFile = null;
+let pollTimer = null;
+
+const p2x = (p) => p / 100 * CW;
+const p2y = (p) => p / 100 * CH;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+// Zone images (placeholder via picsum seeded by zone)
+// Ảnh thực tế - thiên nhiên, vườn, hoa - cố định không random
+const ZONE_IMAGES = {
+  A: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=320&h=80&fit=crop&auto=format',  // núi + hồ yên bình
+  B: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=320&h=80&fit=crop&auto=format',  // cây xanh rừng
+  C: 'https://images.unsplash.com/photo-1490750967868-88df5691cc5a?w=320&h=80&fit=crop&auto=format',  // hoa nở tươi
+  D: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=320&h=80&fit=crop&auto=format',  // đồi cỏ xanh
+  E: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=320&h=80&fit=crop&auto=format',  // rừng lá vàng
+};
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function init() {
+  setupMapEvents();
+  await loadMapData();
+  connectSSE();
+  fitView();
+  startPolling();
+}
+
+async function loadMapData() {
+  const data = await apiFetch('/api/lotmap/overview');
+  if (!data) return;
+  state.zones = data.zones;
+  state.lots  = data.lots;
+  renderZoneOverlays();
+  renderAllLots();
+  renderZoneCards(data.zones);
+  renderZoneBars(data.zones);
+  updateDonut(data.zones);
+  updateGlobalStats(data.zones);
+}
+
+// ═══════════════════════════════════════════
+//  SSE CONNECTION
+// ═══════════════════════════════════════════
+function connectSSE() {
+  if (es) es.close();
+  es = new EventSource(API + '/api/realtime/stream');
+
+  es.onopen = () => {
+    setLiveStatus(true);
+    addEvent('connected', 'Kết nối SSE thành công – đang nhận cập nhật thời gian thực', 'var(--jade)');
+  };
+
+  es.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      handleRealtimeMsg(msg);
+    } catch {}
+  };
+
+  es.onerror = () => {
+    setLiveStatus(false);
+    // Retry after 5s
+    setTimeout(() => { if (es.readyState === EventSource.CLOSED) connectSSE(); }, 5000);
+  };
+}
+
+function handleRealtimeMsg(msg) {
+  if (msg.type === 'import_complete') {
+    const d = msg.data;
+
+    // 1. Flash new lots green on map
+    if (d.updatedLots?.length) {
+      d.updatedLots.forEach(ul => {
+        // Update state
+        const idx = state.lots.findIndex(l => l.id === ul.id);
+        if (idx >= 0) { state.lots[idx] = { ...state.lots[idx], ...ul }; updateLotEl(state.lots[idx], true); }
+        else { state.lots.push(ul); createLotEl(ul, true); }
+      });
+    }
+
+    // 2. Update zone stats
+    if (d.zoneStats?.length) {
+      const mergedZones = state.zones.map(z => {
+        const s = d.zoneStats.find(zs => zs.zone === z.code);
+        if (!s) return z;
+        const total = s.total;
+        return { ...z, totalLots: total, occupiedLots: s.occupied, emptyLots: s.empty, reservedLots: s.reserved };
+      });
+      state.zones = mergedZones;
+      renderZoneCards(mergedZones);
+      renderZoneBars(mergedZones);
+      updateDonut(mergedZones);
+      updateGlobalStats(mergedZones);
+    }
+
+    // 3. Event feed
+    addEvent('import',
+      `Import "<strong>${esc(d.fileName)}</strong>": ${d.imported} hồ sơ → bản đồ đã cập nhật`,
+      'var(--jade)');
+
+    // 4. Last import info
+    showLastImport(d);
+
+    // 5. Update timestamp
+    updateTs();
+
+    toast(`✓ ${d.imported} lô xanh mới trên bản đồ!`, 'ok');
+  }
+}
+
+function setLiveStatus(online) {
+  const el = document.getElementById('live-indicator');
+  const txt = document.getElementById('live-text');
+  el.className = `tb-live${online ? '' : ' offline'}`;
+  txt.textContent = online ? 'LIVE – Realtime' : 'Mất kết nối';
+}
+
+// ═══════════════════════════════════════════
+//  POLLING FALLBACK for zone stats
+// ═══════════════════════════════════════════
+function startPolling() {
+  pollTimer = setInterval(async () => {
+    const data = await apiFetch('/api/realtime/zone-stats');
+    if (!data) return;
+    const merged = state.zones.map(z => {
+      const s = data.stats.find(st => st.code === z.code);
+      if (!s) return z;
+      return { ...z, totalLots: s.total, occupiedLots: s.occupied, emptyLots: s.empty, reservedLots: s.reserved, pctFull: s.pctFull };
+    });
+    state.zones = merged;
+    renderZoneBars(merged);
+    updateDonut(merged);
+    updateGlobalStats(merged);
+    updateTs();
+  }, 10000); // Poll every 10s
+}
+
+// ═══════════════════════════════════════════
+//  MAP RENDERING
+// ═══════════════════════════════════════════
+function renderZoneOverlays() {
+  document.querySelectorAll('.zone-ov').forEach(e => e.remove());
+  const canvas = document.getElementById('map-canvas');
+  state.zones.forEach(z => {
+    const el = document.createElement('div');
+    el.className = 'zone-ov';
+    el.style.cssText = `left:${p2x(z.x)}px;top:${p2y(z.y)}px;width:${p2x(z.w)}px;height:${p2y(z.h)}px;border-color:${z.color};background:${z.color}08`;
+    const lbl = document.createElement('div');
+    lbl.className = 'zone-ov-label';
+    lbl.style.background = z.color;
+    lbl.textContent = z.label || `Khu ${z.code}`;
+    el.appendChild(lbl);
+    canvas.appendChild(el);
+  });
+}
+
+function renderAllLots() {
+  document.querySelectorAll('.lot').forEach(e => e.remove());
+  state.lots.forEach(l => createLotEl(l, false));
+  const cnt = document.getElementById('map-lot-count');
+  if (cnt) cnt.textContent = `${state.lots.length} lô`;
+}
+
+function createLotEl(lot, isNew = false) {
+  const canvas = document.getElementById('map-canvas');
+  const el = document.createElement('div');
+  el.className = `lot ${lot.status.toLowerCase()}${isNew ? ' just-imported' : ''}`;
+  el.dataset.lotId = lot.id;
+  el.style.cssText = `left:${p2x(lot.x)}px;top:${p2y(lot.y)}px;width:${p2x(lot.w)}px;height:${p2y(lot.h)}px`;
+
+  const parts = (lot.lotCode || '').split('-');
+  const lbl = document.createElement('div');
+  lbl.className = 'lot-lbl';
+  lbl.textContent = (parts[1] || '') + (parts[2] ? '-' + parts[2] : '');
+  el.appendChild(lbl);
+
+  el.addEventListener('mouseenter', (e) => showTooltip(e, lot));
+  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('mousemove', (e) => moveTooltip(e));
+  canvas.appendChild(el);
+  return el;
+}
+
+function updateLotEl(lot, flash = false) {
+  let el = document.querySelector(`.lot[data-lot-id="${lot.id}"]`);
+  if (!el) { createLotEl(lot, flash); return; }
+  el.className = `lot ${lot.status.toLowerCase()}${flash ? ' just-imported' : ''}`;
+  el.style.left = p2x(lot.x) + 'px';
+  el.style.top  = p2y(lot.y) + 'px';
+  el.style.width = p2x(lot.w) + 'px';
+  el.style.height= p2y(lot.h) + 'px';
+  if (flash) setTimeout(() => el?.classList.remove('just-imported'), 2200);
+}
+
+// ═══════════════════════════════════════════
+//  ZONE CARDS WITH IMAGES
+// ═══════════════════════════════════════════
+function renderZoneCards(zones) {
+  const container = document.getElementById('zone-cards');
+  const COLOR_NAMES = { '#2E7D6B':'jade', '#2563A8':'sky', '#8B3A52':'rose', '#C9A84C':'gold', '#5B3FA8':'violet' };
+
+  container.innerHTML = zones.map(z => {
+    const total = z.totalLots || 0;
+    const occ   = z.occupiedLots || 0;
+    const res   = z.reservedLots || 0;
+    const pct   = total > 0 ? Math.round(occ / total * 100) : 0;
+    const fillColor = z.color;
+
+    return `<div class="zone-card" id="zcard-${z.code}">
+      <img class="zone-card-img" src="${ZONE_IMAGES[z.code] || ZONE_IMAGES['A']}"
+           alt="${z.label}" loading="lazy" onerror="this.style.display='none'">
+      <div class="zone-card-body">
+        <div class="zone-card-label">
+          <span style="display:flex;align-items:center;gap:5px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${fillColor};display:inline-block"></span>
+            ${esc(z.label || 'Khu ' + z.code)}
+          </span>
+          <span class="zone-card-pct" id="zpct-${z.code}" style="color:${fillColor}">${pct}%</span>
+        </div>
+        <div class="zone-bar-track">
+          <div class="zone-bar-fill" id="zbar-${z.code}" style="width:${pct}%;background:${fillColor}"></div>
+        </div>
+        <div class="zone-card-stats">
+          <div class="zone-cs"><strong id="zocc-${z.code}">${occ}</strong> lô có chủ</div>
+          <div class="zone-cs"><strong>${total}</strong> tổng lô</div>
+          <div class="zone-cs"><strong>${total - occ - res}</strong> trống</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateZoneCard(zoneCode, stats) {
+  const card = document.getElementById(`zcard-${zoneCode}`);
+  if (!card) return;
+  card.classList.remove('updated');
+  void card.offsetWidth; // reflow for animation restart
+  card.classList.add('updated');
+
+  const pct = stats.total > 0 ? Math.round(stats.occupied / stats.total * 100) : 0;
+  const pctEl = document.getElementById(`zpct-${zoneCode}`);
+  const barEl = document.getElementById(`zbar-${zoneCode}`);
+  const occEl = document.getElementById(`zocc-${zoneCode}`);
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (barEl) barEl.style.width = pct + '%';
+  if (occEl) countUp(occEl, +occEl.textContent, stats.occupied);
+}
+
+// ═══════════════════════════════════════════
+//  RIGHT PANEL – DONUT + BARS
+// ═══════════════════════════════════════════
+function updateDonut(zones) {
+  const total   = zones.reduce((s, z) => s + (z.totalLots || 0), 0);
+  const occupied= zones.reduce((s, z) => s + (z.occupiedLots || 0), 0);
+  const reserved= zones.reduce((s, z) => s + (z.reservedLots || 0), 0);
+  const pct = total > 0 ? Math.round(occupied / total * 100) : 0;
+  const res_pct = total > 0 ? Math.round(reserved / total * 100) : 0;
+
+  const CIRCUM = 2 * Math.PI * 48; // 301.6
+  const occDash = (occupied / Math.max(total, 1)) * CIRCUM;
+  const resDash = (reserved / Math.max(total, 1)) * CIRCUM;
+
+  document.getElementById('donut-occ').setAttribute('stroke-dasharray', `${occDash.toFixed(1)} ${(CIRCUM - occDash).toFixed(1)}`);
+  document.getElementById('donut-res').setAttribute('stroke-dasharray', `${resDash.toFixed(1)} ${(CIRCUM - resDash).toFixed(1)}`);
+  document.getElementById('donut-res').setAttribute('stroke-dashoffset', `-${occDash.toFixed(1)}`);
+  document.getElementById('donut-pct').textContent = pct + '%';
+}
+
+function renderZoneBars(zones) {
+  const maxPct = 100;
+  document.getElementById('zone-bars').innerHTML = zones.map(z => {
+    const pct = z.totalLots > 0 ? Math.round((z.occupiedLots || 0) / z.totalLots * 100) : 0;
+    return `<div class="zone-bar-row">
+      <div class="zb-label">Khu ${z.code}</div>
+      <div class="zb-track"><div class="zb-fill" style="width:${pct}%;background:${z.color}"></div></div>
+      <div class="zb-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function updateGlobalStats(zones) {
+  const total   = zones.reduce((s, z) => s + (z.totalLots || 0), 0);
+  const occupied= zones.reduce((s, z) => s + (z.occupiedLots || 0), 0);
+  const reserved= zones.reduce((s, z) => s + (z.reservedLots || 0), 0);
+  const empty   = total - occupied - reserved;
+
+  animateNum(document.getElementById('s-total'),  total);
+  animateNum(document.getElementById('s-occ'),    occupied);
+  animateNum(document.getElementById('s-res'),    reserved);
+  animateNum(document.getElementById('s-empty'),  empty);
+  document.getElementById('map-lot-count').textContent = `${state.lots.length} lô`;
+}
+
+function animateNum(el, target) {
+  if (!el) return;
+  const start = +el.textContent.replace(/[^\d]/g, '') || 0;
+  countUp(el, start, target);
+}
+
+function countUp(el, from, to, ms = 600) {
+  const diff = to - from, steps = 30, dt = ms / steps;
+  let i = 0;
+  const iv = setInterval(() => {
+    i++;
+    el.textContent = Math.round(from + diff * (i / steps));
+    if (i >= steps) { clearInterval(iv); el.textContent = to; }
+  }, dt);
+}
+
+// ═══════════════════════════════════════════
+//  EVENT FEED
+// ═══════════════════════════════════════════
+function addEvent(type, msg, color = 'var(--sky)') {
+  const feed = document.getElementById('event-feed');
+  if (feed.querySelector('.fa-signal')) feed.innerHTML = ''; // clear placeholder
+
+  const el = document.createElement('div');
+  el.className = 'ev-item';
+  el.innerHTML = `<div class="ev-dot" style="background:${color}"></div>
+    <div>
+      <div class="ev-content">${msg}</div>
+      <div class="ev-time">${new Date().toLocaleTimeString('vi-VN')}</div>
+    </div>`;
+  feed.insertBefore(el, feed.firstChild);
+
+  // Keep max 20 events
+  while (feed.children.length > 20) feed.removeChild(feed.lastChild);
+}
+
+// ═══════════════════════════════════════════
+//  IMPORT
+// ═══════════════════════════════════════════
+function onFileSelected(input) {
+  const file = input.files?.[0]; if (!file) return;
+  selectedFile = file;
+  const info = document.getElementById('file-info');
+  info.style.display = 'block';
+  document.getElementById('fi-name').textContent = file.name;
+  document.getElementById('fi-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icons = { xlsx:'fa-file-excel',xls:'fa-file-excel',csv:'fa-file-csv',json:'fa-file-code' };
+  const colors = { xlsx:'var(--jade)',xls:'#1d6f42',csv:'#c9a84c',json:'#2563a8' };
+  document.getElementById('fi-icon').className = `fas ${icons[ext]||'fa-file'}`;
+  document.getElementById('fi-icon').style.color = ext==='xlsx'||ext==='xls'?'var(--jade)':ext==='csv'?'var(--gold)':'var(--sky)';
+  document.getElementById('import-result').innerHTML = '';
+  setupDrop();
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('import-file').value = '';
+  document.getElementById('file-info').style.display = 'none';
+  document.getElementById('import-result').innerHTML = '';
+}
+
+async function doImport() {
+  if (!selectedFile) { toast('Chưa chọn file', 'err'); return; }
+  const btn = document.getElementById('btn-upload');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý…';
+
+  document.getElementById('prog-section').style.display = 'block';
+  const bar = document.getElementById('prog-bar');
+  const lbl = document.getElementById('prog-label');
+  const pct = document.getElementById('prog-pct');
+
+  let p = 5;
+  const iv = setInterval(() => {
+    p = Math.min(p + Math.random() * 4 + 1, 88);
+    bar.style.width = p + '%';
+    pct.textContent = Math.round(p) + '%';
+    lbl.textContent = p < 30 ? 'Đọc file…' : p < 60 ? 'Kiểm tra dữ liệu…' : p < 80 ? 'Lưu vào cơ sở dữ liệu…' : 'Cập nhật bản đồ…';
+  }, 200);
+
+  addEvent('upload', `Đang upload: <strong>${esc(selectedFile.name)}</strong>`, 'var(--gold)');
+
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+
+  try {
+    const res = await fetch(API + '/api/import/upload', { method: 'POST', body: fd });
+    clearInterval(iv);
+    bar.style.width = '100%'; pct.textContent = '100%'; lbl.textContent = 'Hoàn tất!';
+
+    const result = await res.json();
+    if (res.ok) renderImportResult(result);
+    else { toast(result.message || 'Lỗi import', 'err'); addEvent('error', result.message || 'Import thất bại', 'var(--rose)'); }
+  } catch (e) {
+    clearInterval(iv);
+    toast('Lỗi kết nối', 'err');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-upload"></i> Bắt đầu Import & Cập nhật bản đồ';
+}
+
+function renderImportResult(r) {
+  const cls = r.failed === 0 ? 'success' : r.imported > 0 ? 'partial' : 'fail';
+  const icon = cls === 'success' ? 'fa-circle-check' : cls === 'partial' ? 'fa-triangle-exclamation' : 'fa-circle-xmark';
+  const clr  = cls === 'success' ? 'var(--jade)' : cls === 'partial' ? 'var(--gold)' : 'var(--rose)';
+  document.getElementById('import-result').innerHTML = `
+    <div class="import-result ${cls}">
+      <div class="ir-head" style="color:${clr}"><i class="fas ${icon}"></i>
+        ${cls==='success'?'Import & Bản đồ đã cập nhật!':cls==='partial'?'Import một phần':'Import thất bại'}
+      </div>
+      <div class="ir-stats">
+        <div class="ir-stat"><strong>${r.total}</strong><span>Tổng dòng</span></div>
+        <div class="ir-stat" style="color:var(--jade)"><strong>${r.imported}</strong><span>Thành công</span></div>
+        <div class="ir-stat" style="color:var(--rose)"><strong>${r.failed}</strong><span>Lỗi</span></div>
+      </div>
+      ${r.errorLog ? `<div class="ir-log">${esc(r.errorLog)}</div>` : ''}
+    </div>`;
+}
+
+function showLastImport(d) {
+  const sec = document.getElementById('last-import-section');
+  sec.style.display = 'block';
+  document.getElementById('last-import-info').innerHTML = `
+    <div>📄 <strong>${esc(d.fileName)}</strong></div>
+    <div>✅ ${d.imported} hồ sơ nhập thành công</div>
+    <div>🗺 ${d.updatedLots?.length || 0} lô cập nhật trên bản đồ</div>
+    <div style="color:var(--muted)">⏱ ${new Date().toLocaleTimeString('vi-VN')}</div>`;
+}
+
+async function downloadTemplate() {
+  const res = await fetch(API + '/api/import/template');
+  if (!res.ok) { toast('Lỗi tạo template', 'err'); return; }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'SmartCem_Template.xlsx'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Đã tải file Excel mẫu', 'ok');
+}
+
+// ═══════════════════════════════════════════
+//  DRAG-DROP SETUP
+// ═══════════════════════════════════════════
+function setupDrop() {
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) { document.getElementById('import-file').files = e.dataTransfer.files; onFileSelected({ files: e.dataTransfer.files }); }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  TOOLTIP
+// ═══════════════════════════════════════════
+function showTooltip(e, lot) {
+  const t = document.getElementById('lot-tooltip');
+  const stLbl = { Occupied:'Đã có chủ', Empty:'Còn trống', Reserved:'Đặt trước', Unavailable:'Không khả dụng' };
+  t.innerHTML = `<strong>${lot.lotCode}</strong>
+    Khu: ${lot.zoneCode}<br>
+    ${lot.graveName ? '👤 ' + esc(lot.graveName) + '<br>' : ''}
+    ${lot.graveYears ? '📅 ' + lot.graveYears + '<br>' : ''}
+    Trạng thái: ${stLbl[lot.status] || lot.status}`;
+  t.style.display = 'block';
+  moveTooltip(e);
+}
+function hideTooltip() { document.getElementById('lot-tooltip').style.display = 'none'; }
+function moveTooltip(e) {
+  const t = document.getElementById('lot-tooltip');
+  t.style.left = (e.clientX + 12) + 'px';
+  t.style.top  = (e.clientY - 8) + 'px';
+}
+
+// ═══════════════════════════════════════════
+//  MAP PAN & ZOOM
+// ═══════════════════════════════════════════
+function setupMapEvents() {
+  const wrap = document.getElementById('map-wrap');
+  let ps = null;
+  wrap.addEventListener('mousedown', e => {
+    if (e.button === 1 || e.button === 0) { ps = { sx: e.clientX - state.panX, sy: e.clientY - state.panY }; wrap.style.cursor = 'grabbing'; }
+  });
+  wrap.addEventListener('mousemove', e => {
+    if (!ps) return;
+    state.panX = e.clientX - ps.sx;
+    state.panY = e.clientY - ps.sy;
+    applyTransform(); renderMinimap();
+  });
+  wrap.addEventListener('mouseup', () => { ps = null; wrap.style.cursor = 'grab'; });
+  wrap.addEventListener('mouseleave', () => { ps = null; wrap.style.cursor = ''; });
+  wrap.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY > 0 ? 0.9 : 1.1, e.clientX, e.clientY); }, { passive: false });
+  wrap.style.cursor = 'grab';
+}
+
+function zoom(delta, px, py) {
+  const wrap = document.getElementById('map-wrap');
+  const nz = clamp(state.zoom * delta, 0.25, 5);
+  if (!px) { px = wrap.clientWidth / 2; py = wrap.clientHeight / 2; }
+  state.panX = px - (px - state.panX) * (nz / state.zoom);
+  state.panY = py - (py - state.panY) * (nz / state.zoom);
+  state.zoom = nz; applyTransform(); renderMinimap();
+}
+
+function applyTransform() {
+  document.getElementById('map-canvas').style.transform = `translate(${state.panX}px,${state.panY}px) scale(${state.zoom})`;
+}
+
+function fitView() {
+  const wrap = document.getElementById('map-wrap');
+  const sx = wrap.clientWidth / CW, sy = wrap.clientHeight / CH;
+  state.zoom = Math.min(sx, sy) * 0.9;
+  state.panX = (wrap.clientWidth  - CW * state.zoom) / 2;
+  state.panY = (wrap.clientHeight - CH * state.zoom) / 2;
+  applyTransform(); renderMinimap();
+}
+
+// ═══════════════════════════════════════════
+//  MINIMAP
+// ═══════════════════════════════════════════
+function renderMinimap() {
+  const c = document.getElementById('minimap-c');
+  const ctx = c.getContext('2d');
+  const mw = c.width, mh = c.height;
+  const sx = mw / CW, sy = mh / CH;
+  ctx.clearRect(0, 0, mw, mh);
+  ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, mw, mh);
+
+  state.zones.forEach(z => {
+    ctx.fillStyle = z.color + '25'; ctx.strokeStyle = z.color; ctx.lineWidth = 0.8;
+    ctx.fillRect(p2x(z.x)*sx, p2y(z.y)*sy, p2x(z.w)*sx, p2y(z.h)*sy);
+    ctx.strokeRect(p2x(z.x)*sx, p2y(z.y)*sy, p2x(z.w)*sx, p2y(z.h)*sy);
+  });
+
+  state.lots.forEach(l => {
+    const c2 = { Occupied:'#2E7D6B', Empty:'rgba(255,255,255,.1)', Reserved:'#C9A84C', Unavailable:'#8B3A52' };
+    ctx.fillStyle = c2[l.status] || c2.Empty;
+    ctx.fillRect(p2x(l.x)*sx, p2y(l.y)*sy, Math.max(1, p2x(l.w)*sx), Math.max(1, p2y(l.h)*sy));
+  });
+
+  const wrap = document.getElementById('map-wrap');
+  const vx = (-state.panX / state.zoom) * sx, vy = (-state.panY / state.zoom) * sy;
+  const vw = (wrap.clientWidth / state.zoom) * sx, vh = (wrap.clientHeight / state.zoom) * sy;
+  ctx.strokeStyle = '#e8c97a'; ctx.lineWidth = 1.5; ctx.strokeRect(vx, vy, vw, vh);
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function updateTs() {
+  const el = document.getElementById('update-ts');
+  if (el) el.textContent = new Date().toLocaleTimeString('vi-VN');
+}
+
+async function apiFetch(url, method = 'GET', body = null) {
+  try {
+    const opts = { method, headers: {} };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    const res = await fetch(API + url, opts);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+function toast(msg, type = 'info') {
+  const icons = { ok:'fa-circle-check', err:'fa-circle-xmark', info:'fa-circle-info' };
+  const c = document.getElementById('toast-c');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = '.2s'; setTimeout(() => t.remove(), 200); }, 3500);
+}
+
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+setupDrop();
+window.addEventListener('load', () => init().then(updateTs));
+</script>
+</body>
+</html>

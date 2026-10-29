@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCem – Bản đồ Phân lô Phân nền</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --ink:#1a1a2e;--ink-soft:#2d2d4e;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5ead0;
+  --jade:#2e7d6b;--jade-light:#4caf91;--jade-pale:#d4ede8;
+  --sky:#2563a8;--sky-light:#4a90d9;--sky-pale:#d6e8f7;
+  --rose:#8b3a52;--rose-light:#c45e78;--rose-pale:#f8e4ea;
+  --amber:#7a6020;--amber-pale:#fff8e1;
+  --violet:#5b3fa8;--violet-pale:#ede8f8;
+  --cream:#faf7f0;--white:#fff;--muted:#7a7a96;
+  --border:rgba(26,26,46,.1);
+  --shadow:0 4px 24px rgba(26,26,46,.12);--shadow-sm:0 2px 10px rgba(26,26,46,.07);
+  --r:10px;--rsm:7px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f0ede6;color:var(--ink);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ─── TOPBAR ─── */
+.topbar{
+  height:52px;background:var(--ink);display:flex;align-items:center;padding:0 16px;gap:12px;
+  flex-shrink:0;border-bottom:2px solid rgba(201,168,76,.3)
+}
+.tb-brand{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold-light);display:flex;align-items:center;gap:8px}
+.tb-title{font-size:13px;color:rgba(255,255,255,.6);flex:1}
+.tb-actions{display:flex;gap:7px}
+.btn{padding:7px 12px;border-radius:var(--rsm);font-size:12px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;border:none;font-family:'DM Sans',sans-serif;transition:all .18s}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--ink)}
+.btn.primary:hover{box-shadow:0 4px 14px rgba(201,168,76,.4);transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}.btn.ghost:hover{background:rgba(255,255,255,.18)}
+.btn.light{background:rgba(255,255,255,.92);color:var(--ink)}.btn.light:hover{background:var(--white)}
+.btn.jade{background:rgba(46,125,107,.15);color:var(--jade)}.btn.jade:hover{background:rgba(46,125,107,.25)}
+.btn.danger{background:rgba(139,58,82,.1);color:var(--rose)}.btn.danger:hover{background:rgba(139,58,82,.2)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ─── LAYOUT ─── */
+.layout{flex:1;display:flex;overflow:hidden}
+
+/* ─── LEFT PANEL ─── */
+.left-panel{
+  width:240px;background:var(--ink);flex-shrink:0;display:flex;flex-direction:column;
+  border-right:1px solid rgba(201,168,76,.15);overflow-y:auto
+}
+.panel-sec{padding:10px 14px 4px;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.3);font-weight:700}
+
+/* Legend */
+.legend{padding:6px 10px}
+.leg-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;margin-bottom:2px;cursor:pointer;transition:background .15s}
+.leg-item:hover{background:rgba(255,255,255,.06)}
+.leg-item.active{background:rgba(255,255,255,.1)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.leg-label{font-size:12px;color:rgba(255,255,255,.7)}
+.leg-count{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.35);font-weight:700}
+
+/* Zone list */
+.zone-item{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;transition:background .15s;border-left:3px solid transparent}
+.zone-item:hover{background:rgba(255,255,255,.06)}
+.zone-item.active{background:rgba(255,255,255,.08);border-left-color:var(--gold)}
+.zone-color{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.zone-info{flex:1}
+.zone-name{font-size:12px;color:rgba(255,255,255,.8);font-weight:600}
+.zone-stats{font-size:10px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;margin-top:1px}
+.zone-pct{font-size:11px;color:var(--gold);font-weight:700;font-family:'DM Mono',monospace}
+
+/* Stats in left panel */
+.mini-stat{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ms-label{font-size:11px;color:rgba(255,255,255,.45)}
+.ms-val{font-size:14px;font-weight:700;font-family:'Playfair Display',serif;color:var(--gold-light)}
+
+/* ─── MAP CONTAINER ─── */
+.map-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.map-toolbar{
+  height:44px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;box-shadow:var(--shadow-sm)
+}
+.tool-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+.tool-btn{
+  width:32px;height:32px;border-radius:var(--rsm);border:1.5px solid transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;
+  font-size:13px;background:none;color:var(--muted)
+}
+.tool-btn:hover{background:rgba(26,26,46,.06);color:var(--ink)}
+.tool-btn.active{background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.3)}
+.zoom-display{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);min-width:44px;text-align:center}
+.search-box{display:flex;align-items:center;gap:6px;background:rgba(26,26,46,.05);border:1.5px solid transparent;border-radius:var(--rsm);padding:5px 10px;transition:all .2s;margin-left:auto}
+.search-box:focus-within{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.search-box i{color:var(--muted);font-size:11px}
+.search-box input{border:none;outline:none;font-size:12px;background:transparent;font-family:'DM Sans',sans-serif;width:160px}
+
+/* ─── MAP CANVAS WRAPPER ─── */
+.map-wrap{flex:1;position:relative;overflow:hidden;background:#e8e4db;cursor:default}
+.map-wrap.tool-pan{cursor:grab}
+.map-wrap.tool-pan.panning{cursor:grabbing}
+.map-wrap.tool-add{cursor:crosshair}
+
+#map-canvas{
+  position:absolute;transform-origin:0 0;
+  background:linear-gradient(135deg,#ede9e0 0%,#e5e1d8 100%);
+}
+
+/* Grid lines */
+.map-grid-line{position:absolute;background:rgba(26,26,46,.04);pointer-events:none}
+
+/* Zone overlay */
+.zone-overlay{
+  position:absolute;border-radius:4px;pointer-events:none;
+  border:2px solid;transition:opacity .2s
+}
+.zone-overlay-label{
+  position:absolute;top:-20px;left:0;font-size:10px;font-weight:700;
+  letter-spacing:.5px;white-space:nowrap;padding:2px 6px;border-radius:4px;
+  color:#fff;background:currentColor
+}
+
+/* Lots */
+.lot{
+  position:absolute;border-radius:3px;cursor:pointer;
+  border:1.5px solid rgba(255,255,255,.5);transition:transform .12s,box-shadow .12s,opacity .15s;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  user-select:none
+}
+.lot:hover{transform:scale(1.06);box-shadow:0 3px 12px rgba(0,0,0,.22);z-index:10;border-color:#fff}
+.lot.selected{box-shadow:0 0 0 3px rgba(201,168,76,.9),0 4px 16px rgba(0,0,0,.25);z-index:20;border-color:#fff;transform:scale(1.08)}
+.lot.highlighted{animation:pulse 1s ease-in-out 3}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.6)}50%{box-shadow:0 0 0 6px rgba(201,168,76,.0)}}
+
+.lot-label{font-size:5px;color:rgba(255,255,255,.9);font-weight:700;letter-spacing:.2px;
+  text-align:center;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.4);pointer-events:none;padding:1px}
+
+/* Resize handles */
+.resize-handle{position:absolute;width:8px;height:8px;background:#fff;border:1.5px solid var(--gold);border-radius:2px;z-index:30}
+.resize-handle.se{bottom:-4px;right:-4px;cursor:se-resize}
+.resize-handle.sw{bottom:-4px;left:-4px;cursor:sw-resize}
+.resize-handle.ne{top:-4px;right:-4px;cursor:ne-resize}
+.resize-handle.nw{top:-4px;left:-4px;cursor:nw-resize}
+
+/* Draw rect preview */
+.draw-preview{
+  position:absolute;border:2px dashed var(--gold);background:rgba(201,168,76,.1);
+  border-radius:3px;pointer-events:none;z-index:50
+}
+
+/* Lot status colors */
+.lot.empty{background:rgba(240,237,230,.9)}
+.lot.occupied{background:linear-gradient(135deg,rgba(46,125,107,.85),rgba(76,175,145,.85))}
+.lot.reserved{background:linear-gradient(135deg,rgba(201,168,76,.8),rgba(232,201,122,.8))}
+.lot.unavailable{background:linear-gradient(135deg,rgba(139,58,82,.7),rgba(196,94,120,.7))}
+
+/* ─── RIGHT PANEL ─── */
+.right-panel{
+  width:260px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;
+  border-left:1px solid var(--border);overflow-y:auto
+}
+.rp-header{padding:14px 16px;border-bottom:1px solid var(--border)}
+.rp-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);margin-bottom:2px}
+.rp-sub{font-size:11px;color:var(--muted)}
+.rp-body{padding:12px 16px;flex:1}
+.rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:200px;color:var(--muted);gap:8px;text-align:center}
+.rp-empty i{font-size:32px;opacity:.2}
+.rp-empty p{font-size:12px;line-height:1.5}
+
+.info-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(26,26,46,.05)}
+.info-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.info-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.info-content{flex:1}
+.info-label{font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2px}
+.info-value{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.info-sub{font-size:11px;color:var(--muted)}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700}
+.status-badge.empty{background:rgba(26,26,46,.07);color:var(--muted)}
+.status-badge.occupied{background:rgba(46,125,107,.12);color:var(--jade)}
+.status-badge.reserved{background:rgba(201,168,76,.15);color:var(--amber)}
+.status-badge.unavailable{background:rgba(139,58,82,.1);color:var(--rose)}
+
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+
+/* ─── MODAL ─── */
+.modal-ov{position:fixed;inset:0;background:rgba(26,26,46,.7);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(4px)}
+.modal-ov.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-h h3{font-family:'Playfair Display',serif;font-size:17px}
+.modal-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px;transition:color .18s}
+.modal-x:hover{color:var(--rose)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fc{display:flex;flex-direction:column;gap:4px}.fc.full{grid-column:1/-1}
+.fc label{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft)}
+.fc input,.fc select{padding:9px 11px;background:#f8f7f3;border:1.5px solid rgba(26,26,46,.1);
+  border-radius:var(--rsm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:all .2s}
+.fc input:focus,.fc select:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid rgba(26,26,46,.08)}
+.modal .btn{padding:8px 14px;background:rgba(26,26,46,.07);color:var(--ink)}
+.modal .btn.primary-dark{background:var(--ink);color:#fff}
+.modal .btn.primary-dark:hover{background:var(--ink-soft)}
+.modal .btn.jade-full{background:var(--jade);color:#fff}
+.modal .btn.jade-full:hover{background:var(--jade-light)}
+
+/* ─── TOAST ─── */
+#toast-c{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px}
+.toast{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:9px;font-size:12px;font-weight:500;
+  box-shadow:0 3px 16px rgba(0,0,0,.18);animation:slideIn .25s ease;background:#fff;min-width:200px}
+.toast.ok{border-left:4px solid var(--jade)}.toast.ok i{color:var(--jade)}
+.toast.err{border-left:4px solid var(--rose)}.toast.err i{color:var(--rose)}
+.toast.info{border-left:4px solid var(--sky)}.toast.info i{color:var(--sky)}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* ─── MINIMAP ─── */
+.minimap{
+  position:absolute;bottom:12px;left:12px;background:rgba(26,26,46,.85);
+  border-radius:8px;padding:6px;border:1px solid rgba(201,168,76,.2);z-index:200;backdrop-filter:blur(4px)
+}
+.minimap-canvas{display:block;border-radius:4px}
+.minimap-viewport{position:absolute;border:2px solid var(--gold);border-radius:2px;pointer-events:none}
+
+/* Coord display */
+.coord-bar{
+  position:absolute;bottom:12px;right:12px;background:rgba(26,26,46,.8);
+  color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;font-size:10px;
+  padding:5px 10px;border-radius:6px;z-index:200;pointer-events:none;backdrop-filter:blur(4px)
+}
+
+/* Zoom slider */
+.zoom-slider-wrap{display:flex;align-items:center;gap:8px}
+.zoom-slider{-webkit-appearance:none;appearance:none;height:4px;border-radius:99px;background:rgba(26,26,46,.12);outline:none;width:80px;cursor:pointer}
+.zoom-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer}
+
+/* ── RESPONSIVE LOTMAP ── */
+@media(max-width:768px){
+  .layout{flex-direction:column}
+  .left-panel{width:100%;height:auto;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid rgba(201,168,76,.15);flex-shrink:0;max-height:160px}
+  .left-panel > *{flex-shrink:0}
+  .panel-sec{display:none}
+  .legend{display:flex;flex-direction:row;padding:8px;gap:2px;overflow-x:auto}
+  .leg-item{flex-direction:column;gap:3px;padding:6px;min-width:60px;font-size:10px;text-align:center}
+  .leg-count{margin-left:0}
+  .zone-item{min-width:100px;padding:6px 10px}
+  .zone-stats{font-size:9px}
+  .mini-stat{padding:5px 10px}
+  .ms-val{font-size:12px}
+  .sb-footer{display:none}
+
+  .map-area{flex:1;min-height:0}
+  .right-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:200px;overflow-y:auto}
+  .map-toolbar{height:auto;padding:8px;flex-wrap:wrap;gap:6px}
+  .zoom-slider-wrap input{width:60px}
+  .search-box{flex:1;min-width:120px}
+  .minimap{bottom:6px;left:6px}
+  .minimap-canvas{width:80px;height:56px}
+  .coord-bar{display:none}
+  .rp-body{padding:10px 12px}
+  .action-grid{grid-template-columns:1fr 1fr}
+  .topbar{padding:0 10px}
+  .tb-title{font-size:11px}
+}
+@media(max-width:480px){
+  .left-panel{max-height:120px}
+  .legend{gap:1px}
+  .leg-item{min-width:50px;font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-brand">⛩ <span>SmartCem</span></div>
+  <span class="tb-title">Bản đồ Phân lô Phân nền – Nghĩa trang Thông minh</span>
+  <div class="tb-actions">
+    <button class="btn ghost" onclick="window.location='/'"><i class="fas fa-arrow-left"></i> Dashboard</button>
+    <button class="btn ghost" onclick="toggleEditMode()" id="edit-mode-btn"><i class="fas fa-pencil-ruler"></i> Chế độ chỉnh sửa</button>
+    <button class="btn primary" onclick="openAddLotModal()"><i class="fas fa-plus"></i> Thêm lô</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="left-panel">
+    <div class="panel-sec">Tổng quan</div>
+    <div class="mini-stat"><span class="ms-label">Tổng lô</span><span class="ms-val" id="stat-total">–</span></div>
+    <div class="mini-stat"><span class="ms-label">Đã có chủ</span><span class="ms-val" id="stat-occ" style="color:var(--jade-light)">–</span></div>
+    <div class="mini-stat"><span class="ms-label">Đang trống</span><span class="ms-val" id="stat-empty" style="color:rgba(255,255,255,.5)">–</span></div>
+    <div class="mini-stat"><span class="ms-label">Đặt trước</span><span class="ms-val" id="stat-res" style="color:var(--gold-light)">–</span></div>
+
+    <div class="panel-sec" style="margin-top:8px">Chú giải màu sắc</div>
+    <div class="legend">
+      <div class="leg-item active" onclick="filterByStatus('all')">
+        <div class="leg-dot" style="background:#888"></div>
+        <span class="leg-label">Tất cả</span>
+        <span class="leg-count" id="leg-all">–</span>
+      </div>
+      <div class="leg-item" onclick="filterByStatus('occupied')">
+        <div class="leg-dot" style="background:var(--jade)"></div>
+        <span class="leg-label">Đã có chủ</span>
+        <span class="leg-count" id="leg-occ">–</span>
+      </div>
+      <div class="leg-item" onclick="filterByStatus('empty')">
+        <div class="leg-dot" style="background:#d0ccc4"></div>
+        <span class="leg-label">Còn trống</span>
+        <span class="leg-count" id="leg-emp">–</span>
+      </div>
+      <div class="leg-item" onclick="filterByStatus('reserved')">
+        <div class="leg-dot" style="background:var(--gold)"></div>
+        <span class="leg-label">Đặt trước</span>
+        <span class="leg-count" id="leg-res">–</span>
+      </div>
+      <div class="leg-item" onclick="filterByStatus('unavailable')">
+        <div class="leg-dot" style="background:var(--rose)"></div>
+        <span class="leg-label">Không khả dụng</span>
+        <span class="leg-count" id="leg-una">–</span>
+      </div>
+    </div>
+
+    <div class="panel-sec" style="margin-top:8px">Khu vực</div>
+    <div id="zone-list"></div>
+
+    <div style="padding:12px 14px;margin-top:auto;border-top:1px solid rgba(255,255,255,.06)">
+      <button class="btn light" style="width:100%;justify-content:center;font-size:11px" onclick="openGenerateModal()">
+        <i class="fas fa-grid-2"></i> Tạo lưới lô tự động
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div class="map-area">
+    <!-- Toolbar -->
+    <div class="map-toolbar">
+      <button class="tool-btn active" id="tool-select" title="Chọn (V)" onclick="setTool('select')"><i class="fas fa-arrow-pointer"></i></button>
+      <button class="tool-btn" id="tool-pan" title="Di chuyển (H)" onclick="setTool('pan')"><i class="fas fa-hand"></i></button>
+      <button class="tool-btn" id="tool-add" title="Vẽ lô mới (A)" onclick="setTool('add')"><i class="fas fa-vector-square"></i></button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" title="Zoom in (+)" onclick="zoom(1.2)"><i class="fas fa-magnifying-glass-plus"></i></button>
+      <div class="zoom-slider-wrap">
+        <input type="range" class="zoom-slider" id="zoom-slider" min="30" max="400" value="100" oninput="setZoom(this.value/100)">
+      </div>
+      <button class="tool-btn" title="Zoom out (-)" onclick="zoom(0.8)"><i class="fas fa-magnifying-glass-minus"></i></button>
+      <span class="zoom-display" id="zoom-pct">100%</span>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" title="Fit màn hình (F)" onclick="fitView()"><i class="fas fa-expand"></i></button>
+      <button class="tool-btn" title="Căn giữa" onclick="centerView()"><i class="fas fa-crosshairs"></i></button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" title="Ẩn/hiện nhãn" onclick="toggleLabels()" id="btn-labels"><i class="fas fa-tag"></i></button>
+      <button class="tool-btn" title="Bản đồ lưới" onclick="toggleGrid()" id="btn-grid"><i class="fas fa-border-all"></i></button>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input id="map-search" placeholder="Tìm số lô, họ tên…" oninput="searchLot(this.value)">
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="map-wrap" id="map-wrap">
+      <div id="map-canvas" style="width:2000px;height:1400px">
+        <!-- Grid lines injected by JS -->
+        <!-- Zone overlays injected by JS -->
+        <!-- Lots injected by JS -->
+      </div>
+      <div class="minimap">
+        <canvas class="minimap-canvas" id="minimap-c" width="120" height="84"></canvas>
+      </div>
+      <div class="coord-bar" id="coord-bar">X: 0, Y: 0</div>
+      <div class="draw-preview" id="draw-preview" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-title" id="rp-title">Chi tiết lô</div>
+      <div class="rp-sub" id="rp-sub">Click vào một ô trên bản đồ để xem thông tin</div>
+    </div>
+    <div class="rp-body" id="rp-body">
+      <div class="rp-empty">
+        <i class="fas fa-map-location-dot"></i>
+        <p>Chọn một lô trên bản đồ để xem chi tiết và thực hiện các thao tác</p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- MODAL: Add Lot -->
+<div class="modal-ov" id="modal-lot">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 id="modal-lot-title">Thêm lô mộ phần</h3>
+      <button class="modal-x" onclick="closeModal('modal-lot')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="fc"><label>Mã lô *</label><input id="l-code" placeholder="A-01-05"></div>
+      <div class="fc"><label>Khu vực *</label>
+        <select id="l-zone"><option value="">Chọn khu</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+        </select></div>
+      <div class="fc"><label>Tọa độ X (%)</label><input type="number" id="l-x" step="0.1" placeholder="5.0"></div>
+      <div class="fc"><label>Tọa độ Y (%)</label><input type="number" id="l-y" step="0.1" placeholder="5.0"></div>
+      <div class="fc"><label>Chiều rộng (%)</label><input type="number" id="l-w" step="0.1" placeholder="3.0"></div>
+      <div class="fc"><label>Chiều cao (%)</label><input type="number" id="l-h" step="0.1" placeholder="4.0"></div>
+      <div class="fc full"><label>Trạng thái</label>
+        <select id="l-status">
+          <option value="Empty">Còn trống</option>
+          <option value="Reserved">Đặt trước</option>
+          <option value="Unavailable">Không khả dụng</option>
+        </select></div>
+      <div class="fc full"><label>ID Hồ sơ mộ phần (nếu có)</label><input type="number" id="l-gid" placeholder="Để trống nếu chưa có hồ sơ"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-lot')">Hủy</button>
+      <button class="btn primary-dark" onclick="saveLot()"><i class="fas fa-save"></i> Lưu lô</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Assign Grave -->
+<div class="modal-ov" id="modal-assign">
+  <div class="modal" style="width:400px">
+    <div class="modal-h">
+      <h3>Gán hồ sơ mộ phần</h3>
+      <button class="modal-x" onclick="closeModal('modal-assign')"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="margin-bottom:14px;font-size:13px;color:var(--muted)">
+      Nhập ID hồ sơ từ danh sách mộ phần để gán vào lô <strong id="assign-lot-code"></strong>
+    </div>
+    <div class="fc full" style="margin-bottom:12px">
+      <label>ID Hồ sơ mộ phần</label>
+      <input type="number" id="assign-gid" placeholder="Nhập số ID của hồ sơ" min="1">
+    </div>
+    <div id="assign-preview" style="display:none;padding:12px;background:rgba(46,125,107,.06);border-radius:8px;border:1.5px solid rgba(46,125,107,.2);margin-bottom:12px;font-size:13px"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-assign')">Hủy</button>
+      <button class="btn jade-full" onclick="doAssign()"><i class="fas fa-link"></i> Gán hồ sơ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Generate Grid -->
+<div class="modal-ov" id="modal-grid">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>Tạo lưới lô tự động</h3>
+      <button class="modal-x" onclick="closeModal('modal-grid')"><i class="fas fa-times"></i></button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Hệ thống sẽ tự động tính toán và tạo các lô theo lưới ô đều nhau trong khu vực đã chọn.</p>
+    <div class="form-grid">
+      <div class="fc"><label>Khu vực *</label>
+        <select id="g-zone"><option value="">Chọn khu</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+        </select></div>
+      <div class="fc"><label>Số hàng</label><input type="number" id="g-rows" value="5" min="1" max="50"></div>
+      <div class="fc"><label>Số cột</label><input type="number" id="g-cols" value="10" min="1" max="100"></div>
+      <div class="fc"><label>Khoảng cách lô (%)</label><input type="number" id="g-gap" value="0.5" step="0.1" min="0"></div>
+      <div class="fc"><label>Bắt đầu X (%)</label><input type="number" id="g-sx" value="2" step="0.1"></div>
+      <div class="fc"><label>Bắt đầu Y (%)</label><input type="number" id="g-sy" value="2" step="0.1"></div>
+      <div class="fc"><label>Tổng chiều rộng (%)</label><input type="number" id="g-tw" value="28" step="0.1"></div>
+      <div class="fc"><label>Tổng chiều cao (%)</label><input type="number" id="g-th" value="44" step="0.1"></div>
+    </div>
+    <div id="grid-preview-info" style="margin-top:12px;padding:10px;background:rgba(37,99,168,.06);border-radius:7px;font-size:12px;color:var(--sky)"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-grid')">Hủy</button>
+      <button class="btn primary-dark" onclick="doGenerateGrid()"><i class="fas fa-grid-2"></i> Tạo lưới</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-c"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const API = '';
+let state = {
+  zones: [], lots: [],
+  zoom: 1, panX: 0, panY: 0,
+  tool: 'select',
+  selectedLot: null,
+  editMode: false,
+  showLabels: true,
+  showGrid: true,
+  filterStatus: 'all',
+  canvasW: 2000, canvasH: 1400
+};
+let dragState = null, resizeState = null, panState = null, drawState = null;
+let assignLotId = null;
+
+// Canvas px → percent of canvas
+const px2pct = (px, dim) => +(px / dim * 100).toFixed(3);
+const pct2px = (pct, dim) => pct / 100 * dim;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function init() {
+  setupCanvas();
+  await loadOverview();
+  setupKeyboard();
+  renderMinimap();
+  setInterval(renderMinimap, 2000);
+}
+
+function setupCanvas() {
+  const wrap = document.getElementById('map-wrap');
+  const canvas = document.getElementById('map-canvas');
+
+  // Pan & mouse tracking
+  wrap.addEventListener('mousedown', onWrapMouseDown);
+  wrap.addEventListener('mousemove', onWrapMouseMove);
+  wrap.addEventListener('mouseup', onWrapMouseUp);
+  wrap.addEventListener('wheel', onWheel, { passive: false });
+
+  // Grid lines (static)
+  drawGridLines();
+}
+
+function drawGridLines() {
+  const canvas = document.getElementById('map-canvas');
+  for (let x = 0; x <= 100; x += 5) {
+    const d = document.createElement('div');
+    d.className = 'map-grid-line';
+    d.style.cssText = `left:${pct2px(x, state.canvasW)}px;top:0;width:1px;height:${state.canvasH}px;opacity:${x%10===0?0.08:0.04}`;
+    canvas.appendChild(d);
+  }
+  for (let y = 0; y <= 100; y += 5) {
+    const d = document.createElement('div');
+    d.className = 'map-grid-line';
+    d.style.cssText = `top:${pct2px(y, state.canvasH)}px;left:0;height:1px;width:${state.canvasW}px;opacity:${y%10===0?0.08:0.04}`;
+    canvas.appendChild(d);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  DATA LOADING
+// ═══════════════════════════════════════════
+async function loadOverview() {
+  const data = await apiFetch('/api/lotmap/overview');
+  if (!data) return;
+  state.zones = data.zones;
+  state.lots  = data.lots;
+  renderAll();
+  updateStats();
+
+  const params = new URLSearchParams(window.location.search);
+  const targetLot = params.get('lot');
+  if (targetLot) {
+    setTimeout(() => searchLot(targetLot), 300);
+  }
+}
+
+function renderAll() {
+  renderZoneOverlays();
+  renderLots();
+  renderZoneList();
+}
+
+// ═══════════════════════════════════════════
+//  ZONE OVERLAYS
+// ═══════════════════════════════════════════
+function renderZoneOverlays() {
+  document.querySelectorAll('.zone-overlay').forEach(e => e.remove());
+  const canvas = document.getElementById('map-canvas');
+
+  state.zones.forEach(z => {
+    const el = document.createElement('div');
+    el.className = 'zone-overlay';
+    el.dataset.zoneCode = z.code;
+    el.style.cssText = `
+      left:${pct2px(z.x, state.canvasW)}px;
+      top:${pct2px(z.y, state.canvasH)}px;
+      width:${pct2px(z.w, state.canvasW)}px;
+      height:${pct2px(z.h, state.canvasH)}px;
+      border-color:${z.color};
+      background:${z.color}08;
+    `;
+    const lbl = document.createElement('div');
+    lbl.className = 'zone-overlay-label';
+    lbl.style.cssText = `color:#fff;background:${z.color};font-size:${pct2px(0.8,state.canvasW)/100*8}px`;
+    lbl.textContent = z.label || `Khu ${z.code}`;
+    el.appendChild(lbl);
+    canvas.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  LOT RENDERING
+// ═══════════════════════════════════════════
+const STATUS_COLOR = {
+  occupied:    'linear-gradient(135deg,rgba(46,125,107,.88),rgba(76,175,145,.88))',
+  empty:       'rgba(220,216,208,.6)',
+  reserved:    'linear-gradient(135deg,rgba(201,168,76,.82),rgba(232,201,122,.82))',
+  unavailable: 'linear-gradient(135deg,rgba(139,58,82,.75),rgba(196,94,120,.75))',
+};
+
+function renderLots() {
+  document.querySelectorAll('.lot').forEach(e => e.remove());
+  const canvas = document.getElementById('map-canvas');
+
+  const filtered = state.filterStatus === 'all'
+    ? state.lots
+    : state.lots.filter(l => l.status.toLowerCase() === state.filterStatus);
+
+  filtered.forEach(lot => {
+    const el = createLotEl(lot);
+    canvas.appendChild(el);
+  });
+}
+
+function createLotEl(lot) {
+  const st = lot.status.toLowerCase();
+  const el = document.createElement('div');
+  el.className = `lot ${st}${state.selectedLot?.id === lot.id ? ' selected' : ''}`;
+  el.dataset.lotId = lot.id;
+  el.style.cssText = `
+    left:${pct2px(lot.x, state.canvasW)}px;
+    top:${pct2px(lot.y, state.canvasH)}px;
+    width:${pct2px(lot.w, state.canvasW)}px;
+    height:${pct2px(lot.h, state.canvasH)}px;
+    background:${STATUS_COLOR[st] || STATUS_COLOR.empty};
+  `;
+
+  // Label
+  if (state.showLabels) {
+    const lbl = document.createElement('div');
+    lbl.className = 'lot-label';
+    const parts = lot.lotCode.split('-');
+    lbl.innerHTML = `${parts[1] || ''}${parts[2] ? '-'+parts[2] : ''}${lot.graveName ? '<br/><span style="font-size:4px;opacity:.8">' + truncate(lot.graveName, 8) + '</span>' : ''}`;
+    el.appendChild(lbl);
+  }
+
+  // Resize handles (edit mode + selected)
+  if (state.editMode && state.selectedLot?.id === lot.id) {
+    ['nw','ne','sw','se'].forEach(dir => {
+      const h = document.createElement('div');
+      h.className = `resize-handle ${dir}`;
+      h.dataset.dir = dir;
+      h.addEventListener('mousedown', e => startResize(e, lot, dir));
+      el.appendChild(h);
+    });
+  }
+
+  el.addEventListener('mousedown', e => onLotMouseDown(e, lot));
+  return el;
+}
+
+function truncate(s, n) { return s.length > n ? s.substring(0, n) + '…' : s; }
+
+// ═══════════════════════════════════════════
+//  MOUSE EVENTS
+// ═══════════════════════════════════════════
+function onLotMouseDown(e, lot) {
+  e.stopPropagation();
+  if (e.button !== 0) return;
+
+  selectLot(lot);
+
+  if (state.tool === 'select' && state.editMode) {
+    // Start drag
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origX = lot.x, origY = lot.y;
+
+    dragState = {
+      lot, startX, startY, origX, origY,
+      moved: false,
+      move: (mx, my) => {
+        dragState.moved = true;
+        const dx = (mx - startX) / state.zoom;
+        const dy = (my - startY) / state.zoom;
+        lot.x = clamp(+( origX + px2pct(dx, state.canvasW) ).toFixed(3), 0, 98);
+        lot.y = clamp(+( origY + px2pct(dy, state.canvasH) ).toFixed(3), 0, 98);
+        const el = document.querySelector(`.lot[data-lot-id="${lot.id}"]`);
+        if (el) { el.style.left = pct2px(lot.x, state.canvasW)+'px'; el.style.top = pct2px(lot.y, state.canvasH)+'px'; }
+        renderMinimap();
+      },
+      end: async () => {
+        if (dragState.moved) {
+          await apiFetch(`/api/lotmap/lots/${lot.id}/position`, 'PATCH', { x: lot.x, y: lot.y, w: lot.w, h: lot.h });
+          toast('Đã lưu vị trí lô', 'ok');
+        }
+      }
+    };
+  }
+}
+
+function onWrapMouseDown(e) {
+  if (e.button === 1 || (e.button === 0 && state.tool === 'pan')) {
+    // Pan
+    panState = { startX: e.clientX - state.panX, startY: e.clientY - state.panY };
+    document.getElementById('map-wrap').classList.add('panning');
+    return;
+  }
+  if (e.button === 0 && state.tool === 'add') {
+    // Draw new lot
+    const pos = canvasPos(e);
+    drawState = { startX: pos.x, startY: pos.y, x: pos.x, y: pos.y, w: 0, h: 0 };
+    const prev = document.getElementById('draw-preview');
+    prev.style.display = 'block';
+    prev.style.left = pct2px(pos.x, state.canvasW) + 'px';
+    prev.style.top  = pct2px(pos.y, state.canvasH) + 'px';
+    prev.style.width = '1px'; prev.style.height = '1px';
+    return;
+  }
+  if (e.button === 0 && !e.target.closest('.lot')) {
+    deselectLot();
+  }
+}
+
+function onWrapMouseMove(e) {
+  // Update coord bar
+  const pos = canvasPos(e);
+  document.getElementById('coord-bar').textContent = `X: ${pos.x.toFixed(1)}%  Y: ${pos.y.toFixed(1)}%`;
+
+  if (panState) {
+    state.panX = e.clientX - panState.startX;
+    state.panY = e.clientY - panState.startY;
+    applyTransform();
+    renderMinimap();
+    return;
+  }
+  if (dragState) { dragState.move(e.clientX, e.clientY); return; }
+  if (resizeState) { resizeState.move(e.clientX, e.clientY); return; }
+  if (drawState) {
+    const pos = canvasPos(e);
+    drawState.w = pos.x - drawState.startX;
+    drawState.h = pos.y - drawState.startY;
+    const prev = document.getElementById('draw-preview');
+    const actualX = drawState.w < 0 ? pos.x : drawState.startX;
+    const actualY = drawState.h < 0 ? pos.y : drawState.startY;
+    prev.style.left  = pct2px(actualX, state.canvasW) + 'px';
+    prev.style.top   = pct2px(actualY, state.canvasH) + 'px';
+    prev.style.width = pct2px(Math.abs(drawState.w), state.canvasW) + 'px';
+    prev.style.height= pct2px(Math.abs(drawState.h), state.canvasH) + 'px';
+  }
+}
+
+function onWrapMouseUp(e) {
+  document.getElementById('map-wrap').classList.remove('panning');
+
+  if (panState) { panState = null; return; }
+  if (dragState) { dragState.end(); dragState = null; return; }
+  if (resizeState) { resizeState.end(); resizeState = null; return; }
+  if (drawState) {
+    const dx = Math.abs(drawState.w), dy = Math.abs(drawState.h);
+    if (dx > 0.5 && dy > 0.5) {
+      // Open add modal with pre-filled coords
+      const x = drawState.w < 0 ? drawState.startX + drawState.w : drawState.startX;
+      const y = drawState.h < 0 ? drawState.startY + drawState.h : drawState.startY;
+      prefillAddModal(+x.toFixed(3), +y.toFixed(3), +dx.toFixed(3), +dy.toFixed(3));
+      openModal('modal-lot');
+    }
+    document.getElementById('draw-preview').style.display = 'none';
+    drawState = null;
+  }
+}
+
+function startResize(e, lot, dir) {
+  e.stopPropagation();
+  const startX = e.clientX, startY = e.clientY;
+  const origX = lot.x, origY = lot.y, origW = lot.w, origH = lot.h;
+
+  resizeState = {
+    move: (mx, my) => {
+      const dpx = (mx - startX) / state.zoom;
+      const dpy = (my - startY) / state.zoom;
+      const dx = px2pct(dpx, state.canvasW);
+      const dy = px2pct(dpy, state.canvasH);
+
+      if (dir.includes('e')) lot.w = Math.max(0.5, +(origW + dx).toFixed(3));
+      if (dir.includes('s')) lot.h = Math.max(0.5, +(origH + dy).toFixed(3));
+      if (dir.includes('w')) { lot.x = +(origX + dx).toFixed(3); lot.w = Math.max(0.5, +(origW - dx).toFixed(3)); }
+      if (dir.includes('n')) { lot.y = +(origY + dy).toFixed(3); lot.h = Math.max(0.5, +(origH - dy).toFixed(3)); }
+
+      const el = document.querySelector(`.lot[data-lot-id="${lot.id}"]`);
+      if (el) {
+        el.style.left = pct2px(lot.x, state.canvasW) + 'px';
+        el.style.top  = pct2px(lot.y, state.canvasH) + 'px';
+        el.style.width= pct2px(lot.w, state.canvasW) + 'px';
+        el.style.height=pct2px(lot.h, state.canvasH) + 'px';
+      }
+    },
+    end: async () => {
+      await apiFetch(`/api/lotmap/lots/${lot.id}/position`, 'PATCH', { x: lot.x, y: lot.y, w: lot.w, h: lot.h });
+      toast('Đã cập nhật kích thước lô', 'ok');
+    }
+  };
+}
+
+function onWheel(e) {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  zoom(delta, e.clientX, e.clientY);
+}
+
+function canvasPos(e) {
+  const wrap = document.getElementById('map-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const cx = (e.clientX - rect.left - state.panX) / state.zoom;
+  const cy = (e.clientY - rect.top  - state.panY) / state.zoom;
+  return { x: px2pct(cx, state.canvasW), y: px2pct(cy, state.canvasH) };
+}
+
+// ═══════════════════════════════════════════
+//  ZOOM & PAN
+// ═══════════════════════════════════════════
+function zoom(delta, pivotX, pivotY) {
+  const wrap = document.getElementById('map-wrap');
+  const newZoom = clamp(state.zoom * delta, 0.3, 4);
+  if (!pivotX) { pivotX = wrap.clientWidth / 2; pivotY = wrap.clientHeight / 2; }
+
+  state.panX = pivotX - (pivotX - state.panX) * (newZoom / state.zoom);
+  state.panY = pivotY - (pivotY - state.panY) * (newZoom / state.zoom);
+  state.zoom = newZoom;
+  applyTransform();
+  document.getElementById('zoom-pct').textContent = Math.round(newZoom * 100) + '%';
+  document.getElementById('zoom-slider').value = Math.round(newZoom * 100);
+}
+
+function setZoom(z) {
+  const wrap = document.getElementById('map-wrap');
+  zoom(z / state.zoom, wrap.clientWidth / 2, wrap.clientHeight / 2);
+}
+
+function applyTransform() {
+  document.getElementById('map-canvas').style.transform =
+    `translate(${state.panX}px,${state.panY}px) scale(${state.zoom})`;
+}
+
+function fitView() {
+  const wrap = document.getElementById('map-wrap');
+  const scaleX = wrap.clientWidth  / state.canvasW;
+  const scaleY = wrap.clientHeight / state.canvasH;
+  state.zoom = Math.min(scaleX, scaleY) * 0.92;
+  state.panX = (wrap.clientWidth  - state.canvasW * state.zoom) / 2;
+  state.panY = (wrap.clientHeight - state.canvasH * state.zoom) / 2;
+  applyTransform();
+  document.getElementById('zoom-pct').textContent = Math.round(state.zoom * 100) + '%';
+  document.getElementById('zoom-slider').value = Math.round(state.zoom * 100);
+}
+
+function centerView() {
+  const wrap = document.getElementById('map-wrap');
+  if (state.selectedLot) {
+    // Center on selected lot
+    const lot = state.selectedLot;
+    const lx = pct2px(lot.x + lot.w / 2, state.canvasW) * state.zoom;
+    const ly = pct2px(lot.y + lot.h / 2, state.canvasH) * state.zoom;
+    state.panX = wrap.clientWidth  / 2 - lx;
+    state.panY = wrap.clientHeight / 2 - ly;
+  } else {
+    state.panX = (wrap.clientWidth  - state.canvasW * state.zoom) / 2;
+    state.panY = (wrap.clientHeight - state.canvasH * state.zoom) / 2;
+  }
+  applyTransform();
+}
+
+// ═══════════════════════════════════════════
+//  SELECT / DETAIL
+// ═══════════════════════════════════════════
+function selectLot(lot) {
+  state.selectedLot = lot;
+  document.querySelectorAll('.lot').forEach(el => el.classList.remove('selected'));
+  const el = document.querySelector(`.lot[data-lot-id="${lot.id}"]`);
+  if (el) {
+    el.classList.add('selected');
+    if (state.editMode) {
+      // Re-render to show resize handles
+      el.remove();
+      document.getElementById('map-canvas').appendChild(createLotEl(lot));
+    }
+  }
+  renderRightPanel(lot);
+}
+
+function deselectLot() {
+  state.selectedLot = null;
+  document.querySelectorAll('.lot.selected').forEach(el => el.classList.remove('selected'));
+  document.getElementById('rp-title').textContent = 'Chi tiết lô';
+  document.getElementById('rp-sub').textContent = 'Click vào một ô trên bản đồ';
+  document.getElementById('rp-body').innerHTML = `
+    <div class="rp-empty">
+      <i class="fas fa-map-location-dot"></i>
+      <p>Chọn một lô trên bản đồ để xem chi tiết và thực hiện các thao tác</p>
+    </div>`;
+}
+
+function renderRightPanel(lot) {
+  const st = lot.status.toLowerCase();
+  document.getElementById('rp-title').textContent = lot.lotCode;
+  document.getElementById('rp-sub').textContent = `Khu ${lot.zoneCode}  ·  ${statusLabel(lot.status)}`;
+
+  const stColors = { occupied:{bg:'rgba(46,125,107,.1)',color:'var(--jade)'}, empty:{bg:'rgba(26,26,46,.06)',color:'var(--muted)'}, reserved:{bg:'rgba(201,168,76,.12)',color:'var(--amber)'}, unavailable:{bg:'rgba(139,58,82,.08)',color:'var(--rose)'} };
+  const c = stColors[st] || stColors.empty;
+
+  document.getElementById('rp-body').innerHTML = `
+    <div class="info-row">
+      <div class="info-icon" style="background:${c.bg};color:${c.color}"><i class="fas fa-location-dot"></i></div>
+      <div class="info-content">
+        <div class="info-label">Vị trí lô</div>
+        <div class="info-value" style="font-family:'DM Mono',monospace">${lot.lotCode}</div>
+        <div class="info-sub">Khu ${lot.zoneCode} · Hàng ${lot.row||'–'} · Cột ${lot.col||'–'}</div>
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="info-icon" style="background:${c.bg};color:${c.color}"><i class="fas fa-circle-dot"></i></div>
+      <div class="info-content">
+        <div class="info-label">Trạng thái</div>
+        <div class="info-value"><span class="status-badge ${st}">${statusLabel(lot.status)}</span></div>
+      </div>
+    </div>
+    ${lot.graveId ? `
+    <div class="info-row">
+      <div class="info-icon" style="background:rgba(46,125,107,.08);color:var(--jade)"><i class="fas fa-headstone"></i></div>
+      <div class="info-content">
+        <div class="info-label">Hồ sơ mộ phần</div>
+        <div class="info-value">${esc(lot.graveName||'')}</div>
+        <div class="info-sub">${esc(lot.graveYears||'')} · ID #${lot.graveId}</div>
+      </div>
+    </div>` : ''}
+    <div class="info-row">
+      <div class="info-icon" style="background:rgba(37,99,168,.07);color:var(--sky)"><i class="fas fa-ruler-combined"></i></div>
+      <div class="info-content">
+        <div class="info-label">Tọa độ / Kích thước</div>
+        <div class="info-sub" style="font-family:'DM Mono',monospace;font-size:11px;line-height:1.8">
+          X: ${lot.x}%  Y: ${lot.y}%<br>
+          W: ${lot.w}%  H: ${lot.h}%
+        </div>
+      </div>
+    </div>
+    ${lot.notes ? `<div class="info-row"><div class="info-icon" style="background:rgba(201,168,76,.08);color:var(--gold)"><i class="fas fa-note-sticky"></i></div><div class="info-content"><div class="info-label">Ghi chú</div><div class="info-sub">${esc(lot.notes)}</div></div></div>` : ''}
+
+    <div class="action-grid">
+      ${!lot.graveId ? `<button class="btn jade" style="font-size:11px" onclick="openAssignModal(${lot.id},'${lot.lotCode}')"><i class="fas fa-link"></i> Gán hồ sơ</button>` : `<button class="btn danger" style="font-size:11px" onclick="doUnassign(${lot.id})"><i class="fas fa-unlink"></i> Hủy gán</button>`}
+      <button class="btn" style="font-size:11px;background:rgba(37,99,168,.08);color:var(--sky)" onclick="openEditLotModal(${lot.id})"><i class="fas fa-pen"></i> Chỉnh sửa</button>
+      <button class="btn" style="font-size:11px" onclick="navigateTo(${lot.id})"><i class="fas fa-crosshairs"></i> Định vị</button>
+      ${lot.graveId ? `<button class="btn" style="font-size:11px" onclick="window.open('/grave-detail.html?id=' + ${lot.graveId},'_blank')"><i class="fas fa-eye"></i> Xem hồ sơ</button>` : ''}
+      <button class="btn danger" style="font-size:11px;grid-column:1/-1" onclick="deleteLot(${lot.id},'${lot.lotCode}')"><i class="fas fa-trash"></i> Xóa lô này</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════
+let searchTimer;
+function searchLot(q) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    if (!q) { renderLots(); return; }
+    const lower = q.toLowerCase();
+    const found = state.lots.find(l =>
+      l.lotCode.toLowerCase().includes(lower) ||
+      (l.graveName && l.graveName.toLowerCase().includes(lower))
+    );
+    if (found) {
+      selectLot(found);
+      navigateTo(found.id);
+      const el = document.querySelector(`.lot[data-lot-id="${found.id}"]`);
+      if (el) el.classList.add('highlighted');
+    } else {
+      toast(`Không tìm thấy lô: "${q}"`, 'info');
+    }
+  }, 350);
+}
+
+// ═══════════════════════════════════════════
+//  FILTER
+// ═══════════════════════════════════════════
+function filterByStatus(status) {
+  state.filterStatus = status;
+  document.querySelectorAll('.leg-item').forEach(el => el.classList.remove('active'));
+  event?.target?.closest('.leg-item')?.classList.add('active');
+  renderLots();
+}
+
+// ═══════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════
+function setTool(t) {
+  state.tool = t;
+  document.querySelectorAll('.tool-btn[id^=tool-]').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tool-${t}`)?.classList.add('active');
+  const wrap = document.getElementById('map-wrap');
+  wrap.className = `map-wrap${t === 'pan' ? ' tool-pan' : t === 'add' ? ' tool-add' : ''}`;
+}
+
+function toggleEditMode() {
+  state.editMode = !state.editMode;
+  const btn = document.getElementById('edit-mode-btn');
+  btn.style.background = state.editMode ? 'rgba(201,168,76,.2)' : '';
+  btn.style.color = state.editMode ? 'var(--gold-light)' : '';
+  renderLots();
+  toast(state.editMode ? 'Chế độ chỉnh sửa BẬT – có thể kéo & resize lô' : 'Chế độ chỉnh sửa TẮT', 'info');
+}
+
+function toggleLabels() {
+  state.showLabels = !state.showLabels;
+  document.getElementById('btn-labels').classList.toggle('active', state.showLabels);
+  renderLots();
+}
+
+function toggleGrid() {
+  state.showGrid = !state.showGrid;
+  document.getElementById('btn-grid').classList.toggle('active', state.showGrid);
+  document.querySelectorAll('.map-grid-line').forEach(el => el.style.display = state.showGrid ? '' : 'none');
+}
+
+// ═══════════════════════════════════════════
+//  STATS & ZONE LIST
+// ═══════════════════════════════════════════
+function updateStats() {
+  const total = state.lots.length;
+  const occ   = state.lots.filter(l => l.status === 'Occupied').length;
+  const empty = state.lots.filter(l => l.status === 'Empty').length;
+  const res   = state.lots.filter(l => l.status === 'Reserved').length;
+  const una   = state.lots.filter(l => l.status === 'Unavailable').length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-occ').textContent   = occ;
+  document.getElementById('stat-empty').textContent = empty;
+  document.getElementById('stat-res').textContent   = res;
+  document.getElementById('leg-all').textContent    = total;
+  document.getElementById('leg-occ').textContent    = occ;
+  document.getElementById('leg-emp').textContent    = empty;
+  document.getElementById('leg-res').textContent    = res;
+  document.getElementById('leg-una').textContent    = una;
+}
+
+function renderZoneList() {
+  const el = document.getElementById('zone-list');
+  el.innerHTML = state.zones.map(z => {
+    const pct = z.totalLots > 0 ? Math.round(z.occupiedLots / z.totalLots * 100) : 0;
+    return `<div class="zone-item" onclick="focusZone('${z.code}')">
+      <div class="zone-color" style="background:${z.color}"></div>
+      <div class="zone-info">
+        <div class="zone-name">${z.label || 'Khu ' + z.code}</div>
+        <div class="zone-stats">${z.occupiedLots}/${z.totalLots} lô · ${pct}% lấp đầy</div>
+      </div>
+      <div class="zone-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function focusZone(code) {
+  const z = state.zones.find(z => z.code === code);
+  if (!z) return;
+  const wrap = document.getElementById('map-wrap');
+  const cx = pct2px(z.x + z.w / 2, state.canvasW);
+  const cy = pct2px(z.y + z.h / 2, state.canvasH);
+  const scaleX = wrap.clientWidth  / pct2px(z.w * 1.3, state.canvasW);
+  const scaleY = wrap.clientHeight / pct2px(z.h * 1.3, state.canvasH);
+  state.zoom = clamp(Math.min(scaleX, scaleY), 0.3, 4);
+  state.panX = wrap.clientWidth  / 2 - cx * state.zoom;
+  state.panY = wrap.clientHeight / 2 - cy * state.zoom;
+  applyTransform();
+  document.getElementById('zoom-pct').textContent = Math.round(state.zoom * 100) + '%';
+  document.getElementById('zoom-slider').value = Math.round(state.zoom * 100);
+  toast(`Đang xem: ${z.label || 'Khu ' + z.code}`, 'info');
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATE TO LOT
+// ═══════════════════════════════════════════
+function navigateTo(lotId) {
+  const lot = state.lots.find(l => l.id === lotId);
+  if (!lot) return;
+  const wrap = document.getElementById('map-wrap');
+  const cx = pct2px(lot.x + lot.w / 2, state.canvasW) * state.zoom;
+  const cy = pct2px(lot.y + lot.h / 2, state.canvasH) * state.zoom;
+  state.panX = wrap.clientWidth  / 2 - cx;
+  state.panY = wrap.clientHeight / 2 - cy;
+  applyTransform();
+}
+
+// ═══════════════════════════════════════════
+//  MINIMAP
+// ═══════════════════════════════════════════
+function renderMinimap() {
+  const c = document.getElementById('minimap-c');
+  const ctx = c.getContext('2d');
+  const mw = c.width, mh = c.height;
+  const sx = mw / state.canvasW, sy = mh / state.canvasH;
+
+  ctx.clearRect(0, 0, mw, mh);
+  ctx.fillStyle = '#1e1d2c';
+  ctx.fillRect(0, 0, mw, mh);
+
+  // Draw zones
+  state.zones.forEach(z => {
+    ctx.fillStyle = z.color + '30';
+    ctx.strokeStyle = z.color;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.rect(pct2px(z.x, state.canvasW) * sx, pct2px(z.y, state.canvasH) * sy,
+             pct2px(z.w, state.canvasW) * sx, pct2px(z.h, state.canvasH) * sy);
+    ctx.fill(); ctx.stroke();
+  });
+
+  // Draw lots
+  state.lots.forEach(l => {
+    const stColors = { Occupied:'#2E7D6B', Empty:'rgba(255,255,255,.1)', Reserved:'#C9A84C', Unavailable:'#8B3A52' };
+    ctx.fillStyle = stColors[l.status] || stColors.Empty;
+    ctx.fillRect(pct2px(l.x,state.canvasW)*sx, pct2px(l.y,state.canvasH)*sy,
+                 Math.max(1, pct2px(l.w,state.canvasW)*sx), Math.max(1, pct2px(l.h,state.canvasH)*sy));
+  });
+
+  // Viewport indicator
+  const wrap = document.getElementById('map-wrap');
+  const vx = (-state.panX / state.zoom) * sx;
+  const vy = (-state.panY / state.zoom) * sy;
+  const vw = (wrap.clientWidth  / state.zoom) * sx;
+  const vh = (wrap.clientHeight / state.zoom) * sy;
+  ctx.strokeStyle = '#e8c97a';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(vx, vy, vw, vh);
+}
+
+// ═══════════════════════════════════════════
+//  CRUD MODALS
+// ═══════════════════════════════════════════
+function openAddLotModal() { prefillAddModal(5, 5, 3, 4); openModal('modal-lot'); }
+
+function prefillAddModal(x, y, w, h) {
+  document.getElementById('l-code').value = '';
+  document.getElementById('l-zone').value = '';
+  document.getElementById('l-x').value = x;
+  document.getElementById('l-y').value = y;
+  document.getElementById('l-w').value = w;
+  document.getElementById('l-h').value = h;
+  document.getElementById('l-status').value = 'Empty';
+  document.getElementById('l-gid').value = '';
+  document.getElementById('modal-lot-title').textContent = 'Thêm lô mộ phần';
+}
+
+async function openEditLotModal(id) {
+  const lot = state.lots.find(l => l.id === id);
+  if (!lot) return;
+  document.getElementById('modal-lot-title').textContent = 'Chỉnh sửa lô: ' + lot.lotCode;
+  document.getElementById('l-code').value   = lot.lotCode;
+  document.getElementById('l-zone').value   = lot.zoneCode;
+  document.getElementById('l-x').value      = lot.x;
+  document.getElementById('l-y').value      = lot.y;
+  document.getElementById('l-w').value      = lot.w;
+  document.getElementById('l-h').value      = lot.h;
+  document.getElementById('l-status').value = lot.status;
+  document.getElementById('l-gid').value    = lot.graveId || '';
+  document.getElementById('l-code').dataset.editId = id;
+  openModal('modal-lot');
+}
+
+async function saveLot() {
+  const code = document.getElementById('l-code').value.trim();
+  const zone = document.getElementById('l-zone').value;
+  if (!code || !zone) { toast('Nhập đầy đủ Mã lô và Khu vực', 'err'); return; }
+
+  const payload = {
+    lotCode: code.toUpperCase(), zoneCode: zone,
+    x: +document.getElementById('l-x').value,
+    y: +document.getElementById('l-y').value,
+    w: +document.getElementById('l-w').value,
+    h: +document.getElementById('l-h').value,
+    status: document.getElementById('l-status').value,
+    graveId: +document.getElementById('l-gid').value || null
+  };
+
+  const editId = document.getElementById('l-code').dataset.editId;
+  let result;
+  if (editId) {
+    // PATCH position + status
+    result = await apiFetch(`/api/lotmap/lots/${editId}/position`, 'PATCH', { x: payload.x, y: payload.y, w: payload.w, h: payload.h });
+  } else {
+    result = await apiFetch('/api/lotmap/lots', 'POST', payload);
+  }
+
+  if (result) {
+    if (!editId) state.lots.push(result); else Object.assign(state.lots.find(l => l.id == editId), result);
+    renderLots(); updateStats();
+    toast(editId ? 'Đã cập nhật lô' : `Đã tạo lô ${code}`, 'ok');
+    closeModal('modal-lot');
+    delete document.getElementById('l-code').dataset.editId;
+  }
+}
+
+function openAssignModal(lotId, lotCode) {
+  assignLotId = lotId;
+  document.getElementById('assign-lot-code').textContent = lotCode;
+  document.getElementById('assign-gid').value = '';
+  document.getElementById('assign-preview').style.display = 'none';
+  document.getElementById('assign-gid').oninput = previewGrave;
+  openModal('modal-assign');
+}
+
+async function previewGrave() {
+  const id = document.getElementById('assign-gid').value;
+  const prev = document.getElementById('assign-preview');
+  if (!id) { prev.style.display = 'none'; return; }
+  const g = await apiFetch(`/api/graves/${id}`);
+  if (g) {
+    prev.style.display = 'block';
+    prev.innerHTML = `<strong>${esc(g.fullName)}</strong><br><span style="color:var(--muted);font-size:12px">${g.bornYear||'?'} – ${g.diedYear||'?'} · Khu ${g.zone} · ${g.lotCode}</span>`;
+  } else {
+    prev.style.display = 'block';
+    prev.style.background = 'rgba(139,58,82,.06)';
+    prev.innerHTML = `<span style="color:var(--rose)">Không tìm thấy hồ sơ #${id}</span>`;
+  }
+}
+
+async function doAssign() {
+  const gid = +document.getElementById('assign-gid').value;
+  if (!gid) { toast('Nhập ID hồ sơ', 'err'); return; }
+  const result = await apiFetch(`/api/lotmap/lots/${assignLotId}/assign`, 'PATCH', { graveId: gid, status: 'Occupied' });
+  if (result) {
+    const idx = state.lots.findIndex(l => l.id === assignLotId);
+    if (idx >= 0) state.lots[idx] = result;
+    renderLots(); updateStats();
+    if (state.selectedLot?.id === assignLotId) renderRightPanel(result);
+    toast('Đã gán hồ sơ thành công', 'ok');
+    closeModal('modal-assign');
+  }
+}
+
+async function doUnassign(lotId) {
+  if (!confirm('Hủy gán hồ sơ khỏi lô này?')) return;
+  const result = await apiFetch(`/api/lotmap/lots/${lotId}/unassign`, 'DELETE');
+  if (result) {
+    const idx = state.lots.findIndex(l => l.id === lotId);
+    if (idx >= 0) state.lots[idx] = result;
+    renderLots(); updateStats();
+    if (state.selectedLot?.id === lotId) renderRightPanel(result);
+    toast('Đã hủy gán hồ sơ', 'ok');
+  }
+}
+
+async function deleteLot(id, code) {
+  if (!confirm(`Xóa lô "${code}"? Hành động không thể hoàn tác.`)) return;
+  const ok = await fetch(API + `/api/lotmap/lots/${id}`, { method: 'DELETE' });
+  if (ok.status === 204) {
+    state.lots = state.lots.filter(l => l.id !== id);
+    deselectLot(); renderLots(); updateStats();
+    toast(`Đã xóa lô ${code}`, 'ok');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  GENERATE GRID MODAL
+// ═══════════════════════════════════════════
+function openGenerateModal() { openModal('modal-grid'); updateGridPreview(); }
+
+function updateGridPreview() {
+  const rows = +document.getElementById('g-rows').value;
+  const cols = +document.getElementById('g-cols').value;
+  document.getElementById('grid-preview-info').textContent =
+    `Sẽ tạo ${rows * cols} lô (${rows} hàng × ${cols} cột) trong khu đã chọn.`;
+}
+
+['g-rows','g-cols','g-zone','g-gap'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updateGridPreview);
+});
+
+async function doGenerateGrid() {
+  const zone = document.getElementById('g-zone').value;
+  if (!zone) { toast('Chọn khu vực', 'err'); return; }
+
+  const payload = {
+    zoneCode: zone,
+    rows: +document.getElementById('g-rows').value,
+    cols: +document.getElementById('g-cols').value,
+    startX: +document.getElementById('g-sx').value,
+    startY: +document.getElementById('g-sy').value,
+    totalW: +document.getElementById('g-tw').value,
+    totalH: +document.getElementById('g-th').value,
+    gapPct: +document.getElementById('g-gap').value
+  };
+
+  const result = await apiFetch('/api/lotmap/generate-grid', 'POST', payload);
+  if (result) {
+    // Refresh lots
+    state.lots = state.lots.filter(l => l.zoneCode !== zone);
+    state.lots.push(...result.lots);
+    renderLots(); updateStats();
+    toast(result.message, 'ok');
+    closeModal('modal-grid');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'v' || e.key === 'V') setTool('select');
+    if (e.key === 'h' || e.key === 'H') setTool('pan');
+    if (e.key === 'a' || e.key === 'A') setTool('add');
+    if (e.key === 'f' || e.key === 'F') fitView();
+    if (e.key === '+' || e.key === '=') zoom(1.2);
+    if (e.key === '-') zoom(0.8);
+    if (e.key === 'Escape') { deselectLot(); setTool('select'); }
+    if (e.key === 'Delete' && state.selectedLot) deleteLot(state.selectedLot.id, state.selectedLot.lotCode);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+async function apiFetch(url, method = 'GET', body = null) {
+  try {
+    const opts = { method, headers: {} };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    const res = await fetch(API + url, opts);
+    if (!res.ok) { toast('Lỗi: ' + res.statusText, 'err'); return null; }
+    if (res.status === 204) return true;
+    return await res.json();
+  } catch(e) { toast('Lỗi kết nối API', 'err'); return null; }
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); }));
+
+function toast(msg, type = 'info') {
+  const icons = { ok:'fa-circle-check', err:'fa-circle-xmark', info:'fa-circle-info' };
+  const c = document.getElementById('toast-c');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${icons[type]||icons.info}"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .2s'; setTimeout(()=>t.remove(), 200); }, 3000);
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function statusLabel(s) { return { Occupied:'Đã có chủ', Empty:'Còn trống', Reserved:'Đặt trước', Unavailable:'Không khả dụng' }[s] || s; }
+
+// START
+window.addEventListener('load', () => { init().then(() => { fitView(); }); });
+</script>
+</body>
+</html>

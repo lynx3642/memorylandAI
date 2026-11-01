@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLand AI – Dashboard kinh doanh</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/ml.css">
+<style>
+.hero{background:linear-gradient(120deg,#14142a,#2d2d4e 60%,#1f6b5a);color:#fff;border-radius:16px;padding:26px 28px;margin-bottom:18px;position:relative;overflow:hidden}
+.hero h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-light)}
+.hero p{max-width:760px;opacity:.88;line-height:1.6;margin-top:8px;font-size:14px}
+.hero .quote{margin-top:12px;font-style:italic;color:var(--gold-light);font-family:'Playfair Display',serif}
+.hero::after{content:'\f4ba';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;right:-10px;bottom:-30px;font-size:180px;opacity:.07}
+.anchors{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px}
+.anchors a{white-space:nowrap;font-size:12.5px;font-weight:600;text-decoration:none;padding:7px 13px;border-radius:99px;background:#fff;border:1px solid var(--border);color:#555}
+.anchors a:hover{background:var(--gold-pale)}
+h2.sec{font-family:'Playfair Display',serif;font-size:21px;margin:26px 0 12px;display:flex;align-items:center;gap:10px;scroll-margin-top:70px}
+h2.sec i{color:var(--gold);font-size:18px}
+.tam{display:flex;align-items:center;justify-content:center;position:relative;height:300px}
+.tam .c{position:absolute;border-radius:50%;display:flex;align-items:flex-start;justify-content:center;text-align:center;padding-top:14px;font-size:12px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.4)}
+.bmc{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:auto auto auto;gap:10px}
+.bmc .b{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 13px;font-size:12.3px;line-height:1.55}
+.bmc .b h5{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:flex;gap:6px;align-items:center}
+.bmc .b ul{padding-left:16px}.bmc .b li{margin-bottom:2px}
+.bmc .kp{grid-column:1;grid-row:1/3}.bmc .ka{grid-column:2;grid-row:1}.bmc .kr{grid-column:2;grid-row:2}.bmc .vp{grid-column:3;grid-row:1/3;background:linear-gradient(160deg,#fff,#f1faf7);border-color:var(--jade)}
+.bmc .cr{grid-column:4;grid-row:1}.bmc .ch{grid-column:4;grid-row:2}.bmc .cs{grid-column:5;grid-row:1/3}.bmc .co{grid-column:1/4;grid-row:3}.bmc .rs{grid-column:4/6;grid-row:3}
+@media(max-width:1000px){.bmc{grid-template-columns:1fr 1fr}.bmc .b{grid-column:auto!important;grid-row:auto!important}}
+@media(max-width:600px){.bmc{grid-template-columns:1fr}}
+.tl{position:relative;padding-left:26px}
+.tl::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:3px;background:linear-gradient(var(--gold),var(--jade));border-radius:3px}
+.tl .it{position:relative;margin-bottom:16px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px 16px;box-shadow:var(--shadow-sm)}
+.tl .it::before{content:'';position:absolute;left:-24px;top:18px;width:15px;height:15px;border-radius:50%;background:#fff;border:4px solid var(--gold)}
+.tl .it.now::before{border-color:var(--jade);box-shadow:0 0 0 5px rgba(46,125,107,.2)}
+.tl .it h4{font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tl .it p{font-size:12.5px;color:#555;margin-top:4px;line-height:1.55}
+.tl .it .kpi-t{margin-top:7px;font-size:12px;background:var(--cream);border-radius:8px;padding:6px 10px;color:#6a5a20;font-weight:600}
+.prog{display:flex;gap:3px}.prog i{flex:1;height:8px;border-radius:3px;background:#e4e1d6}.prog i.on{background:var(--jade)}.prog i.cur{background:var(--gold);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.risk{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.risk{grid-template-columns:1fr}}
+.risk .rk{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px;border-top:4px solid var(--rose)}
+.risk .rk h4{font-size:14px;margin-bottom:6px}.risk .rk p{font-size:12.5px;line-height:1.6;color:#555}
+.sl{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 18px}
+@media(max-width:700px){.sl{grid-template-columns:1fr}}
+.sl label.f{display:flex;justify-content:space-between}.sl label.f b{color:var(--ink);text-transform:none;letter-spacing:0}
+.yes{color:var(--jade);font-weight:700}.no{color:var(--rose)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <span class="chip gold">HaUI – Startup Mindset 2026 · Nhóm ESC1</span>
+    <h2>MemoryLand AI</h2>
+    <p>Quy hoạch khu mộ phần thông minh bằng <b>AI &amp; Drone</b>, kết hợp dịch vụ cúng bái từ xa. Hai dịch vụ bổ trợ: (1) B2G/B2B quy hoạch phân lô nghĩa trang, tối ưu 20–30% quỹ đất; (2) B2C chăm sóc mộ phần qua MemoryLand App với cam kết “Đúng mộ – Đúng việc – Đúng hẹn” nhờ AI Verify.</p>
+    <div class="quote">“Quy hoạch bằng trí tuệ – Gìn giữ bằng tâm hiếu”</div>
+  </div>
+
+  <div class="anchors">
+    <a href="#kpi">Chỉ số đột phá</a><a href="#live">Số liệu hệ thống</a><a href="#market">Thị trường</a><a href="#revenue">Doanh thu</a><a href="#finance">Tài chính &amp; hòa vốn</a><a href="#b2g">Dự án B2G</a><a href="#bmc">BMC</a><a href="#compare">Đối thủ</a><a href="#road">Lộ trình</a><a href="#risk">Rủi ro &amp; pháp lý</a><a href="#team">Đội ngũ</a>
+  </div>
+
+  <h2 class="sec" id="kpi"><i class="fas fa-gauge-high"></i> Key Project Dashboard</h2>
+  <div class="card"><div class="tw"><table class="t" id="kpi-table"></table></div></div>
+
+  <h2 class="sec" id="live"><i class="fas fa-bolt"></i> Số liệu vận hành trực tiếp từ hệ thống</h2>
+  <div class="grid g4" id="live-kpi"></div>
+
+  <h2 class="sec" id="market"><i class="fas fa-bullseye"></i> Quy mô thị trường TAM – SAM – SOM</h2>
+  <div class="grid g2">
+    <div class="card"><div class="tam">
+      <div class="c" style="width:290px;height:290px;background:rgba(26,26,46,.88)">TAM · &gt; 1.500 tỷ/năm</div>
+      <div class="c" style="width:200px;height:200px;background:rgba(37,99,168,.92);top:auto;margin-top:84px">SAM · ~300 tỷ/năm</div>
+      <div class="c" style="width:110px;height:110px;background:rgba(46,125,107,.95);margin-top:140px;padding-top:30px">SOM<br>45 tỷ</div></div></div>
+    <div class="card"><div class="small" style="line-height:1.85">
+      <p><span class="chip gray">TAM</span> Hơn <b>14.000</b> nghĩa trang công lập + hàng nghìn khu an táng dòng họ, phục vụ &gt; 102 triệu dân. Thị trường ổn định, không chịu chu kỳ suy thoái vì gắn với tín ngưỡng thờ cúng tổ tiên.</p>
+      <p style="margin-top:8px"><span class="chip sky">SAM</span> Nghĩa trang cấp xã/phường ven đô, nông thôn trong lộ trình nông thôn mới nâng cao và chuyển đổi số đất đai.</p>
+      <p style="margin-top:8px"><span class="chip jade">SOM</span> 50–100 nghĩa trang tại Hà Nội và ĐBSH (Bắc Ninh, Hưng Yên, Hải Dương, Nam Định) trong 3 năm đầu.</p>
+      <div class="mt"><span class="chip gold"><i class="fas fa-users"></i> 42 triệu dân đô thị</span> <span class="chip gold"><i class="fas fa-globe"></i> 5,3 triệu kiều bào</span> <span class="chip gold"><i class="fas fa-ruler-combined"></i> 20–30% quỹ đất lãng phí</span></div></div></div>
+  </div>
+
+  <h2 class="sec" id="revenue"><i class="fas fa-coins"></i> 4 dòng doanh thu bền vững</h2>
+  <div class="grid g-side">
+    <div class="card"><div class="tw"><table class="t" id="rev-table"></table></div></div>
+    <div class="card"><h3><span class="l"><i class="fas fa-chart-pie"></i> Cơ cấu doanh thu năm 3 (ước tính)</span></h3><div style="height:250px"><canvas id="rev-chart"></canvas></div></div>
+  </div>
+
+  <h2 class="sec" id="finance"><i class="fas fa-scale-balanced"></i> Kế hoạch tài chính 3 năm &amp; điểm hòa vốn</h2>
+  <div class="grid g2">
+    <div class="card"><div class="tw"><table class="t" id="fin-table"></table></div>
+      <div class="info-box mt" style="min-height:0">Vốn đầu tư ban đầu <b>180 triệu</b> · hòa vốn <b>tháng 14</b> (quý 2 Năm 2) khi hoàn thành 8–10 nghĩa trang và đạt 3.000 người dùng thường xuyên.</div></div>
+    <div class="card"><h3><span class="l"><i class="fas fa-chart-column"></i> Doanh thu – Chi phí – Lợi nhuận (trung vị)</span></h3><div style="height:260px"><canvas id="fin-chart"></canvas></div></div>
+  </div>
+  <div class="card"><h3><span class="l"><i class="fas fa-sliders"></i> Mô phỏng điểm hòa vốn</span><span class="chip jade" id="be-out"></span></h3>
+    <div class="sl">
+      <div><label class="f">Nghĩa trang ký mới / tháng <b id="s1v"></b></label><input type="range" id="s1" min="0.2" max="2" step="0.1" value="0.7"></div>
+      <div><label class="f">Phí quy hoạch TB / nghĩa trang <b id="s2v"></b></label><input type="range" id="s2" min="15" max="40" step="1" value="25"></div>
+      <div><label class="f">Người dùng App tăng thêm / tháng <b id="s3v"></b></label><input type="range" id="s3" min="50" max="500" step="10" value="215"></div>
+      <div><label class="f">Tỉ lệ người dùng đặt dịch vụ / tháng <b id="s4v"></b></label><input type="range" id="s4" min="1" max="10" step="0.5" value="3"></div>
+      <div><label class="f">Giá trị đơn B2C TB <b id="s5v"></b></label><input type="range" id="s5" min="150" max="900" step="10" value="450"></div>
+      <div><label class="f">Chi phí cố định / tháng <b id="s6v"></b></label><input type="range" id="s6" min="5" max="25" step="1" value="11"></div>
+    </div>
+    <div style="height:260px" class="mt"><canvas id="be-chart"></canvas></div>
+    <div class="small muted">Giả định: chi phí biến đổi = 55% doanh thu B2C (đối tác nhận phần lớn) + 30% doanh thu B2G (khảo sát, vận hành drone). Vốn ban đầu 180 triệu.</div>
+  </div>
+
+  <h2 class="sec" id="b2g"><i class="fas fa-file-contract"></i> Dự án quy hoạch B2G (6 bước)</h2>
+  <div class="card"><div class="row mb"><div class="sp small muted">Theo dõi từng hợp đồng quy hoạch: Drone → AI nhận diện → AI phân lô → 3D họp dân → cắm mốc → bàn giao GIS.</div><button class="btn primary sm" id="btn-newp"><i class="fas fa-plus"></i> Ký hợp đồng mới</button></div>
+    <div class="tw"><table class="t" id="proj-table"></table></div></div>
+
+  <h2 class="sec" id="bmc"><i class="fas fa-table-cells-large"></i> Business Model Canvas</h2>
+  <div class="bmc">
+    <div class="b kp"><h5><i class="fas fa-handshake"></i> Đối tác chính</h5><ul><li>UBND xã/phường, Ban quản lý nghĩa trang</li><li>Đơn vị trắc địa &amp; cấp phép bay</li><li>Hộ dân, quản trang, lao động địa phương</li><li>Cửa hàng hoa, đồ lễ; đơn vị xây dựng mộ</li><li>Cổng thanh toán, Zalo/SMS</li></ul></div>
+    <div class="b ka"><h5><i class="fas fa-gears"></i> Hoạt động chính</h5><ul><li>Khảo sát Drone RTK, xử lý ảnh</li><li>Huấn luyện/vận hành 8 module AI</li><li>Vận hành MemoryLand App &amp; Partner App</li></ul></div>
+    <div class="b kr"><h5><i class="fas fa-key"></i> Nguồn lực chính</h5><ul><li>Drone RTK, máy RTK cầm tay</li><li>CSDL không gian độc quyền</li><li>Đội ngũ AI/GIS/Cloud</li></ul></div>
+    <div class="b vp"><h5><i class="fas fa-gem"></i> Giá trị cung cấp</h5><ul><li><b>B2G:</b> quy hoạch nhanh 1 ngày, +20–30% quỹ đất, bản đồ GIS, mô phỏng 3D giúp đồng thuận họp dân</li><li><b>B2C:</b> chăm sóc mộ từ xa minh bạch “Đúng mộ – Đúng việc – Đúng hẹn”, nhắc lịch Âm, bồi hoàn 100%</li><li><b>Xã hội:</b> bảo tồn đạo hiếu, việc làm nông thôn</li></ul></div>
+    <div class="b cr"><h5><i class="fas fa-heart"></i> Quan hệ khách hàng</h5><ul><li>Tư vấn kỹ thuật, họp dân</li><li>Báo cáo ảnh trong 15 phút</li><li>AI Assistant 24/7</li></ul></div>
+    <div class="b ch"><h5><i class="fas fa-bullhorn"></i> Kênh</h5><ul><li>Làm việc trực tiếp với UBND</li><li>App store, Zalo OA, fanpage</li><li>Truyền miệng dòng họ</li></ul></div>
+    <div class="b cs"><h5><i class="fas fa-users"></i> Phân khúc khách hàng</h5><ul><li>UBND xã/phường, ban quản trang</li><li>Dòng họ, làng xã có khu an táng</li><li>Con cháu xa quê, kiều bào</li><li>Hộ nghèo/lao động nhàn rỗi (đối tác)</li></ul></div>
+    <div class="b co"><h5><i class="fas fa-receipt"></i> Cơ cấu chi phí</h5>Thiết bị Drone/RTK &amp; khấu hao · lương đội ngũ kỹ thuật · hạ tầng cloud &amp; AI · chi trả đối tác địa phương · marketing &amp; vận hành. Tổng vốn đầu tư ban đầu ~180 triệu đồng.</div>
+    <div class="b rs"><h5><i class="fas fa-sack-dollar"></i> Dòng doanh thu</h5>Hợp đồng quy hoạch (15–40 tr/nghĩa trang) · Gói chăm sóc định kỳ (lẻ/Lễ Tết/Hiếu Đạo) · Thuê bao phần mềm quản lý (200–500k/tháng/xã) · Hoa hồng đối tác 10–15%.</div>
+  </div>
+
+  <h2 class="sec" id="compare"><i class="fas fa-ranking-star"></i> Lợi thế cạnh tranh</h2>
+  <div class="card"><div class="tw"><table class="t" id="cmp-table"></table></div>
+    <div class="info-box mt" style="min-height:0"><b>Data flywheel:</b> hợp đồng quy hoạch B2G tạo CSDL số độc quyền (ảnh Drone, toạ độ từng cm) → triển khai dịch vụ B2C với chi phí thu hút khách (CAC) gần bằng 0 → đối thủ không có dữ liệu để xác thực.</div></div>
+
+  <h2 class="sec" id="road"><i class="fas fa-route"></i> Lộ trình phát triển 5 giai đoạn (2026 – 2035)</h2>
+  <div class="tl" id="roadmap"></div>
+
+  <h2 class="sec" id="risk"><i class="fas fa-triangle-exclamation"></i> Quản trị rủi ro &amp; căn cứ pháp lý</h2>
+  <div class="risk" id="risks"></div>
+  <div class="card mt"><h3><span class="l"><i class="fas fa-scale-balanced"></i> Căn cứ pháp lý</span></h3><div class="small" style="line-height:1.9" id="legal"></div></div>
+
+  <h2 class="sec" id="team"><i class="fas fa-people-group"></i> Đội ngũ ESC1 – Trường Điện – Điện tử, ĐH Công nghiệp Hà Nội</h2>
+  <div class="card"><div class="tw"><table class="t" id="team-table"></table></div></div>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal" id="modal-box"></div></div>
+<script src="/ml.js"></script>
+<script>
+mlNav('business');
+const set = (id, h) => $('#' + id).innerHTML = h;
+
+/* ── Key dashboard (theo tài liệu dự án) ── */
+set('kpi-table', `<tr><th>Chỉ số then chốt</th><th>Nội dung giải pháp &amp; minh chứng</th><th>Giá trị / Mục tiêu</th></tr>` + [
+  ['Tối ưu quỹ đất', 'AI Planner tối ưu ràng buộc, quy hoạch hàng lối chuẩn', 'Tăng 20% – 30% số ô mộ sử dụng'],
+  ['Tốc độ khảo sát', 'Drone RTK bay lưới tự động + AI Vision nhận diện', 'Rút ngắn 85% (7 ngày → 1 ngày)'],
+  ['Công nghệ AI lõi', 'Hệ sinh thái 8 module AI (Vision, Terrain, Planner, 3D, Forecast, Verify, Assistant, Dispatch)', 'Tự động hóa toàn bộ quy trình B2G &amp; B2C'],
+  ['Mô hình kinh doanh', 'B2G tạo phễu CSDL độc quyền chuyển sang B2C', 'Doanh thu định kỳ lặp lại trọn đời'],
+  ['Quy mô thị trường', '14.000+ nghĩa trang công lập; tập trung Bắc Bộ trước mắt', 'SOM 3 năm đầu ~45 tỷ VNĐ'],
+  ['Điểm hòa vốn', 'Doanh thu hợp đồng B2G + phí gói tâm linh B2C', 'Hòa vốn sau 14 tháng (Năm 2)']].map(r => `<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td><span class="chip jade">${r[2]}</span></td></tr>`).join(''));
+
+/* ── Doanh thu ── */
+set('rev-table', `<tr><th>#</th><th>Dòng doanh thu</th><th>Mức giá</th><th>Đặc điểm</th></tr>` + [
+  ['1', 'Hợp đồng quy hoạch phân lô bằng AI &amp; Drone', '15–40 triệu / nghĩa trang', '50% doanh thu năm đầu'],
+  ['2', 'Gói chăm sóc, cúng bái từ xa', 'Lẻ 150–250k · Lễ Tết 450–650k · Hiếu Đạo 1,8–3,6 tr/năm', 'Doanh thu lặp lại trọn đời'],
+  ['3', 'Thuê bao phần mềm quản lý (AI Forecast)', '200–500k / tháng / xã', 'Định kỳ hằng tháng'],
+  ['4', 'Hoa hồng đối tác địa phương', '10–15% giá trị đơn', 'Hoa tươi, đồ lễ, sửa mộ']].map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td class="small muted">${r[3]}</td></tr>`).join(''));
+new Chart($('#rev-chart'), { type: 'doughnut', data: { labels: ['Quy hoạch B2G', 'Gói chăm sóc B2C', 'Thuê bao phần mềm', 'Hoa hồng đối tác'], datasets: [{ data: [34, 41, 11, 14], backgroundColor: ['#1a1a2e', '#2e7d6b', '#2563a8', '#c9a84c'], borderWidth: 2, borderColor: '#fff' }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}%` } } }, cutout: '58%' } });
+
+/* ── Tài chính ── */
+const FIN = [['Năm 1', '03 – 05', 200, 280, 150, 180, '50 – 100 (tái đầu tư)'], ['Năm 2', '10 – 15', 650, 900, 320, 400, '330 – 500 (biên LN 45%)'], ['Năm 3', '30 – 50', 2200, 3000, 900, 1200, '1.300 – 1.800 (biên LN 55%)']];
+set('fin-table', `<tr><th>Năm</th><th>Số nghĩa trang</th><th>Doanh thu (tr đ)</th><th>Chi phí (tr đ)</th><th>Lợi nhuận ròng</th></tr>` + FIN.map(f => `<tr><td><b>${f[0]}</b></td><td>${f[1]}</td><td>${f[2].toLocaleString('vi')} – ${f[3].toLocaleString('vi')}</td><td>${f[4]} – ${f[5]}</td><td><b style="color:var(--jade)">${f[6]}</b></td></tr>`).join(''));
+const mid = (a, b) => (a + b) / 2;
+new Chart($('#fin-chart'), { type: 'bar', data: { labels: FIN.map(f => f[0]), datasets: [
+  { label: 'Doanh thu', data: FIN.map(f => mid(f[2], f[3])), backgroundColor: '#2e7d6b', borderRadius: 6 },
+  { label: 'Chi phí', data: FIN.map(f => mid(f[4], f[5])), backgroundColor: '#c9a84c', borderRadius: 6 },
+  { label: 'Lợi nhuận', data: FIN.map(f => mid(f[2], f[3]) - mid(f[4], f[5])), backgroundColor: '#1a1a2e', borderRadius: 6 }] },
+  options: { maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'triệu đồng' } } } } });
+
+/* ── Mô phỏng hòa vốn ── */
+let beChart;
+function runBE() {
+  const v = id => +$('#' + id).value, ps = v('s1'), fee = v('s2') * 1e6, ug = v('s3'), rate = v('s4') / 100, avg = v('s5') * 1e3, fixed = v('s6') * 1e6, invest = 180e6;
+  $('#s1v').textContent = ps.toFixed(1) + ' NT'; $('#s2v').textContent = v('s2') + ' tr'; $('#s3v').textContent = ug + ' người'; $('#s4v').textContent = v('s4') + '%'; $('#s5v').textContent = v('s5') + 'k'; $('#s6v').textContent = v('s6') + ' tr';
+  let cum = -invest, be = null, users = 0, cems = 0; const labels = [], data = [];
+  for (let m = 1; m <= 36; m++) {
+    users += ug; cems += ps;
+    const b2g = ps * fee, b2c = users * rate * avg, saas = cems * 0.3e6 * 0.5;
+    const net = b2g * .7 + b2c * .45 + saas - fixed; cum += net; labels.push('T' + m); data.push(Math.round(cum / 1e6));
+    if (be === null && cum >= 0) be = { m, users: Math.round(users), cems: Math.round(cems * 10) / 10 };
+  }
+  $('#be-out').innerHTML = be ? `Hòa vốn tháng ${be.m} · ${be.cems} nghĩa trang · ${be.users.toLocaleString('vi')} người dùng` : 'Chưa hòa vốn trong 36 tháng';
+  if (beChart) beChart.destroy();
+  beChart = new Chart($('#be-chart'), { type: 'line', data: { labels, datasets: [{ label: 'Dòng tiền lũy kế (triệu đồng)', data, borderColor: '#2e7d6b', backgroundColor: 'rgba(46,125,107,.12)', fill: true, tension: .25, pointRadius: 0, segment: { borderColor: c => c.p1.parsed.y < 0 ? '#8b3a52' : '#2e7d6b' } }] }, options: { maintainAspectRatio: false, animation: false, plugins: { legend: { display: true } } } });
+}
+['s1', 's2', 's3', 's4', 's5', 's6'].forEach(id => $('#' + id).oninput = runBE); runBE();
+
+/* ── Đối thủ ── */
+set('cmp-table', `<tr><th>Tiêu chí</th><th style="color:var(--jade)">MemoryLand AI</th><th>Đo đạc thủ công</th><th>CityWork GIS</th><th>Dọn mộ tự phát</th></tr>` + [
+  ['Khảo sát địa hình', 'Drone RTK tự động (20–40 phút/ha)', 'Thước/toàn đạc (5–7 ngày/ha)', 'Không khảo sát drone', 'Không có'],
+  ['Nhận diện mộ phần', 'AI Vision tự động 100%, có toạ độ', 'Đếm ghi tay, dễ sót mộ cây che', 'Nhập thủ công từng điểm', 'Không có'],
+  ['Tối ưu phân lô', 'AI Planner sinh 2–3 phương án', '1 phương án CAD thủ công', 'Không có tính năng', 'Không có'],
+  ['Mô phỏng 3D', '3D trước – sau trực quan trên web', 'Bản vẽ 2D giấy khó hiểu', 'Không hỗ trợ 3D', 'Không có'],
+  ['Kiểm định dịch vụ', 'AI Verify đối soát GPS, ảnh', 'Không có', 'Không có dịch vụ B2C', 'Tin lời miệng, dễ nhầm']].map(r => `<tr><td><b>${r[0]}</b></td><td class="yes">${r[1]}</td><td class="no">${r[2]}</td><td class="no">${r[3]}</td><td class="no">${r[4]}</td></tr>`).join(''));
+
+/* ── Lộ trình ── */
+const ROAD = [
+  ['GĐ 1 · Q3/2026 – Q2/2027', 'Thí điểm & AI lõi', 'Triển khai 01 nghĩa trang thí điểm, hoàn thiện AI Vision &amp; Planner v1.0', 'Số hóa 1.000 ô mộ; bán thử nghiệm gói cúng bái đạt doanh thu', true],
+  ['GĐ 2 · Q3/2027 – Q4/2028', 'Thương mại hóa diện hẹp', '5–10 nghĩa trang tại Hà Nội &amp; Bắc Ninh; ra mắt AI Verify', '5.000 người dùng App · đạt điểm hòa vốn · mạng lưới 50 đối tác', false],
+  ['GĐ 3 · 2029 – 2030', 'Tự động hóa & tăng tốc', 'Mở rộng 20–50 nghĩa trang Bắc Bộ; vận hành AI Forecast &amp; Dispatch', '20.000 người dùng · doanh thu &gt; 3 tỷ/năm · thỏa thuận chuyển đổi số cấp huyện', false],
+  ['GĐ 4 · 2031 – 2033', 'Tích hợp IoT toàn quốc', 'Cảm biến IoT năng lượng mặt trời giám sát nghĩa trang; mở rộng toàn quốc', 'Số hóa &gt; 200 nghĩa trang; tự động cảnh báo sạt lở, cháy nổ, ngập úng', false],
+  ['GĐ 5 · Sau 2033', 'Tưởng niệm số & Đông Nam Á', 'Cổng gia phả số dòng họ; nghiên cứu xuất khẩu mô hình', 'Kết nối kiều bào toàn cầu; nhân rộng Thái Lan, Malaysia, Indonesia', false]];
+set('roadmap', ROAD.map(r => `<div class="it ${r[4] ? 'now' : ''}"><h4><span class="chip ${r[4] ? 'jade' : 'gray'}">${r[0]}</span>${r[1]} ${r[4] ? '<span class="chip gold">Đang thực hiện – bản demo này</span>' : ''}</h4><p>${r[2]}</p><div class="kpi-t"><i class="fas fa-flag-checkered"></i> KPI: ${r[3]}</div></div>`).join(''));
+
+/* ── Rủi ro & pháp lý ── */
+set('risks', [
+  ['Rủi ro tâm linh & phản ứng cộng đồng', 'Định vị là đơn vị tư vấn kỹ thuật; mọi phương án trình chiếu 3D minh bạch trong họp dân, lấy ý kiến đồng thuận của nhân dân và dòng họ trước khi UBND xã phê duyệt.'],
+  ['Rủi ro thời tiết bay Drone', 'Theo dõi dự báo khí tượng, thiết bị kháng gió cấp 5–6; dùng mốc khống chế mặt đất (GCP) cố định để đảm bảo độ chính xác trắc địa.'],
+  ['Rủi ro gian lận dịch vụ dọn mộ', 'AI Verify 3 lớp: siêu dữ liệu ảnh chụp trong app, đối soát GPS, quét QR tại chỗ → chặn ảnh cũ/làm giả. <a href="/app.html" style="color:var(--sky)"><b>Thử trong App →</b></a>']].map(r => `<div class="rk"><h4>${r[0]}</h4><p>${r[1]}</p></div>`).join(''));
+set('legal', `<div><b>Quy hoạch nghĩa trang:</b> Luật Đất đai 2024; Nghị định 23/2016/NĐ-CP; Nghị định 98/2023/NĐ-CP; QCVN 01:2021/BXD.</div>
+  <div><b>Bay thiết bị không người lái:</b> Nghị định 36/2008/NĐ-CP, 79/2011/NĐ-CP — xin cấp phép bay từ Cục Tác chiến (Bộ Tổng Tham mưu) và đăng ký chính quyền địa phương.</div>
+  <div><b>Bảo vệ dữ liệu cá nhân:</b> Nghị định 13/2023/NĐ-CP — mã hóa thông tin thân nhân &amp; người đã khuất, cam kết không thương mại hóa dữ liệu nhạy cảm.</div>`);
+
+/* ── Đội ngũ ── */
+set('team-table', `<tr><th>STT</th><th>Họ và tên</th><th>MSV</th><th>Lớp</th><th>Vai trò</th></tr>` + [
+  ['Nguyễn Văn An', '2021600001', 'ĐH Kỹ thuật ĐT 1 - K16', 'Nhóm trưởng – Chiến lược & Vận hành'], ['Trần Quang Huy', '2021600002', 'ĐH CNTT 2 - K16', 'Kỹ sư Trí tuệ nhân tạo (AI & Vision)'],
+  ['Lê Hoàng Nam', '2022600003', 'ĐH KT Điều khiển - K17', 'Kỹ sư Phần cứng Drone & GIS số'], ['Phạm Minh Trang', '2022600004', 'ĐH KT Phần mềm 1 - K17', 'Lập trình viên App/Web & Cloud CSDL'],
+  ['Đỗ Thùy Linh', '2023600005', 'ĐH Quản trị KD 3 - K18', 'Chuyên viên Tài chính & Marketing']].map((r, i) => `<tr><td>${i + 1}</td><td><b>${r[0]}</b></td><td class="mono small">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join(''));
+
+/* ── Số liệu trực tiếp + dự án B2G ── */
+async function loadLive() {
+  const b = await api('/business');
+  set('live-kpi', `<div class="kpi"><div class="lb">Doanh thu B2G (hợp đồng)</div><div class="v">${moneyM(b.b2gRevenue)}</div><div class="s">${b.projects} dự án · ${b.projectsDone} đã bàn giao</div></div>
+    <div class="kpi jade"><div class="lb">Doanh thu B2C (gói tâm linh)</div><div class="v">${moneyM(b.b2cRevenue)}</div><div class="s up">${b.orders} đơn · hoa hồng đối tác ≈ ${moneyM(b.partnerCommission)}</div></div>
+    <div class="kpi sky"><div class="lb">Ô mộ tăng thêm nhờ AI</div><div class="v">${b.slotsGained.toLocaleString('vi')}</div><div class="s">≈ ${(b.slotsGained * 3.4 / 10000).toFixed(2)} ha quỹ đất công</div></div>
+    <div class="kpi rose"><div class="lb">AI Verify</div><div class="v">${b.verified} ✓ / ${b.rejected} ✗</div><div class="s">${b.partners} đối tác · ★ ${b.avgRating} · ${b.activeUsers} gia đình</div></div>`);
+  const ps = await api('/projects');
+  set('proj-table', `<tr><th>Nghĩa trang</th><th>Địa bàn</th><th>Diện tích</th><th>Phí</th><th style="min-width:210px">Tiến độ 6 bước</th><th>Ô mộ tăng</th><th></th></tr>` + ps.map(p => `<tr><td><b>${esc(p.cemetery)}</b></td><td class="small">${esc(p.commune)}, ${esc(p.province)}</td><td>${p.areaHa} ha</td><td>${moneyM(p.fee)}</td>
+    <td><div class="prog">${[1, 2, 3, 4, 5, 6].map(i => `<i class="${i < p.step || p.done ? 'on' : i === p.step ? 'cur' : ''}"></i>`).join('')}</div><div class="small muted" style="margin-top:4px">${p.done ? '✔ Đã bàn giao ' + fmtDate(p.finishedAt) : 'Bước ' + p.step + '/6 · ' + p.stepName}</div></td>
+    <td>${p.slotsGained ? '+' + p.slotsGained : '—'}</td><td>${p.done ? '<span class="chip jade">Hoàn tất</span>' : `<button class="btn jade sm" onclick="advance(${p.id})">Hoàn thành bước ${p.step} →</button>`}</td></tr>`).join(''));
+}
+async function advance(id) { try { await api(`/projects/${id}/advance`, { method: 'POST' }); toast('Đã cập nhật tiến độ dự án.', 'ok'); loadLive(); } catch (e) { toast(e.message, 'err'); } }
+$('#btn-newp').onclick = () => { $('#modal-box').innerHTML = `<h3>Ký hợp đồng quy hoạch mới</h3>
+  <label class="f">Tên nghĩa trang</label><input class="i" id="np1" placeholder="Nghĩa trang …">
+  <div class="grid g2"><div><label class="f">Xã / phường</label><input class="i" id="np2"></div><div><label class="f">Tỉnh / TP</label><input class="i" id="np3" value="Hà Nội"></div>
+  <div><label class="f">Diện tích (ha)</label><input class="i" id="np4" type="number" step="0.1" value="1"></div><div><label class="f">Phí (triệu đồng)</label><input class="i" id="np5" type="number" value="25"></div></div>
+  <div class="row mt"><button class="btn primary" id="np-ok">Tạo hợp đồng</button><button class="btn ghost" onclick="$('#modal').classList.remove('on')">Huỷ</button></div>`;
+  $('#modal').classList.add('on');
+  $('#np-ok').onclick = async () => { try { await api('/projects', { method: 'POST', body: { cemetery: $('#np1').value, commune: $('#np2').value, province: $('#np3').value, areaHa: +$('#np4').value, fee: +$('#np5').value * 1e6 } }); $('#modal').classList.remove('on'); toast('Đã ký hợp đồng mới – bắt đầu bước 1: Khảo sát Drone.', 'ok'); loadLive(); } catch (e) { toast(e.message, 'err'); } };
+};
+$('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').classList.remove('on'); };
+loadLive();
+</script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chăm sóc mộ từ xa – MemoryLand AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Chăm sóc mộ từ xa</h1>
+  <p class="lead">“Đúng mộ – Đúng việc – Đúng hẹn”. Đặt dịch vụ, người địa phương gần nhất nhận việc, nghiệm thu bằng GPS, mã QR và ảnh trước/sau.</p>
+
+  <div class="tabs" id="tabs">
+    <button class="tab" data-t="book"><i class="fas fa-calendar-plus"></i> Đặt dịch vụ</button>
+    <button class="tab" data-t="orders"><i class="fas fa-clipboard-list"></i> Đơn của tôi</button>
+    <button class="tab" data-t="chat"><i class="fas fa-comments"></i> Hỏi trợ lý</button>
+    <button class="tab" data-t="partner"><i class="fas fa-person-walking"></i> Dành cho đối tác</button>
+    <button class="tab" data-t="admin"><i class="fas fa-route"></i> Quản lý điều phối</button>
+  </div>
+
+  <div class="card family-only" id="grave-card">
+    <label style="margin-top:0">Mộ cần chăm sóc</label>
+    <select id="grave-sel"></select>
+    <p class="small muted" style="margin:.5rem 0 0" id="grave-info"></p>
+  </div>
+
+  <!-- ═══ ĐẶT DỊCH VỤ ═══ -->
+  <section class="pane" id="p-book">
+    <div id="anniv"></div>
+    <div class="card">
+      <h2>1. Chọn dịch vụ</h2>
+      <div class="grid g2" id="pkgs"></div>
+    </div>
+    <div class="card">
+      <h2>2. Thời gian và thanh toán</h2>
+      <div class="row">
+        <div><label style="margin-top:0">Ngày thực hiện</label><input type="date" id="b-date"></div>
+        <div><label style="margin-top:0">Hình thức thanh toán</label><select id="b-pay"><option value="qr">Quét mã QR ngân hàng</option><option value="momo">Ví MoMo</option><option value="card">Thẻ ATM / Visa</option></select></div>
+      </div>
+      <label>Lời nhắn cho người thực hiện (không bắt buộc)</label>
+      <textarea id="b-note" placeholder="Ví dụ: Gia đình thích hoa cúc vàng."></textarea>
+      <div style="margin-top:1rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div>Tổng thanh toán: <span class="price" id="b-total">—</span></div>
+        <button class="btn pri" id="b-go" style="margin-left:auto"><i class="fas fa-lock"></i> Đặt và thanh toán</button>
+      </div>
+      <p class="small muted" style="margin-bottom:0">Cam kết bồi hoàn 100% nếu nghiệm thu không đạt. Thanh toán trong bản này là mô phỏng.</p>
+    </div>
+    <div id="b-result"></div>
+  </section>
+
+  <!-- ═══ ĐƠN CỦA TÔI ═══ -->
+  <section class="pane" id="p-orders"><div id="my-jobs"></div></section>
+
+  <!-- ═══ TRỢ LÝ ═══ -->
+  <section class="pane" id="p-chat">
+    <div class="card">
+      <h2>Trợ lý văn khấn &amp; lịch âm</h2>
+      <p class="muted" style="margin-top:-.4rem">Hỏi về văn khấn, lễ vật, ngày giỗ, bảng giá… (hoạt động 24/7)</p>
+      <div class="chat" id="chat"></div>
+      <div class="chips" id="chips"></div>
+      <form class="row" id="chat-form" style="flex-wrap:nowrap"><input id="chat-q" placeholder="Nhập câu hỏi…" autocomplete="off"><button class="btn pri" style="flex:none">Gửi</button></form>
+    </div>
+  </section>
+
+  <!-- ═══ ĐỐI TÁC ═══ -->
+  <section class="pane" id="p-partner">
+    <div class="card">
+      <div class="row">
+        <div style="flex:2"><label style="margin-top:0">Bạn là đối tác</label><select id="par-sel"></select></div>
+        <div id="par-info" class="small muted"></div>
+      </div>
+      <details style="margin-top:1rem"><summary style="cursor:pointer;font-weight:600">Thử nghiệm kiểm định gian lận (dành cho demo)</summary>
+        <p class="small muted">Chọn một kịch bản rồi làm các bước như bình thường để xem AI Verify phát hiện gian lận.</p>
+        <select id="par-scn">
+          <option value="ok">Làm đúng quy trình</option>
+          <option value="far">Ảnh nghiệm thu chụp cách mộ 180 m</option>
+          <option value="old">Dùng ảnh cũ (chụp 3 ngày trước)</option>
+          <option value="wrong">Chụp nhầm mộ khác</option>
+          <option value="gallery">Ảnh tải từ thư viện, không chụp tại chỗ</option>
+          <option value="lazy">Làm qua loa, không dọn cỏ</option>
+        </select>
+      </details>
+    </div>
+    <div id="par-jobs"></div>
+  </section>
+
+  <!-- ═══ QUẢN LÝ ═══ -->
+  <section class="pane" id="p-admin">
+    <div class="grid g4" id="a-stats" style="margin-bottom:1rem"></div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0;flex:1">Đơn chăm sóc</h2><button class="btn sm" style="flex:none" id="a-rebal"><i class="fas fa-route"></i> Điều phối lại đơn chưa có người nhận</button></div>
+      <div class="tbl-wrap" style="margin-top:.6rem"><table id="a-jobs"></table></div>
+    </div>
+    <div class="card"><h2>Đối tác địa phương</h2><div class="tbl-wrap"><table id="a-partners"></table></div></div>
+    <div class="card"><h2>Ngày giỗ trong 90 ngày tới</h2><div class="tbl-wrap"><table id="a-rem"></table></div></div>
+  </section>
+</div>
+
+<script src="/site.js"></script>
+<script src="/photo.js"></script>
+<script>
+topbar('cb');
+const STATUS = {
+  Dispatched: ['Chờ đối tác nhận', 'y'], Accepted: ['Đối tác đã nhận việc', 'b'], CheckedIn: ['Đã tới đúng mộ', 'b'],
+  BeforeDone: ['Đang thực hiện', 'b'], Verified: ['Hoàn thành', 'g'], Rejected: ['Nghiệm thu không đạt', 'r'], Unassigned: ['Chưa có người nhận', 'r']
+};
+const ORDER = ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone', 'Verified'];
+const FAMILY = ['book', 'orders', 'chat'];
+let graves = [], catalog = [], partners = [], gid = +new URLSearchParams(location.search).get('grave') || +localStorage.getItem('ml_gid') || 0, pkgId = 0, pid = +localStorage.getItem('ml_pid') || 0, timer = null;
+
+let busy = false;
+
+async function init() {
+  [graves, catalog, partners] = await Promise.all([api('/ml/app/graves'), api('/ml/app/catalog'), api('/ml/partners')]);
+  const keep = ['ML-01', 'ML-02', 'ML-03', 'SVC-02', 'SVC-06'];
+  catalog = catalog.filter(p => keep.includes(p.code));
+  if (!graves.find(g => g.id === gid)) gid = graves[0]?.id || 0;
+  pkgId = catalog[0]?.id;
+  $('#grave-sel').innerHTML = graves.map(g => `<option value="${g.id}">${esc(g.fullName)} – Lô ${esc(g.lotCode)}</option>`).join('');
+  $('#grave-sel').value = gid;
+  $('#grave-sel').onchange = () => { gid = +$('#grave-sel').value; localStorage.setItem('ml_gid', gid); graveChanged(); };
+  if (!partners.find(p => p.id === pid)) pid = partners[0]?.id;
+  $('#par-sel').innerHTML = partners.map(p => `<option value="${p.id}">${esc(p.name)} – ${esc(p.area)}</option>`).join('');
+  $('#par-sel').value = pid;
+  $('#par-sel').onchange = () => { pid = +$('#par-sel').value; localStorage.setItem('ml_pid', pid); loadPartner(); };
+  $('#b-date').min = $('#b-date').value = isoDate(new Date(Date.now() + 864e5));
+  renderPkgs(); graveChanged();
+}
+const isoDate = d => { const z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; };
+const grave = () => graves.find(g => g.id === gid);
+
+function graveChanged() {
+  const g = grave(); if (!g) return;
+  $('#grave-info').textContent = `Khu ${g.zone} · năm ${g.bornYear || '?'}–${g.diedYear || '?'} · giỗ ${g.lunarDeathDate || 'chưa có'} · thân nhân: ${g.contactName || '—'}`;
+  const d = g.daysUntil;
+  $('#anniv').innerHTML = g.nextAnniversary && d <= 60
+    ? `<div class="note"><b><i class="fas fa-bell"></i> ${d === 0 ? 'Hôm nay là ngày giỗ' : 'Còn ' + d + ' ngày nữa đến giỗ'} ${esc(g.fullName)}</b> (${esc(g.lunarDeathDate)} = ngày ${fmtDate(g.nextAnniversary)} dương lịch).
+       <button class="btn sm" style="margin-left:.6rem" onclick="useAnniv()">Đặt cho ngày này</button></div>` : '';
+  $('#chat').innerHTML = ''; chatInit = false;
+  const act = $('.tab.on')?.dataset.t; if (act === 'orders') loadOrders(); if (act === 'chat') initChat();
+}
+function useAnniv() {
+  const g = grave(); $('#b-date').value = g.nextAnniversary;
+  const ceremony = catalog.find(p => p.code === 'SVC-06') || catalog.find(p => p.code === 'ML-02'); if (ceremony) { pkgId = ceremony.id; renderPkgs(); }
+}
+
+/* ───────── Đặt dịch vụ ───────── */
+function showBook() { renderPkgs(); }
+function renderPkgs() {
+  $('#pkgs').innerHTML = catalog.map(p => `<label class="pick ${p.id === pkgId ? 'on' : ''}" data-id="${p.id}">
+    <h3><i class="fas ${p.iconClass || 'fa-leaf'}" style="color:${p.color || 'var(--green)'}"></i> ${esc(p.name)}</h3>
+    <p class="muted small" style="margin:0 0 .5rem">${esc(p.description)}</p><span class="price">${money(p.price)}</span> <span class="muted">/ ${esc(p.unit)}</span></label>`).join('');
+  $$('#pkgs .pick').forEach(c => c.onclick = () => { pkgId = +c.dataset.id; renderPkgs(); });
+  const p = catalog.find(x => x.id === pkgId); $('#b-total').textContent = p ? money(p.price) : '—';
+}
+$('#b-go').onclick = async () => {
+  const btn = $('#b-go'); btn.disabled = true;
+  try {
+    const r = await api('/ml/app/book', { method: 'POST', body: { graveId: gid, packageId: pkgId, scheduledAt: $('#b-date').value ? $('#b-date').value + 'T08:00:00' : null, note: $('#b-note').value, paymentMethod: $('#b-pay').value } });
+    const d = r.dispatch;
+    $('#b-result').innerHTML = `<div class="note g"><h3 style="margin-top:0"><i class="fas fa-circle-check"></i> Đặt thành công – mã đơn ${esc(r.orderCode)}</h3>
+      ${d ? `Hệ thống đã chọn <b>${esc(d.partner)}</b>, cách mộ khoảng ${d.distanceKm} km, dự kiến tới nơi sau ${d.etaMin} phút.` : 'Hiện chưa có đối tác rảnh, hệ thống sẽ tự điều phối lại sớm nhất.'}
+      <div style="margin-top:.8rem"><button class="btn pri" onclick="$('[data-t=orders]').click()">Theo dõi đơn của tôi</button></div></div>`;
+    $('#b-note').value = ''; toast('Đã đặt dịch vụ', 'ok');
+    $('#b-result').scrollIntoView({ behavior: 'smooth' });
+    partners = await api('/ml/partners');
+  } catch (e) { toast(e.message, 'err'); }
+  btn.disabled = false;
+};
+
+/* ───────── Đơn của tôi ───────── */
+function stepList(j) {
+  const i = ORDER.indexOf(j.status), rej = j.status === 'Rejected', done = j.status === 'Verified';
+  const S = [
+    ['Đặt dịch vụ và thanh toán', j.order ? `${esc(j.order.serviceName)} · ${money(j.order.price)}` : '', 1],
+    ['Hệ thống chọn đối tác gần nhất', j.partner ? `${esc(j.partner.name)} · dự kiến ${Math.round(j.etaMinutes)} phút` : 'Đang tìm đối tác…', j.partner ? 1 : 0],
+    ['Đối tác tới đúng mộ (GPS + mã QR)', j.checkinAt ? `Cách mộ ${j.checkinDistanceM?.toFixed(1)} m · ${fmtTime(utc(j.checkinAt))}` : '', i >= 2],
+    ['Chụp ảnh trước, dọn dẹp, dâng lễ', j.beforeAt ? `Ảnh trước lúc ${fmtTime(utc(j.beforeAt))}` : '', i >= 3],
+    ['Nghiệm thu bằng AI và gửi báo cáo', done ? `Đạt ${j.verifyScore}/100 · báo cáo gửi lúc ${fmtTime(utc(j.reportSentAt))}` : rej ? `Không đạt (${j.verifyScore}/100)` : '', done]
+  ];
+  let first = true;
+  return '<ul class="steps">' + S.map((s, n) => {
+    const ok = s[2]; let cls = ok ? 'ok' : '';
+    if (!ok && first) { cls = rej && n === 4 ? 'bad' : 'run'; first = false; }
+    return `<li data-n="${n + 1}" class="${cls}"><b>${s[0]}</b><span class="small muted">${s[1] || ''}</span></li>`;
+  }).join('') + '</ul>';
+}
+function verifyBox(j) {
+  if (!j.verify) return '';
+  return `<div style="margin-top:.6rem"><b>Kết quả AI Verify: ${j.verify.pass ? '<span class="tag g">ĐẠT</span>' : '<span class="tag r">KHÔNG ĐẠT</span>'} ${j.verify.score}/100</b>` +
+    (j.verify.layers || []).map(l => `<div class="small" style="padding:.3rem 0;border-bottom:1px dashed var(--line)"><i class="fas ${l.pass ? 'fa-circle-check' : 'fa-circle-xmark'}" style="color:${l.pass ? 'var(--green)' : 'var(--red)'}"></i> <b>${esc(l.name)}</b><br>${esc(l.detail)}</div>`).join('') + '</div>';
+}
+function photos(j) {
+  return j.beforeThumb ? `<div class="pair" style="margin-top:.8rem"><figure><img src="${j.beforeThumb}" alt=""><figcaption>TRƯỚC</figcaption></figure>${j.afterThumb ? `<figure><img src="${j.afterThumb}" alt=""><figcaption>SAU</figcaption></figure>` : '<div class="muted small" style="align-self:center">Chưa có ảnh sau</div>'}</div>` : '';
+}
+function rejectedActions(j) {
+  return j.status === 'Rejected' ? `<div class="note r" style="margin-top:.8rem">Dịch vụ chưa đạt yêu cầu. Bạn có thể yêu cầu <b>làm lại miễn phí</b> với đối tác khác hoặc <b>hoàn tiền 100%</b>.
+    <div class="row fit" style="margin-top:.6rem"><button class="btn sm pri" onclick="redo(${j.id})">Làm lại với đối tác khác</button>${j.refunded ? '<span class="tag">Đã hoàn tiền</span>' : `<button class="btn sm red" onclick="refund(${j.id})">Hoàn tiền 100%</button>`}</div></div>` : '';
+}
+async function loadOrders() {
+  if (!gid) return;
+  const jobs = await api('/ml/jobs?graveId=' + gid);
+  $('#my-jobs').innerHTML = jobs.length ? jobs.map(j => `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:.8rem"><div style="flex:3"><h3 style="margin:0">${esc(j.order?.serviceName || 'Dịch vụ chăm sóc mộ')}</h3><span class="muted small">Mã ${esc(j.jobCode)}${j.order ? ' · ' + esc(j.order.orderCode) : ''} · đặt lúc ${fmtDT(utc(j.createdAt))}</span></div>
+      <div style="flex:none"><span class="tag ${STATUS[j.status][1]}">${STATUS[j.status][0]}</span></div></div>
+      ${stepList(j)}${photos(j)}${verifyBox(j)}${rejectedActions(j)}</div>`).join('')
+    : '<div class="card"><p class="muted">Chưa có đơn nào cho mộ này. Hãy vào “Đặt dịch vụ”.</p></div>';
+}
+async function redo(id) { try { const r = await api(`/ml/jobs/${id}/redispatch`, { method: 'POST' }); toast(r.dispatch ? 'Đã chuyển cho ' + r.dispatch.partner : 'Chưa có đối tác rảnh', 'ok'); refreshAll(); } catch (e) { toast(e.message, 'err'); } }
+async function refund(id) { if (!confirm('Hoàn tiền 100% cho đơn này?')) return; try { await api(`/ml/jobs/${id}/refund`, { method: 'POST' }); toast('Đã hoàn tiền', 'ok'); refreshAll(); } catch (e) { toast(e.message, 'err'); } }
+function refreshAll() { const t = $('.tab.on').dataset.t; ({ orders: loadOrders, partner: loadPartner, admin: loadAdmin }[t] || (() => { }))(); }
+
+/* ───────── Trợ lý ───────── */
+let chatInit = false;
+function addMsg(who, text) { const m = document.createElement('div'); m.className = 'msg ' + who; m.textContent = text; $('#chat').appendChild(m); $('#chat').scrollTop = 1e9; return m; }
+function initChat() {
+  if (chatInit) return; chatInit = true;
+  const g = grave();
+  addMsg('b', `Xin chào! Tôi có thể giúp gia đình ${g ? 'chăm sóc mộ ' + g.fullName : ''} về văn khấn, lễ vật, ngày giỗ và bảng giá dịch vụ.`);
+  setChips(['Văn khấn ngày giỗ', 'Lễ vật cần chuẩn bị', 'Khi nào đến giỗ?', 'Bảng giá dịch vụ']);
+}
+function setChips(list) { $('#chips').innerHTML = list.map(s => `<button type="button">${esc(s)}</button>`).join(''); $$('#chips button').forEach(b => b.onclick = () => ask(b.textContent)); }
+async function ask(q) {
+  if (!q.trim()) return; addMsg('u', q); $('#chat-q').value = '';
+  const w = addMsg('b', '…');
+  try { const r = await api('/ml/assistant', { method: 'POST', body: { message: q, graveId: gid } }); w.textContent = r.answer; if (r.suggestions?.length) setChips(r.suggestions); }
+  catch (e) { w.textContent = 'Xin lỗi, hiện chưa trả lời được: ' + e.message; }
+}
+$('#chat-form').onsubmit = e => { e.preventDefault(); ask($('#chat-q').value); };
+
+/* ───────── Đối tác ───────── */
+async function loadPartner() {
+  if (!pid) return;
+  partners = await api('/ml/partners');
+  const p = partners.find(x => x.id === pid);
+  $('#par-info').innerHTML = p ? `★ ${p.rating} · ${p.completedJobs} việc đã làm<br>${p.available ? 'Đang nhận việc' : 'Đang nghỉ'}` : '';
+  const jobs = await api('/ml/jobs?partnerId=' + pid);
+  const active = jobs.filter(j => ORDER.slice(0, 4).includes(j.status)), rest = jobs.filter(j => !ORDER.slice(0, 4).includes(j.status)).slice(0, 5);
+  $('#par-jobs').innerHTML = (active.length ? active.map(partnerCard).join('') : '<div class="card"><p class="muted" style="margin:0">Hiện chưa có việc mới. Hãy đặt một dịch vụ ở tab “Đặt dịch vụ”, việc sẽ được giao cho đối tác gần mộ nhất.</p></div>')
+    + (rest.length ? '<h3 style="margin-top:1.4rem">Việc gần đây</h3>' + rest.map(j => `<div class="card"><div class="row" style="justify-content:space-between"><b>${esc(j.grave?.fullName)} · Lô ${esc(j.grave?.lotCode)}</b><span class="tag ${STATUS[j.status][1]}">${STATUS[j.status][0]}</span></div>${verifyBox(j)}</div>`).join('') : '');
+}
+function partnerCard(j) {
+  const g = j.grave, st = j.status;
+  const act = {
+    Dispatched: `<button class="btn pri block" onclick="accept(${j.id})"><i class="fas fa-hand"></i> Nhận việc này</button>`,
+    Accepted: `<p class="small muted">Đến mộ rồi thì bấm check-in. Hệ thống kiểm tra vị trí GPS (≤ 5 m) và mã QR gắn tại mộ.</p><button class="btn pri block" onclick="checkin(${j.id})"><i class="fas fa-qrcode"></i> Check-in tại mộ (quét QR + GPS)</button>`,
+    CheckedIn: photoUi(j, 'before', 'Chụp ảnh TRƯỚC khi dọn'),
+    BeforeDone: `<p class="small muted">Hãy dọn cỏ, lau bia, dâng hương hoa rồi chụp ảnh sau.</p>` + photoUi(j, 'after', 'Chụp ảnh SAU khi dọn xong')
+  }[st];
+  return `<div class="card"><div class="row" style="justify-content:space-between"><div style="flex:3"><h3 style="margin:0">${esc(g.fullName)} – Lô ${esc(g.lotCode)}</h3><span class="muted small">${esc(j.order?.serviceName || 'Dịch vụ chăm sóc')} · ${esc(j.jobCode)}</span></div><div style="flex:none"><span class="tag ${STATUS[st][1]}">${STATUS[st][0]}</span></div></div>
+    <p class="small" style="margin:.6rem 0">Thân nhân: ${esc(g.contactName || '—')} ${esc(g.contactPhone || '')}${j.note ? '<br>Lời nhắn: ' + esc(j.note) : ''}<br><span class="mono muted">GPS mộ: ${g.lat.toFixed(6)}, ${g.lng.toFixed(6)}</span></p>
+    ${act}${photos(j)}</div>`;
+}
+function photoUi(j, kind, label) {
+  return `<div class="row fit"><label class="btn pri" style="margin:0"><i class="fas fa-camera"></i> ${label}<input type="file" accept="image/*" capture="environment" hidden onchange="sendPhoto(${j.id},'${kind}',this.files[0])"></label>
+    <button class="btn" onclick="sendPhoto(${j.id},'${kind}',null)"><i class="fas fa-image"></i> Dùng ảnh mẫu</button></div>`;
+}
+const scn = () => $('#par-scn').value;
+async function guard(fn) { busy = true; try { await fn(); } catch (e) { toast(e.message, 'err'); } busy = false; loadPartner(); }
+const accept = id => guard(async () => { await api(`/ml/jobs/${id}/accept`, { method: 'POST' }); toast('Đã nhận việc', 'ok'); });
+const checkin = id => guard(async () => {
+  const j = await api('/ml/jobs/' + id), g = j.grave, jit = () => (Math.random() - .5) * 2 * 1.5 / 111320;
+  const r = await api(`/ml/jobs/${id}/checkin`, { method: 'POST', body: { lat: g.lat + jit(), lng: g.lng + jit(), qr: scn() === 'wrong' ? 'X-99-99' : g.lotCode } });
+  toast(r.message, r.ok ? 'ok' : 'err');
+});
+const sendPhoto = (id, kind, file) => guard(async () => {
+  const j = await api('/ml/jobs/' + id), g = j.grave, s = scn();
+  const ph = await makePhoto(file, { kind, scenario: s, seed: id * 7 + 3, beforeWeed: j.beforeWeed });
+  const far = kind === 'after' && s === 'far' ? 0.0016 : 0;
+  const when = s === 'old' ? new Date(Date.now() - 3 * 864e5) : new Date();
+  const r = await api(`/ml/jobs/${id}/photo`, { method: 'POST', body: { kind, hash: ph.hash, weed: ph.weed, capturedAt: when.toISOString(), inApp: s !== 'gallery', lat: g.lat + far + (Math.random() - .5) * 2e-5, lng: g.lng + (Math.random() - .5) * 2e-5, thumb: ph.thumb } });
+  if (kind === 'before') toast('Đã lưu ảnh trước. Hãy dọn dẹp rồi chụp ảnh sau.', 'ok');
+  else toast(r.pass ? `Nghiệm thu ĐẠT (${r.score}/100). Báo cáo đã gửi cho gia đình.` : `Nghiệm thu KHÔNG ĐẠT (${r.score}/100).`, r.pass ? 'ok' : 'err');
+});
+
+/* ───────── Quản lý ───────── */
+async function loadAdmin() {
+  const [b, jobs, pl, rem] = await Promise.all([api('/ml/business'), api('/ml/jobs'), api('/ml/partners'), api('/ml/reminders?withinDays=90')]);
+  $('#a-stats').innerHTML = [[b.orders, 'tổng số đơn'], [b.verified, 'đã nghiệm thu đạt'], [b.rejected, 'không đạt'], [money(b.b2cRevenue), 'doanh thu dịch vụ']].map(s => `<div class="stat"><b style="font-size:${String(s[0]).length > 8 ? '1.4rem' : '2rem'}">${s[0]}</b><span>${s[1]}</span></div>`).join('');
+  $('#a-jobs').innerHTML = '<tr><th>Mã</th><th>Mộ</th><th>Dịch vụ</th><th>Đối tác</th><th>Trạng thái</th><th>Điểm AI</th><th></th></tr>' +
+    (jobs.length ? jobs.map(j => `<tr><td class="small mono">${esc(j.jobCode)}</td><td><b>${esc(j.grave?.fullName)}</b><br><span class="small muted">Lô ${esc(j.grave?.lotCode)}</span></td><td class="small">${esc(j.order?.serviceName || '—')}</td><td class="small">${esc(j.partner?.name || '—')}</td>
+      <td><span class="tag ${STATUS[j.status][1]}">${STATUS[j.status][0]}</span></td><td>${j.verifyScore ?? '—'}</td>
+      <td style="white-space:nowrap">${j.status === 'Rejected' || j.status === 'Unassigned' ? `<button class="btn sm" onclick="redo(${j.id})">Giao lại</button> ` : ''}${j.status === 'Rejected' && !j.refunded ? `<button class="btn sm red" onclick="refund(${j.id})">Hoàn tiền</button>` : ''}</td></tr>`).join('') : '<tr><td colspan="7" class="muted">Chưa có đơn.</td></tr>');
+  $('#a-partners').innerHTML = '<tr><th>Đối tác</th><th>Khu vực</th><th>Đánh giá</th><th>Đã làm</th><th>Đang làm</th><th></th></tr>' + pl.map(p => `<tr><td><b>${esc(p.name)}</b><br><span class="small muted">${esc(p.phone)}</span></td><td class="small">${esc(p.area)}</td><td>★ ${p.rating}</td><td>${p.completedJobs}</td><td>${p.activeJobs}</td>
+    <td><button class="btn sm ${p.available ? '' : 'red'}" onclick="toggleP(${p.id})">${p.available ? 'Đang nhận việc' : 'Đang nghỉ'}</button></td></tr>`).join('');
+  $('#a-rem').innerHTML = rem.length ? '<tr><th>Người đã khuất</th><th>Lô</th><th>Giỗ (âm)</th><th>Ngày dương</th><th>Còn</th><th>Liên hệ nhắc lịch</th></tr>' + rem.map(r => `<tr><td><b>${esc(r.fullName)}</b></td><td>${esc(r.lotCode)}</td><td>${esc(r.lunarDeathDate)}</td><td>${fmtDate(r.solar)}</td><td><span class="tag ${r.daysUntil <= 7 ? 'r' : 'y'}">${r.daysUntil} ngày</span></td><td>${esc(r.contactName)} · ${esc(r.contactPhone)}</td></tr>`).join('') : '<tr><td class="muted">Không có.</td></tr>';
+}
+const toggleP = id => api(`/ml/partners/${id}/toggle`, { method: 'POST' }).then(loadAdmin);
+$('#a-rebal').onclick = async () => { try { const r = await api('/ml/dispatch/rebalance', { method: 'POST' }); toast(`Đã điều phối ${r.assigned}/${r.reassigned} đơn`, 'ok'); loadAdmin(); } catch (e) { toast(e.message, 'err'); } };
+
+init().then(() => {
+tabs($('#tabs'), id => {
+  $('#grave-card').style.display = FAMILY.includes(id) ? '' : 'none';
+  clearInterval(timer);
+  ({ book: showBook, orders: loadOrders, chat: initChat, partner: loadPartner, admin: loadAdmin })[id]();
+  if (['orders', 'partner', 'admin'].includes(id)) timer = setInterval(() => { if (!busy) ({ orders: loadOrders, partner: loadPartner, admin: loadAdmin })[id](); }, 8000);
+});
+
+}).catch(e => toast(e.message, 'err'));
+</script>
+</body>
+</html>

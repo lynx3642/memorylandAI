@@ -1,0 +1,51 @@
+/* Chữ to, dễ đọc hơn – áp dụng cho mọi trang */
+body{font-size:17px!important;line-height:1.55}
+.nav-item{font-size:16px!important;padding:12px 14px!important}
+.nav-item i{font-size:16px!important;width:20px!important}
+.nav-sec{font-size:12px!important;letter-spacing:.8px!important}
+.sidebar{width:290px!important}
+.sb-brand h2{font-size:20px!important}.sb-brand span{font-size:12px!important}
+.u-info p{font-size:14px!important}.u-info span{font-size:12px!important}
+.topbar-title,h1.page-title{font-size:26px!important}
+.card-title,.card h3{font-size:19px!important}
+.stat-label,.kpi .lb{font-size:13px!important}
+.stat-value,.kpi .v{font-size:32px!important}
+.stat-sub,.kpi .s{font-size:14px!important}
+.btn{font-size:15.5px!important;padding:11px 18px!important;min-height:44px}
+.btn.sm{font-size:14px!important;padding:8px 13px!important;min-height:38px}
+table{font-size:15.5px!important}
+th{font-size:13px!important;padding:13px 14px!important}
+td{padding:13px 14px!important}
+.badge,.chip{font-size:13px!important;padding:4px 11px!important}
+input,select,textarea,.filter-select,.search-input-wrap input{font-size:16px!important}
+.fc label{font-size:13.5px!important}
+.fc input,.fc select,.fc textarea{padding:12px 14px!important}
+.modal-h h3{font-size:22px!important}
+.toast{font-size:15.5px!important}
+.alert-head h4{font-size:16px!important}
+.sub{font-size:16px!important}
+.small{font-size:14.5px!important}
+.tab{font-size:16px!important;padding:11px 18px!important}
+.ml-nav a{font-size:16px!important;padding:10px 16px!important}
+.ml-top{height:62px!important}
+.ml-brand b{font-size:19px!important}
+.pkg-name{font-size:16.5px!important}.pkg-desc{font-size:14px!important}.pkg-price{font-size:18px!important}
+/* app khách / đối tác */
+.ph-body,.pc,.msg,.step b{font-size:15px!important}
+.step small,.pkg .pd,.vl,.evt{font-size:13.5px!important}
+.pkg .pn{font-size:15.5px!important}.pkg .pp{font-size:16px!important}
+.ph-nav div{font-size:12px!important}
+.ph-in input{font-size:15px!important}
+.cmp,.info-box{font-size:14.5px!important}
+.zone-chip{font-size:15px!important}
+/* biểu mẫu, bảng trên các trang gia đình / đối tác / công cụ */
+label.f{font-size:13.5px!important}
+input.i,select.i,textarea.i{font-size:16px!important;padding:12px 14px!important}
+table.t{font-size:15.5px!important}
+table.t th{font-size:13px!important}
+table.t td{padding:12px 10px!important}
+.muted{line-height:1.5}
+.card h3 .l{flex-wrap:wrap}
+.modal{max-width:520px}
+.modal h3{font-size:22px}
+.ml-brand small{font-size:12.5px!important;display:block}

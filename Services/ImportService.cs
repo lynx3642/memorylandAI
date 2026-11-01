@@ -292,8 +292,8 @@ public class ImportService(SmartCemDb db, IWebHostEnvironment env) : IImportServ
         // Sample data rows
         var samples = new object[][]
         {
-            ["Nguyễn Văn A", "Ông A", 1950, 2020, "A", "A-01-01", "Hà Nội", "Nguyễn Thị B", "0912000001", "Liệt sĩ", "Active"],
-            ["Trần Thị B",   "",      1960, 2022, "B", "B-01-01", "Nam Định","Trần Văn C",  "0923000002", "",       "Pending"],
+            ["Nguyễn Văn A", "Ông A", 1950, 2020, "A", "A-01-01", "Hà Nội", "Nguyễn Thị B", "0877xxxxxx", "Liệt sĩ", "Active"],
+            ["Trần Thị B",   "",      1960, 2022, "B", "B-01-01", "Nam Định","Trần Văn C",  "0877xxxxxx", "",       "Pending"],
         };
         for (int r = 0; r < samples.Length; r++)
             for (int c = 0; c < samples[r].Length; c++)

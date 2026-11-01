@@ -26,16 +26,17 @@ public interface IGraveService
 
 public class GraveService(SmartCemDb db) : IGraveService
 {
-    private static bool CheckAnniversarySoon(DateTime? diedDate, int windowDays = 30)
+    // Ngày giỗ tính theo âm lịch (LunarDeathDate "dd/mm Âm lịch"), không theo ngày mất dương lịch
+    private static int? DaysToAnniversary(string? lunarDeathDate)
     {
-        if (!diedDate.HasValue) return false;
-        var today = DateTime.UtcNow.Date;
-        var thisYearAnniv = new DateTime(today.Year, diedDate.Value.Month, Math.Min(diedDate.Value.Day, DateTime.DaysInMonth(today.Year, diedDate.Value.Month)));
-        if (thisYearAnniv < today)
-            thisYearAnniv = thisYearAnniv.AddYears(1);
-
-        return (thisYearAnniv - today).TotalDays <= windowDays;
+        var dm = Lunar.ParseDayMonth(lunarDeathDate);
+        if (dm is null) return null;
+        var next = Lunar.NextSolarOf(dm.Value.d, dm.Value.m, DateTime.Now);
+        return next is null ? null : (next.Value.Date - DateTime.Now.Date).Days;
     }
+
+    private static bool CheckAnniversarySoon(string? lunarDeathDate, int windowDays = 30)
+        => DaysToAnniversary(lunarDeathDate) is int d && d <= windowDays;
 
     private static bool CheckContractExpiringSoon(DateTime? contractEndDate, int windowDays = 60)
     {
@@ -53,7 +54,7 @@ public class GraveService(SmartCemDb db) : IGraveService
         g.Notes, g.Status.ToString(),
         g.PhotoPath, g.QrImagePath,
         g.CreatedAt,
-        CheckAnniversarySoon(g.DiedDate),
+        CheckAnniversarySoon(g.LunarDeathDate),
         CheckContractExpiringSoon(g.ContractEndDate)
     );
 
@@ -90,7 +91,7 @@ public class GraveService(SmartCemDb db) : IGraveService
 
         IEnumerable<Grave> filtered = allItems;
         if (anniversarySoon == true)
-            filtered = filtered.Where(g => CheckAnniversarySoon(g.DiedDate));
+            filtered = filtered.Where(g => CheckAnniversarySoon(g.LunarDeathDate));
 
         if (expiringSoon == true)
             filtered = filtered.Where(g => CheckContractExpiringSoon(g.ContractEndDate));
@@ -263,26 +264,17 @@ public class GraveService(SmartCemDb db) : IGraveService
 
     public async Task<IEnumerable<AnniversaryReminderDto>> GetUpcomingAnniversariesAsync(int days = 30)
     {
-        var graves = await db.Graves.Where(g => g.DiedDate != null).ToListAsync();
-        var today = DateTime.UtcNow.Date;
+        var graves = await db.Graves.Where(g => g.LunarDeathDate != null && g.Status != GraveStatus.Archived).ToListAsync();
         var list = new List<AnniversaryReminderDto>();
 
         foreach (var g in graves)
         {
-            if (!g.DiedDate.HasValue) continue;
-            var thisYearAnniv = new DateTime(today.Year, g.DiedDate.Value.Month, Math.Min(g.DiedDate.Value.Day, DateTime.DaysInMonth(today.Year, g.DiedDate.Value.Month)));
-            if (thisYearAnniv < today)
-                thisYearAnniv = thisYearAnniv.AddYears(1);
-
-            var diff = (int)(thisYearAnniv - today).TotalDays;
-            if (diff >= 0 && diff <= days)
-            {
-                list.Add(new AnniversaryReminderDto(
-                    g.Id, g.FullName, g.Zone, g.LotCode,
-                    g.DiedDate, g.LunarDeathDate, diff,
-                    g.ContactName, g.ContactPhone
-                ));
-            }
+            if (DaysToAnniversary(g.LunarDeathDate) is not int diff || diff < 0 || diff > days) continue;
+            list.Add(new AnniversaryReminderDto(
+                g.Id, g.FullName, g.Zone, g.LotCode,
+                g.DiedDate, g.LunarDeathDate, diff,
+                g.ContactName, g.ContactPhone
+            ));
         }
 
         return list.OrderBy(x => x.DaysUntil);
@@ -376,7 +368,7 @@ public class GraveService(SmartCemDb db) : IGraveService
             "STT", "Họ và tên", "Tên gọi/Biệt hiệu", "Năm sinh", "Năm mất",
             "Ngày mất DL", "Ngày giỗ ÂL", "Khu vực", "Mã lô", "Kiểu mộ",
             "Diện tích (m²)", "Quê quán", "Thân nhân", "Mối quan hệ", "Điện thoại",
-            "Địa chỉ", "Loại hợp đồng", "Ngày bắt đầu", "Ngày hết hạn", "Trạng thái", "Ghi chú"
+            "Địa chỉ", "Trạng thái", "Ghi chú"
         };
 
         for (int i = 0; i < headers.Length; i++)
@@ -409,11 +401,8 @@ public class GraveService(SmartCemDb db) : IGraveService
             ws.Cells[row, 14].Value = g.ContactRelation ?? "";
             ws.Cells[row, 15].Value = g.ContactPhone ?? "";
             ws.Cells[row, 16].Value = g.ContactAddress ?? "";
-            ws.Cells[row, 17].Value = g.ContractType;
-            ws.Cells[row, 18].Value = g.ContractStartDate?.ToString("dd/MM/yyyy") ?? "";
-            ws.Cells[row, 19].Value = g.ContractEndDate?.ToString("dd/MM/yyyy") ?? "";
-            ws.Cells[row, 20].Value = g.Status.ToString();
-            ws.Cells[row, 21].Value = g.Notes ?? "";
+            ws.Cells[row, 17].Value = g.Status.ToString();
+            ws.Cells[row, 18].Value = g.Notes ?? "";
             row++;
         }
 

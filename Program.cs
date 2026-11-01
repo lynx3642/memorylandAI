@@ -31,6 +31,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<SmartCemDb>();
     db.Database.EnsureCreated();
     DbSeeder.Seed(db);
+    MemoryLandSeeder.Seed(db);
 }
 
 if (app.Environment.IsDevelopment())

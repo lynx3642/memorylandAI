@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLand AI – App khách hàng, đối tác & điều phối</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/ml.css">
+<style>
+.demo{display:grid;grid-template-columns:372px minmax(280px,1fr) 372px;gap:18px;align-items:start}
+@media(max-width:1180px){.demo{grid-template-columns:1fr;justify-items:center}.demo>.mid{width:100%;max-width:372px;order:3}}
+.phone{width:372px;height:740px;border-radius:40px;border:10px solid #14142a;background:#fff;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(20,20,42,.35);position:relative}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:110px;height:20px;background:#14142a;border-radius:0 0 14px 14px;z-index:10}
+.ph-head{padding:30px 16px 14px;color:#fff;flex-shrink:0}
+.ph-head.cus{background:linear-gradient(135deg,#1f6b5a,#2e7d6b 60%,#3d9a82)}
+.ph-head.par{background:linear-gradient(135deg,#1a1a2e,#2d2d4e 60%,#44447a)}
+.ph-head h4{font-family:'Playfair Display',serif;font-size:17px}.ph-head small{opacity:.8;font-size:11.5px}
+.ph-body{flex:1;overflow-y:auto;padding:14px;background:#f6f3ec}
+.ph-nav{display:flex;border-top:1px solid var(--border);background:#fff;flex-shrink:0}
+.ph-nav div{flex:1;text-align:center;padding:9px 0 8px;font-size:10px;color:#8a8aa4;cursor:pointer;font-weight:600}
+.ph-nav div i{display:block;font-size:17px;margin-bottom:2px}
+.ph-nav div.on{color:var(--jade)}
+.pc{background:#fff;border-radius:14px;padding:13px;margin-bottom:11px;box-shadow:0 1px 6px rgba(26,26,46,.07)}
+.pc h5{font-size:13.5px;margin-bottom:6px;display:flex;align-items:center;gap:7px;justify-content:space-between}
+.pkg{display:flex;gap:11px;align-items:center;border:2px solid transparent;cursor:pointer;transition:.15s}
+.pkg.on{border-color:var(--jade);background:#f1faf7}
+.pkg .pi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0}
+.pkg .pn{font-weight:700;font-size:13px}.pkg .pd{font-size:11px;color:var(--muted);line-height:1.4}
+.pkg .pp{font:700 14px 'Playfair Display',serif;color:var(--jade);margin-left:auto;white-space:nowrap;text-align:right}
+.hot{font-size:9px;background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;margin-left:5px;vertical-align:1px}
+.step{display:flex;gap:10px;position:relative;padding-bottom:11px}
+.step:not(:last-child)::before{content:'';position:absolute;left:8px;top:18px;bottom:0;width:2px;background:#dcd9cd}
+.step.ok:not(:last-child)::before{background:var(--jade)}
+.step .dot{width:18px;height:18px;border-radius:50%;background:#dcd9cd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;margin-top:1px}
+.step.ok .dot{background:var(--jade)}.step.run .dot{background:var(--gold);animation:pulse 1.2s infinite}.step.bad .dot{background:var(--rose)}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(201,168,76,.25)}}
+.step b{font-size:12.5px;display:block}.step small{font-size:11px;color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:9px}
+.msg{max-width:86%;padding:9px 12px;border-radius:14px;font-size:12.8px;line-height:1.5;white-space:pre-wrap}
+.msg.u{align-self:flex-end;background:var(--jade);color:#fff;border-bottom-right-radius:4px}
+.msg.b{align-self:flex-start;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.08);border-bottom-left-radius:4px}
+.msg .src{font-size:10px;color:var(--muted);margin-top:6px;border-top:1px dashed #ddd;padding-top:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips span{font-size:11px;padding:5px 10px;border-radius:99px;background:var(--jade-pale);color:#1c5e4f;cursor:pointer;font-weight:600}
+.typing{display:flex;gap:4px;padding:4px 2px}.typing i{width:6px;height:6px;border-radius:50%;background:#aaa;animation:bl 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes bl{50%{opacity:.2}}
+.ph-in{display:flex;gap:6px;padding:9px;background:#fff;border-top:1px solid var(--border)}
+.ph-in input{flex:1;border:1.5px solid #ddd;border-radius:99px;padding:8px 13px;font:13px 'DM Sans';outline:none}
+.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}.photo-pair figure{position:relative}.photo-pair img{width:100%;border-radius:8px;display:block}
+.photo-pair figcaption{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;font-size:9.5px;padding:2px 6px;border-radius:5px}
+.vl{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;padding:7px 0;border-bottom:1px dashed #e5e2d8}
+.vl i{margin-top:2px}.vl.ok i{color:var(--jade)}.vl.bad i{color:var(--rose)}
+.mid .card{padding:14px}
+.evt{font-size:12px;padding:7px 0;border-bottom:1px dashed var(--border);display:flex;gap:8px}
+.evt time{font:11px 'DM Mono',monospace;color:var(--muted);flex-shrink:0}
+.evt.c i{color:var(--jade)}.evt.p i{color:var(--ink)}.evt.a i{color:var(--gold)}
+.scn{width:100%;font-size:12px;padding:7px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff}
+.scn option{color:#000}
+.qrbox{display:flex;justify-content:center;margin:10px 0}
+.cv-mini{display:block;margin:0 auto;border-radius:10px}
+.map-wrap{position:relative;background:#e9efe2;border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.map-wrap canvas{width:100%;display:block}
+</style>
+<link rel="stylesheet" href="/big.css">
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page-title">MemoryLand App · Partner App · Điều phối</h1>
+  <p class="sub">Chu trình dịch vụ cúng bái từ xa <b>“Đúng mộ – Đúng việc – Đúng hẹn”</b>: khách đặt gói → <b>AI Dispatch</b> chọn đối tác → check-in GPS/QR → ảnh trước/sau → <b>AI Verify 3 lớp</b> → báo cáo cho gia đình. Thanh toán, GPS và ảnh đều là mô phỏng. Thử cả kịch bản gian lận ở Partner App!</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-p="demo"><i class="fas fa-mobile-screen-button"></i> Demo song song (Khách ⇄ Đối tác)</div>
+    <div class="tab" data-p="admin"><i class="fas fa-compass"></i> Điều phối &amp; Giám sát</div>
+  </div>
+
+  <!-- ═════ DEMO ═════ -->
+  <section class="pane on" id="p-demo">
+    <div class="demo">
+      <!-- Khách hàng -->
+      <div class="phone" id="ph-c">
+        <div class="ph-head cus"><div class="row"><div class="sp"><small>MemoryLand App</small><h4 id="c-title">Xin chào</h4></div><i class="fas fa-bell"></i></div>
+          <select class="scn" id="c-grave" style="margin-top:8px"></select></div>
+        <div class="ph-body" id="c-body"></div>
+        <div class="ph-in" id="c-chatin" style="display:none"><input id="c-q" placeholder="Hỏi trợ lý AI… (giỗ, văn khấn, giá)"><button class="btn jade sm" id="c-send"><i class="fas fa-paper-plane"></i></button></div>
+        <div class="ph-nav" id="c-nav">
+          <div data-s="home" class="on"><i class="fas fa-house"></i>Trang chủ</div><div data-s="book"><i class="fas fa-calendar-plus"></i>Đặt dịch vụ</div>
+          <div data-s="orders"><i class="fas fa-clipboard-list"></i>Đơn của tôi</div><div data-s="chat"><i class="fas fa-comments"></i>Trợ lý AI</div></div>
+      </div>
+
+      <!-- Giữa: sự kiện -->
+      <div class="mid">
+        <div class="card"><h3><span class="l"><i class="fas fa-bolt"></i> Luồng sự kiện trực tiếp</span><button class="btn ghost sm" onclick="$('#evts').innerHTML=''">Xoá</button></h3>
+          <div id="evts" style="max-height:330px;overflow:auto"></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-circle-info"></i> Hướng dẫn thử nhanh</span></h3>
+          <ol class="small" style="padding-left:18px;line-height:1.9">
+            <li><b>Khách</b>: tab <i>Đặt dịch vụ</i> → chọn gói → thanh toán QR.</li>
+            <li>AI Dispatch chọn đối tác gần nhất → sang <b>Partner App</b> (bên phải).</li>
+            <li>Chọn đúng đối tác ở đầu Partner App → <i>Nhận việc → Check-in → Ảnh trước → Ảnh sau</i>.</li>
+            <li>Đổi <b>kịch bản</b> thành “gian lận” để xem AI Verify từ chối &amp; hoàn tiền 100%.</li>
+            <li>Quay lại Khách → <i>Đơn của tôi</i> xem báo cáo ảnh trước/sau.</li>
+          </ol></div>
+      </div>
+
+      <!-- Đối tác -->
+      <div class="phone" id="ph-p">
+        <div class="ph-head par"><div class="row"><div class="sp"><small>MemoryLand Partner</small><h4 id="p-title">Đối tác</h4></div><span class="chip gold" id="p-rate">★ 4.8</span></div>
+          <select class="scn" id="p-sel" style="margin-top:8px"></select>
+          <select class="scn" id="p-scn" style="margin-top:6px"><option value="ok">🟢 Kịch bản: làm đúng quy trình</option><option value="far">🔴 Gian lận: ảnh nghiệm thu cách mộ 180 m</option><option value="old">🔴 Gian lận: dùng ảnh cũ (3 ngày trước)</option><option value="wrong">🔴 Gian lận: chụp nhầm mộ khác</option><option value="gallery">🔴 Gian lận: ảnh tải từ thư viện</option><option value="lazy">🔴 Làm qua loa: không dọn cỏ</option></select></div>
+        <div class="ph-body" id="p-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ ADMIN ═════ -->
+  <section class="pane" id="p-admin">
+    <div class="grid g4 mb" id="a-kpi"></div>
+    <div class="grid g-side">
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-map-location-dot"></i> Bản đồ điều phối thời gian thực</span>
+          <span class="row"><button class="btn primary sm" id="a-rebal"><i class="fas fa-route"></i> Chạy AI Dispatch</button><button class="btn ghost sm" id="a-sim"><i class="fas fa-dice"></i> Mô phỏng 6 đơn mới</button></span></h3>
+          <div class="map-wrap"><canvas id="a-map" width="900" height="480"></canvas></div>
+          <div class="legend"><span><i style="background:#2e7d6b"></i>Đối tác sẵn sàng</span><span><i style="background:#999"></i>Đối tác nghỉ</span><span><i style="background:#c9a84c"></i>Khu nghĩa trang</span><span><i style="background:#d33"></i>Đơn mới (mô phỏng)</span></div>
+          <div id="a-sim-out" class="small mt"></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-list-check"></i> Danh sách công việc</span></h3><div class="tw"><table class="t" id="a-jobs"></table></div></div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-users"></i> Đối tác địa phương</span></h3><div id="a-partners"></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-calendar-check"></i> AI nhắc lịch Âm (90 ngày)</span><span class="chip jade" id="a-lunar"></span></h3><div id="a-rem"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal" id="modal-box"></div></div>
+
+<script src="/ml.js"></script>
+<script>
+mlNav('app');
+const C = { graves: [], gid: null, catalog: [], jobs: [], screen: 'home', pkg: null, chat: [], lunar: null, pay: 'qr' };
+const P = { list: [], pid: null, jobs: [], open: null, scn: 'ok', busy: false, lastPhoto: {} };
+let lastEvt = {};
+
+function evt(kind, icon, html) { $('#evts').insertAdjacentHTML('afterbegin', `<div class="evt ${kind}"><time>${new Date().toLocaleTimeString('vi-VN')}</time><i class="fas ${icon}"></i><span>${html}</span></div>`); }
+function showModal(html) { $('#modal-box').innerHTML = html; $('#modal').classList.add('on'); }
+function closeModal() { $('#modal').classList.remove('on'); }
+$('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+
+/* ───────── Tabs ───────── */
+function openTab(p) { $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p)); $$('.pane').forEach(x => x.classList.toggle('on', x.id === 'p-' + p)); if (p === 'admin') loadAdmin(); history.replaceState(null, '', '#' + p); }
+$$('.tab').forEach(t => t.onclick = () => openTab(t.dataset.p));
+
+/* ───────── Khởi tạo ───────── */
+(async function init() {
+  try {
+    const [g, cat, partners, lunar] = await Promise.all([api('/app/graves'), api('/app/catalog'), api('/partners'), api('/lunar')]);
+    C.graves = g; C.catalog = cat; P.list = partners; C.lunar = lunar;
+    C.gid = +localStorage.getItem('ml_gid') || g[0].id; if (!g.find(x => x.id === C.gid)) C.gid = g[0].id;
+    P.pid = +localStorage.getItem('ml_pid') || partners[0].id;
+    $('#c-grave').innerHTML = g.map(x => `<option value="${x.id}" ${x.id === C.gid ? 'selected' : ''}>${esc(x.fullName)} · ${x.lotCode}</option>`).join('');
+    $('#c-grave').onchange = e => { C.gid = +e.target.value; localStorage.setItem('ml_gid', C.gid); C.chat = []; refreshAll(); };
+    renderPartnerSel(); renderC();
+    await refreshAll();
+    setInterval(pollTick, 2500);
+    if (location.hash === '#admin') openTab('admin');
+  } catch (e) { toast('Lỗi tải dữ liệu: ' + e.message, 'err'); }
+})();
+async function pollTick() { if (document.hidden) return; if ($('#p-demo').classList.contains('on')) await refreshJobs(); else loadAdmin(); }
+async function refreshAll() { await refreshJobs(); renderC(); renderP(); }
+async function refreshJobs() {
+  const [cj, pj] = await Promise.all([api('/jobs?graveId=' + C.gid), api('/jobs?partnerId=' + P.pid)]);
+  const watch = (arr, who) => arr.forEach(j => { const k = who + j.id; if (lastEvt[k] && lastEvt[k] !== j.status) evt(who === 'c' ? 'c' : 'p', 'fa-arrow-right', `<b>${j.jobCode}</b> → ${statusVi(j.status)}`); lastEvt[k] = j.status; });
+  watch(cj, 'c'); C.jobs = cj; P.jobs = pj;
+  if (C.screen === 'orders') renderC(true);
+  if (!P.busy) renderP(true);
+}
+const ST = { Dispatched: ['Chờ đối tác nhận', 'gold'], Accepted: ['Đối tác đã nhận việc', 'sky'], CheckedIn: ['Đã có mặt đúng mộ', 'sky'], BeforeDone: ['Đang thực hiện', 'sky'], Verified: ['Hoàn thành & đã nghiệm thu', 'jade'], Rejected: ['AI từ chối nghiệm thu', 'rose'], Unassigned: ['Đang tìm đối tác', 'gray'] };
+const statusVi = s => (ST[s] || [s])[0];
+
+/* ═════════════════ KHÁCH HÀNG ═════════════════ */
+const curGrave = () => C.graves.find(g => g.id === C.gid);
+$$('#c-nav div').forEach(d => d.onclick = () => { C.screen = d.dataset.s; renderC(); });
+function renderC(soft) {
+  const g = curGrave(); if (!g) return;
+  $$('#c-nav div').forEach(d => d.classList.toggle('on', d.dataset.s === C.screen));
+  $('#c-title').textContent = 'Xin chào, ' + (g.contactName || 'bạn');
+  $('#c-chatin').style.display = C.screen === 'chat' ? 'flex' : 'none';
+  const body = $('#c-body'), top = body.scrollTop;
+  if (C.screen === 'home') body.innerHTML = cHome(g);
+  else if (C.screen === 'book') { if (!soft || !body.querySelector('.pkg')) body.innerHTML = cBook(g); }
+  else if (C.screen === 'orders') body.innerHTML = cOrders(g);
+  else if (C.screen === 'chat') { if (!soft || !body.querySelector('.chat')) { body.innerHTML = cChat(); body.scrollTop = body.scrollHeight; } return; }
+  if (soft) body.scrollTop = top;
+}
+function cHome(g) {
+  const d = g.daysUntil, soon = d != null && d <= 30;
+  const last = C.jobs[0];
+  return `
+  <div class="pc" style="background:linear-gradient(135deg,#fff,#f1faf7)"><div class="small muted">Hôm nay</div><b>${new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' })}</b><div class="chip gold" style="margin-top:5px"><i class="fas fa-moon"></i> ${C.lunar.text}</div></div>
+  <div class="pc"><h5>${esc(g.fullName)} ${g.alias ? '<span class="small muted">(' + esc(g.alias) + ')</span>' : ''}</h5>
+    <div class="small muted">${g.bornYear || '?'} – ${g.diedYear || '?'} · Lô <b>${g.lotCode}</b> · Khu ${g.zone}</div>
+    <div class="small mono muted mt">GPS ${g.lat.toFixed(6)}, ${g.lng.toFixed(6)}</div>
+    <div class="small mt"><i class="fas fa-user"></i> Thân nhân: ${esc(g.contactName || '—')} (${esc(g.contactRelation || '')})</div></div>
+  ${g.nextAnniversary ? `<div class="pc" style="${soon ? 'background:linear-gradient(135deg,#fff7e0,#fdf0c8);border:1.5px solid var(--gold)' : ''}">
+    <h5><span><i class="fas fa-calendar-day" style="color:var(--gold)"></i> Ngày giỗ</span>${soon ? '<span class="chip rose">Sắp đến</span>' : ''}</h5>
+    <div style="font:700 22px 'Playfair Display',serif">${d === 0 ? 'Hôm nay!' : 'Còn ' + d + ' ngày'}</div>
+    <div class="small muted">${g.lunarDeathDate} ↔ ${fmtDate(g.nextAnniversary)} (Dương lịch)</div>
+    <button class="btn ${soon ? 'primary' : 'ghost'} sm block mt" onclick="goBook('ML-02')"><i class="fas fa-gift"></i> Đặt gói Lễ Tết / Giỗ</button></div>` : ''}
+  <div class="pc"><h5>Lối tắt</h5><div class="row"><button class="btn jade sm" onclick="goBook()"><i class="fas fa-calendar-plus"></i> Đặt dịch vụ</button><button class="btn ghost sm" onclick="C.screen='chat';renderC()"><i class="fas fa-comments"></i> Hỏi AI</button></div></div>
+  ${last ? `<div class="pc" onclick="C.screen='orders';renderC()" style="cursor:pointer"><h5>Đơn gần nhất <span class="chip ${ST[last.status][1]}">${ST[last.status][0]}</span></h5><div class="small">${esc(last.order?.serviceName || '')} · ${last.jobCode}</div></div>` : ''}`;
+}
+function goBook(code) { C.screen = 'book'; if (code) C.pkg = (C.catalog.find(p => p.code === code) || {}).id || null; renderC(); }
+function cBook(g) {
+  if (!C.pkg) C.pkg = (C.catalog.find(p => p.featured) || C.catalog[0]).id;
+  const feat = C.catalog.filter(p => p.featured), rest = C.catalog.filter(p => !p.featured);
+  const card = p => `<div class="pc pkg ${C.pkg === p.id ? 'on' : ''}" onclick="C.pkg=${p.id};renderC()"><div class="pi" style="background:${p.color || '#2e7d6b'}"><i class="fas ${p.iconClass || 'fa-star'}"></i></div>
+      <div><div class="pn">${esc(p.name)}${p.featured ? '<span class="hot">MemoryLand</span>' : ''}</div><div class="pd">${esc((p.description || '').slice(0, 90))}</div></div><div class="pp">${money(p.price)}<div class="small muted">/${p.unit || 'lần'}</div></div></div>`;
+  const pk = C.catalog.find(p => p.id === C.pkg);
+  const tmr = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+  return `<div class="small muted mb">Chăm sóc mộ <b>${esc(g.fullName)}</b> (${g.lotCode})</div>
+    ${feat.map(card).join('')}<div class="small muted" style="margin:8px 2px">Dịch vụ khác</div>${rest.map(card).join('')}
+    <div class="pc"><label class="f" style="margin-top:0">Ngày thực hiện</label><input class="i" type="date" id="b-date" value="${tmr}">
+      <label class="f">Lời nhắn cho đối tác</label><input class="i" id="b-note" placeholder="VD: Gia đình thích hoa cúc vàng">
+      <label class="f">Thanh toán</label><select class="i" id="b-pay"><option value="qr">QR ngân hàng (VietQR – giả lập)</option><option value="wallet">Ví điện tử (giả lập)</option><option value="card">Thẻ quốc tế – kiều bào (giả lập)</option></select></div>
+    <button class="btn primary block" onclick="checkout()"><i class="fas fa-lock"></i> Thanh toán ${money(pk.price)}</button>
+    <div class="small muted" style="text-align:center;margin-top:8px"><i class="fas fa-shield-halved"></i> Cam kết bồi hoàn 100% nếu phát hiện sai sót</div>`;
+}
+function fakeQr(canvas, seed) {
+  const g = canvas.getContext('2d'), n = 29, s = canvas.width / n, R = rng(seed);
+  g.fillStyle = '#fff'; g.fillRect(0, 0, canvas.width, canvas.width); g.fillStyle = '#111';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const f = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9); if (!f && R() < .5) g.fillRect(x * s, y * s, s, s); }
+  [[0, 0], [n - 7, 0], [0, n - 7]].forEach(([x, y]) => { g.fillStyle = '#111'; g.fillRect(x * s, y * s, 7 * s, 7 * s); g.fillStyle = '#fff'; g.fillRect((x + 1) * s, (y + 1) * s, 5 * s, 5 * s); g.fillStyle = '#111'; g.fillRect((x + 2) * s, (y + 2) * s, 3 * s, 3 * s); });
+}
+async function checkout() {
+  const pk = C.catalog.find(p => p.id === C.pkg), g = curGrave(), method = $('#b-pay').value;
+  const label = { qr: 'Quét mã VietQR để thanh toán', wallet: 'Xác nhận trên ví điện tử', card: 'Thanh toán thẻ quốc tế' }[method];
+  const date = $('#b-date').value, note = $('#b-note').value;
+  showModal(`<h3>Thanh toán ${money(pk.price)}</h3><div class="small muted">${esc(pk.name)} · ${esc(g.fullName)}</div>
+    <div class="qrbox"><canvas id="qr" width="190" height="190"></canvas></div><div class="small" style="text-align:center">${label}<br><span class="muted">Giả lập – không phát sinh giao dịch thật</span></div>
+    <div class="row mt" style="justify-content:center"><span class="spin"></span><span class="small" id="pay-st">Đang chờ thanh toán…</span></div>`);
+  fakeQr($('#qr'), pk.id * 7 + g.id);
+  await sleep(2200); $('#pay-st').textContent = '✔ Đã nhận thanh toán – đang điều phối…';
+  try {
+    const r = await api('/app/book', { method: 'POST', body: { graveId: g.id, packageId: pk.id, scheduledAt: date ? date + 'T08:00:00' : null, note, paymentMethod: method } });
+    evt('c', 'fa-cart-shopping', `Khách đặt <b>${esc(pk.name)}</b> (${r.orderCode}) – ${money(pk.price)}`);
+    if (r.dispatch) evt('a', 'fa-route', `AI Dispatch → <b>${esc(r.dispatch.partner)}</b> · ${r.dispatch.distanceKm} km · ETA ${r.dispatch.etaMin}′ · cost ${r.dispatch.cost}`);
+    else evt('a', 'fa-triangle-exclamation', 'Không có đối tác khả dụng – đơn chờ điều phối');
+    showModal(`<h3 style="color:var(--jade)"><i class="fas fa-circle-check"></i> Đặt thành công</h3><p class="small">Mã đơn <b>${r.orderCode}</b> · Công việc <b>${r.jobCode}</b></p>
+      ${r.dispatch ? `<div class="info-box mt" style="background:#f1faf7;border:1px solid var(--jade)"><b><i class="fas fa-route"></i> AI Dispatch đã chọn</b><br>${esc(r.dispatch.partner)} · cách mộ ${r.dispatch.distanceKm} km · dự kiến ${r.dispatch.etaMin} phút</div>` : '<div class="info-box mt">Chưa có đối tác khả dụng, hệ thống sẽ tự điều phối lại.</div>'}
+      <button class="btn primary block mt" onclick="closeModal();C.screen='orders';refreshAll()">Theo dõi đơn</button>`);
+    if (r.dispatch) { P.pid = r.dispatch.partnerId; localStorage.setItem('ml_pid', P.pid); P.list = await api('/partners'); renderPartnerSel(); P.open = r.jobId; }
+    C.screen = 'orders'; await refreshAll();
+  } catch (e) { closeModal(); toast(e.message, 'err'); }
+}
+function stepsFor(j) {
+  const s = j.status, order = ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone', 'Verified'], idx = s === 'Rejected' ? 4 : order.indexOf(s);
+  const st = (i, ok, run) => ok ? 'ok' : (run ? 'run' : '');
+  const rows = [
+    ['Đã thanh toán & đặt đơn', fmtTime(j.createdAt), true, false],
+    ['AI Dispatch chọn đối tác', j.partner ? `${j.partner.name} · ETA ${j.EtaMinutes ?? j.etaMinutes}′` : 'Đang tìm đối tác…', !!j.partner, !j.partner],
+    ['Đối tác nhận việc', fmtTime(j.acceptedAt), idx >= 1, idx === 0],
+    ['Check-in đúng mộ (GPS + QR)', j.checkinAt ? `Cách mộ ${j.checkinDistanceM?.toFixed(1)} m · ${fmtTime(j.checkinAt)}` : '', idx >= 2, idx === 1],
+    ['Chụp ảnh trước · thực hiện', j.beforeAt ? fmtTime(j.beforeAt) : '', idx >= 3, idx === 2],
+    ['Chụp ảnh sau · AI Verify', j.afterAt ? fmtTime(j.afterAt) : '', s === 'Verified', idx === 3],
+    ['Báo cáo gửi gia đình', j.reportSentAt ? fmtTime(j.reportSentAt) : '', s === 'Verified', false]];
+  return rows.map((r, i) => `<div class="step ${s === 'Rejected' && i === 5 ? 'bad' : r[2] ? 'ok' : r[3] ? 'run' : ''}"><div class="dot">${r[2] ? '<i class="fas fa-check"></i>' : s === 'Rejected' && i === 5 ? '<i class="fas fa-xmark"></i>' : ''}</div><div><b>${r[0]}</b><small>${r[1] || ''}</small></div></div>`).join('');
+}
+function verifyHtml(j) {
+  if (!j.verify) return '';
+  return `<div class="mt"><div class="row"><b class="small">AI Verify</b><span class="chip ${j.verify.pass ? 'jade' : 'rose'}">${j.verify.pass ? 'ĐẠT' : 'KHÔNG ĐẠT'}</span><span class="sp"></span><b>${j.verify.score}/100</b></div>
+    ${j.verify.layers.map(l => `<div class="vl ${l.pass ? 'ok' : 'bad'}"><i class="fas ${l.pass ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><div><b>${l.name}</b><br><span class="muted">${esc(l.detail)}</span></div></div>`).join('')}</div>`;
+}
+function cOrders(g) {
+  if (!C.jobs.length) return '<div class="pc" style="text-align:center;color:var(--muted)"><i class="fas fa-inbox" style="font-size:28px"></i><p class="small mt">Chưa có đơn nào cho mộ này.</p><button class="btn jade sm mt" onclick="goBook()">Đặt dịch vụ</button></div>';
+  return C.jobs.map(j => `<div class="pc"><h5><span>${esc(j.order?.serviceName || 'Dịch vụ')}</span><span class="chip ${ST[j.status][1]}">${ST[j.status][0]}</span></h5>
+    <div class="small muted mb">${j.jobCode} · ${j.order?.orderCode || ''} · ${j.order ? money(j.order.price) : ''}</div>
+    ${j.partner ? `<div class="row small mb"><span style="width:30px;height:30px;border-radius:50%;background:${j.partner.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">${j.partner.name.split(' ').pop()[0]}</span><div><b>${esc(j.partner.name)}</b> ★${j.partner.rating}<br><span class="muted">${esc(j.partner.area)}</span></div></div>` : ''}
+    ${stepsFor(j)}
+    ${j.status === 'Verified' && j.beforeThumb ? `<div class="photo-pair mt"><figure><img src="${j.beforeThumb}"><figcaption>TRƯỚC</figcaption></figure><figure><img src="${j.afterThumb}"><figcaption>SAU</figcaption></figure></div>` : ''}
+    ${j.status === 'Verified' ? `<div class="info-box mt" style="min-height:0;background:#f1faf7;border-color:var(--jade)">✔ Báo cáo đã gửi qua Zalo/Email lúc ${fmtTime(j.reportSentAt)} – sau <b>${Math.max(1, Math.round((new Date(j.reportSentAt) - new Date(j.acceptedAt)) / 60000))} phút</b> kể từ khi đối tác nhận việc (cam kết ≤ 15 phút sau nghiệm thu).</div>` : ''}
+    ${verifyHtml(j)}
+    ${j.status === 'Rejected' && !j.refunded ? `<div class="info-box mt" style="background:#fdf0f3;border-color:var(--rose-light);min-height:0">⚠ AI Verify phát hiện bất thường nên chưa gửi nghiệm thu cho bạn. Theo cam kết, bạn có thể:</div>
+      <div class="row mt"><button class="btn jade sm" onclick="redo(${j.id})"><i class="fas fa-rotate"></i> Làm lại miễn phí (đối tác khác)</button><button class="btn rose sm" onclick="refund(${j.id})"><i class="fas fa-money-bill-transfer"></i> Hoàn tiền 100%</button></div>` : ''}
+    ${j.refunded ? `<div class="info-box mt" style="min-height:0">💸 Đã hoàn tiền 100% (${money(j.order?.price)}) vào phương thức thanh toán ban đầu.</div>` : ''}
+    </div>`).join('');
+}
+async function redo(id) { const r = await api(`/jobs/${id}/redispatch`, { method: 'POST' }); evt('a', 'fa-rotate', `Làm lại: AI Dispatch → <b>${esc(r.dispatch?.partner || 'chưa có đối tác')}</b>`); if (r.dispatch) { P.pid = r.dispatch.partnerId; localStorage.setItem('ml_pid', P.pid); renderPartnerSel(); P.open = id; } toast('Đã điều đối tác khác làm lại miễn phí.', 'ok'); refreshAll(); }
+async function refund(id) { const r = await api(`/jobs/${id}/refund`, { method: 'POST' }); evt('a', 'fa-money-bill-transfer', `Hoàn tiền 100%: <b>${money(r.refunded)}</b>`); toast('Đã hoàn tiền 100%.', 'ok'); refreshAll(); }
+
+/* Chat */
+const WELCOME = 'Chào bạn! Tôi là Trợ lý MemoryLand (LLM tiếng Việt + RAG nội bộ). Tôi có thể nhắc lịch Âm, hướng dẫn lễ vật, văn khấn và báo giá.';
+function cChat() {
+  if (!C.chat.length) C.chat.push({ r: 'b', t: WELCOME, chips: ['Ngày giỗ gần nhất là khi nào?', 'Văn khấn tại mộ', 'Giá các gói dịch vụ', 'Hôm nay âm lịch ngày mấy?'] });
+  return `<div class="chat">${C.chat.map(m => `<div class="msg ${m.r}">${m.typing ? '<div class="typing"><i></i><i></i><i></i></div>' : esc(m.t)}${m.src ? `<div class="src">Nguồn: ${m.src.map(esc).join(', ')} · tin cậy ${(m.conf * 100).toFixed(0)}%</div>` : ''}${m.chips ? `<div class="chips">${m.chips.map(c => `<span onclick="ask(this.textContent)">${esc(c)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>`;
+}
+async function ask(q) {
+  q = (q || '').trim(); if (!q) return; $('#c-q').value = ''; C.screen = 'chat';
+  C.chat.push({ r: 'u', t: q }); C.chat.push({ r: 'b', typing: true }); renderC(); $('#c-body').scrollTop = 1e6;
+  try {
+    const a = await api('/assistant', { method: 'POST', body: { message: q, graveId: C.gid } });
+    C.chat.pop(); C.chat.push({ r: 'b', t: a.answer, src: a.sources, conf: a.confidence, chips: a.suggestions });
+    evt('c', 'fa-comments', `Hỏi AI: “${esc(q)}” → intent <b>${a.intent}</b>`);
+  } catch (e) { C.chat.pop(); C.chat.push({ r: 'b', t: 'Lỗi: ' + e.message }); }
+  renderC(); $('#c-body').scrollTop = 1e6;
+}
+$('#c-send').onclick = () => ask($('#c-q').value); $('#c-q').onkeydown = e => { if (e.key === 'Enter') ask($('#c-q').value); };
+
+/* ═════════════════ ĐỐI TÁC ═════════════════ */
+function renderPartnerSel() {
+  $('#p-sel').innerHTML = P.list.map(p => `<option value="${p.id}" ${p.id === P.pid ? 'selected' : ''}>${esc(p.name)} · ${esc(p.area.split('–')[0])}</option>`).join('');
+  const p = P.list.find(x => x.id === P.pid); if (p) { $('#p-title').textContent = p.name; $('#p-rate').textContent = '★ ' + p.rating; }
+}
+$('#p-sel').onchange = async e => { P.pid = +e.target.value; localStorage.setItem('ml_pid', P.pid); P.open = null; renderPartnerSel(); await refreshJobs(); renderP(); };
+$('#p-scn').onchange = e => { P.scn = e.target.value; };
+function renderP(soft) {
+  const body = $('#p-body'), top = body.scrollTop, pr = P.list.find(x => x.id === P.pid);
+  const active = P.jobs.filter(j => !['Verified', 'Rejected'].includes(j.status)), done = P.jobs.filter(j => ['Verified', 'Rejected'].includes(j.status));
+  let open = P.open ? P.jobs.find(j => j.id === P.open) : null;
+  if (open) { body.innerHTML = pDetail(open); if (soft) body.scrollTop = top; return; }
+  const earn = P.jobs.filter(j => j.status === 'Verified').reduce((a, j) => a + (j.order?.price || 0) * .88, 0);
+  body.innerHTML = `<div class="pc" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);color:#fff"><div class="small" style="opacity:.7">Thu nhập (88% giá trị đơn)</div><div style="font:700 24px 'Playfair Display',serif;color:var(--gold-light)">${money(earn)}</div><div class="small" style="opacity:.7">${pr ? pr.completedJobs : 0} đơn hoàn thành · ${pr ? pr.area : ''}</div></div>
+    <div class="small muted" style="margin:4px 2px 8px">Việc đang xử lý (${active.length})</div>
+    ${active.map(jobCard).join('') || '<div class="pc small muted" style="text-align:center">Chưa có việc mới. Hãy đặt đơn ở App khách hàng bên trái.</div>'}
+    ${done.length ? `<div class="small muted" style="margin:10px 2px 8px">Đã kết thúc</div>${done.map(jobCard).join('')}` : ''}`;
+  if (soft) body.scrollTop = top;
+}
+function jobCard(j) {
+  return `<div class="pc" style="cursor:pointer" onclick="P.open=${j.id};renderP()"><h5><span>${esc(j.order?.serviceName || '')}</span><span class="chip ${ST[j.status][1]}">${ST[j.status][0]}</span></h5>
+    <div class="small"><b>${esc(j.grave.fullName)}</b> · Lô ${j.grave.lotCode}<br><span class="muted">${j.jobCode} · ETA ${j.etaMinutes}′ · ${j.order ? money(j.order.price) : ''}</span></div></div>`;
+}
+function pDetail(j) {
+  const s = j.status, back = '<button class="btn ghost sm" onclick="P.open=null;renderP()"><i class="fas fa-arrow-left"></i> Danh sách</button>';
+  let act = '';
+  if (s === 'Dispatched') act = `<button class="btn primary block mt" onclick="pAccept(${j.id})"><i class="fas fa-hand"></i> Nhận việc</button>`;
+  else if (s === 'Accepted') act = `<div class="pc mt"><h5>Bước 1 · Check-in tại mộ</h5><div class="small muted mb">Đứng tại mộ <b>${j.grave.lotCode}</b> và quét mã QR trên bia (tối đa lệch 5 m).</div>
+    <button class="btn jade block" onclick="pCheckin(${j.id},true)"><i class="fas fa-qrcode"></i> Quét QR &amp; lấy GPS tại mộ</button>
+    <button class="btn ghost sm block" style="margin-top:7px" onclick="pCheckin(${j.id},false)"><i class="fas fa-location-dot"></i> Thử check-in cách mộ 150 m</button></div>`;
+  else if (s === 'CheckedIn') act = `<div class="pc mt"><h5>Bước 2 · Chụp ảnh hiện trạng TRƯỚC</h5><div class="small muted mb">Chụp trực tiếp trong app (siêu dữ liệu EXIF được ghi lại).</div>
+    <button class="btn jade block" onclick="pPhoto(${j.id},'before')"><i class="fas fa-camera"></i> Chụp ảnh trước</button></div>`;
+  else if (s === 'BeforeDone') act = `<div class="pc mt"><h5>Bước 3 · Thực hiện</h5>
+      ${['Nhổ cỏ, quét lá, nhặt rác', 'Lau bia, lư hương', 'Dâng hoa tươi, thắp hương, đọc văn khấn'].map((t, i) => `<label class="small" style="display:flex;gap:8px;margin:5px 0"><input type="checkbox" checked> ${t}</label>`).join('')}</div>
+    <div class="pc"><h5>Bước 4 · Ảnh SAU &amp; gửi nghiệm thu</h5><div class="small muted mb">Kịch bản hiện tại: <b>${$('#p-scn').selectedOptions[0].textContent}</b></div>
+    <button class="btn primary block" onclick="pPhoto(${j.id},'after')"><i class="fas fa-camera"></i> Chụp ảnh sau &amp; gửi AI Verify</button></div>`;
+  const photos = j.beforeThumb ? `<div class="photo-pair mt"><figure><img src="${j.beforeThumb}"><figcaption>TRƯỚC</figcaption></figure>${j.afterThumb ? `<figure><img src="${j.afterThumb}"><figcaption>SAU</figcaption></figure>` : ''}</div>` : '';
+  const result = (s === 'Verified' || s === 'Rejected') ? `<div class="pc mt" style="border:2px solid ${s === 'Verified' ? 'var(--jade)' : 'var(--rose)'}"><h5>${s === 'Verified' ? '<span style="color:var(--jade)"><i class="fas fa-circle-check"></i> Nghiệm thu thành công</span>' : '<span style="color:var(--rose)"><i class="fas fa-circle-xmark"></i> Bị từ chối</span>'}</h5>${verifyHtml(j)}
+    ${s === 'Verified' ? `<div class="small mt">Đã cộng <b>${money((j.order?.price || 0) * .88)}</b> vào thu nhập.</div>` : '<div class="small mt muted">Khách hàng sẽ chọn làm lại hoặc hoàn tiền. Đơn không được tính thu nhập.</div>'}</div>` : '';
+  return `${back}<div class="pc mt"><h5><span>${esc(j.order?.serviceName || '')}</span><span class="chip ${ST[s][1]}">${ST[s][0]}</span></h5>
+    <div class="small"><b>${esc(j.grave.fullName)}</b> · Lô ${j.grave.lotCode} · Khu ${j.grave.zone}<br><span class="muted">Thân nhân: ${esc(j.grave.contactName || '—')} ${esc(j.grave.contactPhone || '')}</span><br><span class="mono muted">${j.grave.lat.toFixed(6)}, ${j.grave.lng.toFixed(6)}</span></div></div>${act}${photos}${result}`;
+}
+async function pAccept(id) { await api(`/jobs/${id}/accept`, { method: 'POST' }); evt('p', 'fa-hand', 'Đối tác <b>nhận việc</b>'); await refreshJobs(); }
+async function pCheckin(id, good) {
+  const j = P.jobs.find(x => x.id === id), jit = () => (Math.random() - .5) * 3e-5;
+  const lat = j.grave.lat + (good ? jit() / 3 : .00135), lng = j.grave.lng + (good ? jit() / 3 : 0);
+  const r = await api(`/jobs/${id}/checkin`, { method: 'POST', body: { lat, lng, qr: j.grave.lotCode } });
+  if (r.ok) { evt('p', 'fa-location-dot', `Check-in OK – cách mộ <b>${r.distanceM} m</b>, QR khớp`); toast(r.message, 'ok'); } else { evt('p', 'fa-triangle-exclamation', `Check-in bị chặn: ${r.message}`); toast(r.message, 'err'); }
+  await refreshJobs();
+}
+
+/* ── Ảnh mô phỏng: cảnh mộ + cỏ (cỏ sau là tập con cỏ trước → cùng một vị trí) ── */
+function drawScene(seed, weedN, inverted) {
+  const c = document.createElement('canvas'); c.width = 240; c.height = 160; const g = c.getContext('2d'), R = rng(seed * 97 + 13);
+  const gr = g.createLinearGradient(0, 0, 0, 160); gr.addColorStop(0, '#9bb27a'); gr.addColorStop(1, '#6f8c4e'); g.fillStyle = gr; g.fillRect(0, 0, 240, 160);
+  g.fillStyle = '#b9ad8a'; g.fillRect(0, 118, 240, 42);                       // nền xi măng quanh mộ
+  g.fillStyle = '#8f8a7a'; g.fillRect(70, 50, 100, 70);                       // thân mộ
+  g.fillStyle = '#d6d1c2'; g.fillRect(70, 50, 100, 12);
+  g.fillStyle = '#5b574c'; g.fillRect(100, 16, 40, 38); g.fillStyle = '#e9e5d8'; g.fillRect(104, 20, 32, 30);   // bia
+  g.fillStyle = '#7a6d55'; for (let i = 0; i < 4; i++) g.fillRect(108, 25 + i * 6, 24, 2);
+  g.fillStyle = '#6a4a2a'; g.fillRect(112, 100, 16, 10); g.fillStyle = '#b13a3a'; g.fillRect(116, 92, 8, 8); // lư hương
+  const W = []; const RR = rng(seed * 31 + 7);
+  for (let i = 0; i < 60; i++) W.push([RR() * 236, 40 + RR() * 116, 6 + RR() * 12, RR() < .6]);
+  W.slice(0, weedN).forEach(w => { g.fillStyle = w[3] ? 'rgba(48,86,30,.9)' : 'rgba(110,84,40,.85)'; g.beginPath(); g.ellipse(w[0], w[1], w[2], w[2] * .6, 0, 0, 7); g.fill(); });
+  if (inverted) { const id = g.getImageData(0, 0, 240, 160), d = id.data; for (let i = 0; i < d.length; i += 4) { d[i] = 255 - d[i]; d[i + 1] = 255 - d[i + 1]; d[i + 2] = 255 - d[i + 2]; } g.putImageData(id, 0, 0); }
+  return c;
+}
+function thumbOf(cv) { const t = document.createElement('canvas'); t.width = 120; t.height = 80; t.getContext('2d').drawImage(cv, 0, 0, 120, 80); return t.toDataURL('image/jpeg', .55); }
+async function pPhoto(id, kind) {
+  const j = P.jobs.find(x => x.id === id), scn = $('#p-scn').value; P.busy = true;
+  const jit = () => (Math.random() - .5) * 2e-5;
+  let weed, lat = j.grave.lat + jit(), lng = j.grave.lng + jit(), at = new Date(), inApp = true, inverted = false;
+  if (kind === 'before') { weed = .45 + Math.random() * .2; P.lastPhoto[id] = weed; }
+  else {
+    const wb = P.lastPhoto[id] ?? j.beforeWeed ?? .5;
+    weed = scn === 'lazy' ? wb * .92 : .03 + Math.random() * .05;
+    if (scn === 'far') lat += .0016;
+    if (scn === 'old') at = new Date(Date.now() - 3 * 864e5);
+    if (scn === 'gallery') inApp = false;
+    if (scn === 'wrong') inverted = true;
+  }
+  const n = Math.round(weed * 60), cv = drawScene(j.graveId, n, inverted), hash = imageHash(cv);
+  try {
+    const body = { kind, hash, weed: n / 60, capturedAt: at.toISOString(), inApp, lat, lng, thumb: thumbOf(cv) };
+    if (kind === 'after') { showModal(`<h3><i class="fas fa-shield-halved" style="color:var(--jade)"></i> AI Verify đang thẩm định…</h3><div id="vf-steps" class="mt"></div>`); }
+    const r = await api(`/jobs/${id}/photo`, { method: 'POST', body });
+    if (kind === 'before') { evt('p', 'fa-camera', 'Đối tác chụp <b>ảnh trước</b>'); toast('Đã lưu ảnh trước.', 'ok'); }
+    else {
+      for (let i = 0; i < r.layers.length; i++) {
+        const l = r.layers[i];
+        $('#vf-steps').insertAdjacentHTML('beforeend', `<div class="vl ${l.pass ? 'ok' : 'bad'}" style="opacity:0;transition:.4s"><i class="fas ${l.pass ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><div><b>${l.name}</b><br><span class="muted">${esc(l.detail)}</span></div></div>`);
+        await sleep(60); $('#vf-steps').lastElementChild.style.opacity = 1; await sleep(750);
+      }
+      $('#vf-steps').insertAdjacentHTML('beforeend', `<div class="info-box mt" style="min-height:0;background:${r.pass ? '#f1faf7' : '#fdf0f3'};border-color:${r.pass ? 'var(--jade)' : 'var(--rose)'}"><b>${r.pass ? '✔ ĐẠT' : '✘ KHÔNG ĐẠT'} · ${r.score}/100</b><br>${r.pass ? 'Báo cáo ảnh trước/sau đã được gửi cho gia đình.' : 'Đơn bị từ chối – khách hàng được hoàn tiền 100% hoặc làm lại miễn phí.'}</div><button class="btn primary block mt" onclick="closeModal()">Đóng</button>`);
+      evt('a', r.pass ? 'fa-shield-halved' : 'fa-ban', `AI Verify ${r.pass ? '<b style="color:var(--jade)">ĐẠT</b>' : '<b style="color:var(--rose)">TỪ CHỐI</b>'} ${j.jobCode} · ${r.score}/100`);
+    }
+  } catch (e) { closeModal(); toast(e.message, 'err'); }
+  P.busy = false; P.list = await api('/partners'); renderPartnerSel(); await refreshJobs();
+}
+
+/* ═════════════════ ĐIỀU PHỐI (ADMIN) ═════════════════ */
+const MAP = { lat0: 21.0560, lat1: 21.0090, lng0: 105.8340, lng1: 105.8780, sim: null };
+const mp = (lat, lng) => [(lng - MAP.lng0) / (MAP.lng1 - MAP.lng0) * 900, (lat - MAP.lat0) / (MAP.lat1 - MAP.lat0) * 480];
+async function loadAdmin() {
+  const [pl, jobs, rem, biz, lunar] = await Promise.all([api('/partners'), api('/jobs'), api('/reminders?withinDays=90'), api('/business'), api('/lunar')]);
+  P.list = pl; $('#a-lunar').textContent = lunar.text;
+  const cnt = s => jobs.filter(j => j.status === s).length;
+  $('#a-kpi').innerHTML = `<div class="kpi jade"><div class="lb">Công việc</div><div class="v">${jobs.length}</div><div class="s">${cnt('Verified')} đã nghiệm thu</div></div>
+    <div class="kpi"><div class="lb">Đang xử lý</div><div class="v">${jobs.filter(j => ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone'].includes(j.status)).length}</div><div class="s">${cnt('Unassigned')} chưa có đối tác</div></div>
+    <div class="kpi rose"><div class="lb">AI Verify từ chối</div><div class="v">${cnt('Rejected')}</div><div class="s">Tỉ lệ chống gian lận ${jobs.length ? Math.round(100 * (cnt('Verified') + cnt('Rejected')) / jobs.length) : 0}% đã kiểm định</div></div>
+    <div class="kpi sky"><div class="lb">Đối tác sẵn sàng</div><div class="v">${pl.filter(p => p.available).length}/${pl.length}</div><div class="s">★ TB ${biz.avgRating}</div></div>`;
+  $('#a-jobs').innerHTML = `<tr><th>Mã</th><th>Mộ</th><th>Dịch vụ</th><th>Đối tác</th><th>ETA</th><th>Trạng thái</th><th>AI Verify</th></tr>` + jobs.map(j => `<tr><td class="mono small">${j.jobCode}</td><td>${esc(j.grave?.fullName || '')}<br><span class="small muted">${j.grave?.lotCode}</span></td><td class="small">${esc(j.order?.serviceName || '—')}</td><td class="small">${esc(j.partner?.name || '—')}</td><td>${j.etaMinutes ? j.etaMinutes + '′' : '—'}</td><td><span class="chip ${ST[j.status][1]}">${ST[j.status][0]}</span></td><td>${j.verifyScore != null ? `<b>${j.verifyScore}</b>` : '—'}</td></tr>`).join('');
+  $('#a-partners').innerHTML = pl.map(p => `<div class="row" style="padding:7px 0;border-bottom:1px dashed var(--border)"><span style="width:30px;height:30px;border-radius:50%;background:${p.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">${p.name.split(' ').pop()[0]}</span>
+      <div class="sp"><b class="small">${esc(p.name)}</b><br><span class="small muted">★${p.rating} · ${p.completedJobs} đơn · ${p.activeJobs} đang làm</span></div>
+      <button class="btn ${p.available ? 'jade' : 'ghost'} sm" onclick="togglePartner(${p.id})">${p.available ? 'Sẵn sàng' : 'Nghỉ'}</button></div>`).join('');
+  $('#a-rem').innerHTML = rem.length ? rem.map(r => `<div class="row" style="padding:8px 0;border-bottom:1px dashed var(--border)"><div class="sp"><b class="small">${esc(r.fullName)}</b> <span class="chip ${r.daysUntil <= 7 ? 'rose' : r.daysUntil <= 30 ? 'gold' : 'gray'}">${r.daysUntil === 0 ? 'Hôm nay' : 'còn ' + r.daysUntil + ' ngày'}</span><br><span class="small muted">${r.lunarDeathDate} ↔ ${fmtDate(r.solar)} · ${esc(r.contactName || '')}</span></div>
+      <button class="btn ghost sm" onclick="sendRemind('${esc(r.fullName)}','${esc(r.contactName || '')}','${esc(r.contactPhone || '')}',${r.daysUntil})"><i class="fas fa-paper-plane"></i></button></div>`).join('') : '<div class="small muted">Không có ngày giỗ nào trong 90 ngày tới.</div>';
+  drawMap(jobs);
+}
+function sendRemind(name, who, phone, days) { toast(`Đã gửi nhắc lịch (Zalo/SMS mô phỏng) tới <b>${who}</b> ${phone}: “Còn ${days} ngày đến giỗ ${name}”.`, 'ok'); evt('a', 'fa-bell', `Nhắc giỗ <b>${name}</b> → ${who}`); }
+async function togglePartner(id) { await api(`/partners/${id}/toggle`, { method: 'POST' }); loadAdmin(); }
+function drawMap(jobs) {
+  const cv = $('#a-map'), g = cv.getContext('2d'); g.fillStyle = '#e8eedd'; g.fillRect(0, 0, 900, 480);
+  const R = rng(3); g.strokeStyle = '#d4dcc6'; g.lineWidth = 1; for (let i = 0; i < 14; i++) { g.beginPath(); g.moveTo(0, R() * 480); g.bezierCurveTo(300, R() * 480, 600, R() * 480, 900, R() * 480); g.stroke(); }
+  g.strokeStyle = '#fff'; g.lineWidth = 5; [[0, 250, 900, 210], [430, 0, 470, 480], [0, 90, 900, 140]].forEach(l => { g.beginPath(); g.moveTo(l[0], l[1]); g.lineTo(l[2], l[3]); g.stroke(); });
+  g.fillStyle = 'rgba(120,170,200,.55)'; g.beginPath(); g.ellipse(760, 400, 90, 36, -.3, 0, 7); g.fill();
+  const cem = mp(21.0285, 105.8530); g.fillStyle = '#c9a84c'; g.beginPath(); g.arc(cem[0], cem[1], 15, 0, 7); g.fill(); g.fillStyle = '#1a1a2e'; g.font = '700 11px DM Sans'; g.textAlign = 'center'; g.fillText('Nghĩa trang', cem[0], cem[1] - 22);
+  const act = jobs.filter(j => j.partner && ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone'].includes(j.status));
+  act.forEach(j => { const p = P.list.find(x => x.id === j.partner.id); if (!p) return; const a = mp(p.lat, p.lng), b = mp(j.grave.lat, j.grave.lng); g.strokeStyle = p.color; g.lineWidth = 2.5; g.setLineDash([7, 5]); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); g.setLineDash([]); g.fillStyle = '#d33'; g.beginPath(); g.arc(b[0], b[1], 6, 0, 7); g.fill(); });
+  const sim = MAP.sim;
+  if (sim) {
+    sim.jobs.forEach(j => { const r = sim.results.find(x => x.jobId === j.id), p = P.list.find(x => x.id === r.partnerId), b = mp(j.lat, j.lng); if (p) { const a = mp(p.lat, p.lng); g.strokeStyle = p.color; g.lineWidth = 2.5; g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); } g.fillStyle = '#d33'; g.beginPath(); g.arc(b[0], b[1], 7, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = '700 9px DM Sans'; g.fillText(j.id, b[0], b[1] + 3); });
+  }
+  P.list.forEach(p => { const a = mp(p.lat, p.lng); g.fillStyle = p.available ? p.color : '#999'; g.beginPath(); g.arc(a[0], a[1], 11, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#fff'; g.font = '700 11px DM Sans'; g.textAlign = 'center'; g.fillText(p.name.split(' ').pop()[0], a[0], a[1] + 4); g.fillStyle = '#333'; g.font = '600 10px DM Sans'; g.fillText(p.name.split(' ').slice(-2).join(' '), a[0], a[1] + 24); });
+}
+$('#a-rebal').onclick = async () => { const r = await api('/dispatch/rebalance', { method: 'POST' }); toast(`AI Dispatch (Hungarian) đã điều phối <b>${r.assigned}/${r.reassigned}</b> đơn chờ nhận.`, 'ok'); evt('a', 'fa-route', `Rebalance: ${r.assigned}/${r.reassigned} đơn được ghép đối tác`); loadAdmin(); };
+$('#a-sim').onclick = async () => {
+  const r = await api('/dispatch/simulate?count=6', { method: 'POST' }); MAP.sim = r; await loadAdmin();
+  $('#a-sim-out').innerHTML = `<b>Kết quả ghép cặp tối ưu</b> (tổng chi phí <b>${r.totalCost}</b>): ` + r.results.map(x => { const p = P.list.find(q => q.id === x.partnerId); return `<span class="chip gray">Đơn ${x.jobId} → ${p ? esc(p.name.split(' ').slice(-2).join(' ')) : '—'} · ${x.distanceKm} km · ${x.etaMin}′</span>`; }).join(' ');
+};
+</script>
+</body>
+</html>

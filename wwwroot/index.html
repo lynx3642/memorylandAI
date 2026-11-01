@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartCem 4.0 – Quản lý Nghĩa trang Thông minh</title>
+<title>MemoryLand AI – Quản lý nghĩa trang &amp; chăm sóc mộ từ xa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -80,10 +80,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);m
 .stat-sub.up{color:var(--jade);font-weight:600}
 
 /* SMART ALERTS WIDGETS */
-.alert-strip{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.alert-strip{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
 .alert-card{background:#fff;border-radius:var(--r);padding:16px;border:1.5px solid rgba(26,26,46,.08);box-shadow:var(--shadow-sm)}
 .alert-card.anniv{border-left:4px solid var(--gold)}
-.alert-card.contract{border-left:4px solid var(--rose)}
 .alert-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .alert-head h4{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
 .alert-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#fcfbf8;border:1px solid rgba(26,26,46,.05);margin-bottom:6px}
@@ -101,8 +100,8 @@ tr:hover td{background:rgba(201,168,76,.03)}
 .badge.active{background:rgba(46,125,107,.12);color:var(--jade)}
 .badge.pending{background:rgba(201,168,76,.15);color:#7a6020}
 .badge.archived{background:rgba(26,26,46,.08);color:var(--muted)}
+.badge.expired{background:rgba(139,58,82,.12);color:var(--rose)}
 .badge.tag-anniv{background:#fff3d6;color:#8f6300;border:1px solid #ebd08d}
-.badge.tag-expire{background:#ffe3ea;color:#a82247;border:1px solid #f7b2c3}
 
 /* SEARCH & FILTERS */
 .search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
@@ -169,6 +168,7 @@ tr:hover td{background:rgba(201,168,76,.03)}
   .form-grid{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="/big.css">
 </head>
 <body>
 
@@ -178,28 +178,28 @@ tr:hover td{background:rgba(201,168,76,.03)}
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
       <div class="sb-icon">⛩</div>
-      <div><h2>SmartCem</h2><span>v4.0 · Pro Edition</span></div>
+      <div><h2>MemoryLand AI</h2><span>Quản lý nghĩa trang &amp; chăm sóc mộ</span></div>
     </div>
     <nav class="sb-nav">
       <div class="nav-sec">Tổng quan</div>
-      <div class="nav-item active" data-page="dashboard" onclick="nav(this)"><i class="fas fa-gauge-high"></i> Dashboard</div>
+      <div class="nav-item active" data-page="dashboard" onclick="nav(this)"><i class="fas fa-gauge-high"></i> Trang chủ</div>
 
-      <div class="nav-sec">Hồ sơ & Bản đồ</div>
-      <div class="nav-item" onclick="window.open('/lotmap.html','_blank')"><i class="fas fa-map-location-dot"></i> Bản đồ phân lô <span class="nav-badge" style="background:var(--jade)">GIS</span></div>
-      <div class="nav-item" data-page="graves" onclick="nav(this)"><i class="fas fa-headstone"></i> Danh sách mộ phần</div>
-      <div class="nav-item" data-page="import" onclick="nav(this)"><i class="fas fa-upload"></i> Import dữ liệu</div>
-      <div class="nav-item" onclick="window.open('/import-live.html','_blank')"><i class="fas fa-satellite-dish"></i> Live Stream</div>
+      <div class="nav-sec">1 · Quy hoạch nghĩa trang</div>
+      <div class="nav-item" onclick="location.href='/lotmap.html'"><i class="fas fa-map-location-dot"></i> Bản đồ phân lô</div>
+      <div class="nav-item" data-page="graves" onclick="nav(this)"><i class="fas fa-address-book"></i> Hồ sơ mộ phần</div>
+      <div class="nav-item" onclick="location.href='/ai.html'"><i class="fas fa-wand-magic-sparkles"></i> Quy hoạch &amp; dự báo</div>
 
-      <div class="nav-sec">Dịch vụ & Vận hành</div>
-      <div class="nav-item" data-page="orders" onclick="nav(this)"><i class="fas fa-concierge-bell"></i> Đơn & Gói dịch vụ</div>
-      <div class="nav-item" data-page="logs" onclick="nav(this)"><i class="fas fa-clock-rotate-left"></i> Nhật ký hệ thống</div>
+      <div class="nav-sec">2 · Chăm sóc mộ từ xa</div>
+      <div class="nav-item" data-page="orders" onclick="nav(this)"><i class="fas fa-concierge-bell"></i> Đơn chăm sóc &amp; gói</div>
+      <div class="nav-item" data-page="partners" onclick="nav(this)"><i class="fas fa-route"></i> Đối tác &amp; điều phối</div>
 
-      <div class="nav-sec">Hệ thống</div>
-      <div class="nav-item" onclick="window.open('/swagger','_blank')"><i class="fas fa-code"></i> Swagger API Docs</div>
+      <div class="nav-sec">Trang cho người dùng</div>
+      <div class="nav-item" onclick="window.open('/gia-dinh.html','_blank')"><i class="fas fa-people-roof"></i> Trang gia đình <i class="fas fa-up-right-from-square" style="margin-left:auto;font-size:11px!important"></i></div>
+      <div class="nav-item" onclick="window.open('/doi-tac.html','_blank')"><i class="fas fa-person-digging"></i> Trang đối tác <i class="fas fa-up-right-from-square" style="margin-left:auto;font-size:11px!important"></i></div>
     </nav>
     <div class="sb-footer">
       <div class="u-av">AD</div>
-      <div class="u-info"><p>Ban Quản Lý</p><span>admin@smartcem.vn</span></div>
+      <div class="u-info"><p>Ban Quản Lý</p><span>Nghĩa trang Đồng Mả – Ba Vì</span></div>
     </div>
   </aside>
 
@@ -207,7 +207,7 @@ tr:hover td{background:rgba(201,168,76,.03)}
   <main class="main">
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
-      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-title" id="page-title">Trang chủ – Tổng quan</div>
       <div style="display:flex;gap:8px" id="topbar-actions"></div>
     </div>
     <div class="content">
@@ -217,7 +217,7 @@ tr:hover td{background:rgba(201,168,76,.03)}
         <!-- Stats Strip -->
         <div class="stats-grid" id="dash-stats"></div>
 
-        <!-- Smart Alerts: Anniversaries & Expiring Contracts -->
+        <!-- Ngày giỗ sắp tới -->
         <div class="alert-strip">
           <div class="alert-card anniv">
             <div class="alert-head">
@@ -225,13 +225,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
               <button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="filterAnniversaryGraves()">Xem tất cả</button>
             </div>
             <div id="dash-anniv-list"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
-          </div>
-          <div class="alert-card contract">
-            <div class="alert-head">
-              <h4><i class="fas fa-clock" style="color:var(--rose)"></i> Hợp đồng sắp hết hạn (60 ngày)</h4>
-              <button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="filterExpiringGraves()">Xem tất cả</button>
-            </div>
-            <div id="dash-contract-list"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
           </div>
         </div>
 
@@ -257,13 +250,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
           <select class="filter-select" id="filter-zone" onchange="loadGraves()">
             <option value="">Tất cả phân khu</option>
           </select>
-          <select class="filter-select" id="filter-contract" onchange="loadGraves()">
-            <option value="">Mọi loại hợp đồng</option>
-            <option value="Vĩnh viễn">Vĩnh viễn</option>
-            <option value="Thuê 20 năm">Thuê 20 năm</option>
-            <option value="Thuê 30 năm">Thuê 30 năm</option>
-            <option value="Thuê 50 năm">Thuê 50 năm</option>
-          </select>
           <select class="filter-select" id="filter-status" onchange="loadGraves()">
             <option value="">Mọi trạng thái</option>
             <option value="Active">Đang quản lý</option>
@@ -273,7 +259,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
           <select class="filter-select" id="filter-smart" onchange="loadGraves()">
             <option value="">Lọc thông minh</option>
             <option value="anniv">🔔 Ngày giỗ sắp tới</option>
-            <option value="expire">⚠️ Hợp đồng sắp hết hạn</option>
           </select>
         </div>
 
@@ -288,7 +273,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
                   <th>Khu / Lô</th>
                   <th class="hide-mobile">Ngày giỗ (ÂL / DL)</th>
                   <th class="hide-mobile">Thân nhân & SĐT</th>
-                  <th>Hợp đồng</th>
                   <th>Thao tác</th>
                 </tr>
               </thead>
@@ -316,12 +300,11 @@ tr:hover td{background:rgba(201,168,76,.03)}
           <div class="search-bar">
             <div class="search-input-wrap">
               <i class="fas fa-search"></i>
-              <input id="svc-search" placeholder="Tìm theo mã đơn, tên mộ, nhân viên phụ trách…" oninput="debouncedSvcSearch()">
+              <input id="svc-search" placeholder="Tìm theo mã đơn, tên người mất, đối tác…" oninput="debouncedSvcSearch()">
             </div>
             <select class="filter-select" id="svc-filter-status" onchange="loadOrders()">
               <option value="">Tất cả trạng thái</option>
-              <option value="Pending">Chờ xác nhận</option>
-              <option value="Confirmed">Đã xác nhận</option>
+              <option value="Confirmed">Chờ đối tác nhận</option>
               <option value="InProgress">Đang thực hiện</option>
               <option value="Done">Hoàn thành</option>
               <option value="Cancelled">Đã hủy</option>
@@ -338,8 +321,8 @@ tr:hover td{background:rgba(201,168,76,.03)}
                     <th>Dịch vụ</th>
                     <th>Thành tiền</th>
                     <th class="hide-mobile">Lịch hẹn</th>
-                    <th class="hide-mobile">Phụ trách</th>
-                    <th>Trạng thái</th>
+                    <th class="hide-mobile">Đối tác</th>
+                    <th>Tiến độ</th>
                     <th>Thanh toán</th>
                     <th>Thao tác</th>
                   </tr>
@@ -406,39 +389,22 @@ tr:hover td{background:rgba(201,168,76,.03)}
         </div>
       </div>
 
-      <!-- ── PAGE: AUDIT LOGS ── -->
-      <div class="page" id="page-logs">
-        <div class="search-bar">
-          <div class="search-input-wrap">
-            <i class="fas fa-search"></i>
-            <input id="log-search" placeholder="Tìm theo nội dung, người thực hiện…" oninput="loadLogs()">
-          </div>
-          <select class="filter-select" id="log-filter-action" onchange="loadLogs()">
-            <option value="">Mọi hành động</option>
-            <option value="add">Thêm hồ sơ</option>
-            <option value="edit">Chỉnh sửa</option>
-            <option value="delete">Xóa hồ sơ</option>
-            <option value="service">Dịch vụ</option>
-            <option value="payment">Thanh toán</option>
-            <option value="import">Import dữ liệu</option>
-            <option value="qr">Mã QR</option>
-          </select>
+      <!-- ── PAGE: PARTNERS & DISPATCH ── -->
+      <div class="page" id="page-partners">
+        <div class="stats-grid" id="ptn-stats" style="margin-bottom:16px"></div>
+        <div class="card">
+          <div class="card-title">Đơn cần xử lý
+            <button class="btn ghost" onclick="rebalance()"><i class="fas fa-route"></i> Giao lại các đơn chưa có người nhận</button></div>
+          <div style="color:var(--muted);margin:-6px 0 12px">Đơn chưa có đối tác nhận, hoặc bị từ chối nghiệm thu (sai vị trí, ảnh không hợp lệ, chưa sạch…).</div>
+          <div class="table-wrap"><table><thead><tr><th>Mã việc</th><th>Mộ phần</th><th>Dịch vụ</th><th>Đối tác</th><th>Tình trạng</th><th>Lý do</th><th>Xử lý</th></tr></thead><tbody id="ptn-issues"></tbody></table></div>
         </div>
-        <div class="card" style="padding:0">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Thời gian</th>
-                  <th>Hành động</th>
-                  <th>Nội dung chi tiết</th>
-                  <th>Người thực hiện</th>
-                </tr>
-              </thead>
-              <tbody id="logs-tbody"></tbody>
-            </table>
-          </div>
-          <div id="logs-pagination" style="padding:12px 16px;border-top:1px solid rgba(26,26,46,.06)"></div>
+        <div class="card">
+          <div class="card-title">Việc đang thực hiện</div>
+          <div class="table-wrap"><table><thead><tr><th>Mã việc</th><th>Mộ phần</th><th>Dịch vụ</th><th>Đối tác</th><th>Dự kiến tới</th><th>Tiến độ</th></tr></thead><tbody id="ptn-active"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Đối tác địa phương</div>
+          <div class="table-wrap"><table><thead><tr><th>Đối tác</th><th>Khu vực</th><th>Đánh giá</th><th>Đã hoàn thành</th><th>Đang làm</th><th>Trạng thái</th></tr></thead><tbody id="ptn-list"></tbody></table></div>
         </div>
       </div>
 
@@ -476,22 +442,11 @@ tr:hover td{background:rgba(201,168,76,.03)}
       <div class="fc full" style="border-top:1px solid rgba(26,26,46,.08);padding-top:10px;margin-top:4px">
         <span style="font-weight:700;font-size:12px;color:var(--jade)">Thông tin thân nhân / người đại diện liên hệ:</span>
       </div>
-      <div class="fc"><label>Họ tên thân nhân</label><input id="g-contact" placeholder="Nguyễn Thế B"></div>
+      <div class="fc"><label>Họ tên thân nhân</label><input id="g-contact" placeholder="Nguyễn Văn B"></div>
       <div class="fc"><label>Mối quan hệ</label><input id="g-relation" placeholder="Con trưởng, Vợ, Chồng, Cháu..."></div>
-      <div class="fc"><label>Số điện thoại</label><input id="g-phone" placeholder="0912 345 678"></div>
+      <div class="fc"><label>Số điện thoại</label><input id="g-phone" placeholder="0877xxxxxx"></div>
       <div class="fc"><label>Địa chỉ thân nhân</label><input id="g-address" placeholder="Địa chỉ liên hệ"></div>
 
-      <div class="fc full" style="border-top:1px solid rgba(26,26,46,.08);padding-top:10px;margin-top:4px">
-        <span style="font-weight:700;font-size:12px;color:var(--gold)">Hợp đồng & thời hạn sử dụng mộ:</span>
-      </div>
-      <div class="fc"><label>Loại hợp đồng</label>
-        <select id="g-contract-type">
-          <option value="Vĩnh viễn">Vĩnh viễn</option>
-          <option value="Thuê 20 năm">Thuê 20 năm</option>
-          <option value="Thuê 30 năm">Thuê 30 năm</option>
-          <option value="Thuê 50 năm">Thuê 50 năm</option>
-        </select>
-      </div>
       <div class="fc"><label>Trạng thái hồ sơ</label>
         <select id="g-status">
           <option value="Active">Đang quản lý</option>
@@ -499,9 +454,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
           <option value="Archived">Lưu trữ</option>
         </select>
       </div>
-      <div class="fc"><label>Ngày bắt đầu hợp đồng</label><input id="g-contract-start" type="date"></div>
-      <div class="fc"><label>Ngày hết hạn hợp đồng</label><input id="g-contract-end" type="date"></div>
-
       <div class="fc full"><label>Ghi chú đặc biệt</label><textarea id="g-note" placeholder="Dặn dò gia đình, phong tục..."></textarea></div>
     </div>
     <div class="modal-foot">
@@ -567,20 +519,17 @@ tr:hover td{background:rgba(201,168,76,.03)}
       <h3>Tạo đơn dịch vụ mới</h3>
       <button class="modal-x" onclick="closeModal('modal-create-order')"><i class="fas fa-times"></i></button>
     </div>
+    <div style="color:var(--muted);margin-bottom:12px">Dùng khi gia đình đặt trực tiếp tại văn phòng hoặc qua điện thoại. Hệ thống tự giao việc cho đối tác gần mộ nhất.</div>
     <div class="form-grid">
-      <div class="fc full"><label>Gói dịch vụ đã chọn</label><input id="ord-pkg-name" readonly style="background:#eee;font-weight:700;color:var(--jade)"></div>
-      <div class="fc full"><label>Mộ phần thực hiện *</label>
-        <select id="ord-grave-select" style="padding:10px"></select>
-      </div>
-      <div class="fc"><label>Giá dịch vụ (VNĐ)</label><input id="ord-price" type="number"></div>
-      <div class="fc"><label>Giảm giá (VNĐ)</label><input id="ord-discount" type="number" value="0"></div>
-      <div class="fc"><label>Nhân viên thực hiện</label><input id="ord-assigned" placeholder="NV. Bảo, NV. Lan..."></div>
-      <div class="fc"><label>Lịch hẹn thực hiện</label><input id="ord-scheduled" type="datetime-local"></div>
-      <div class="fc full"><label>Ghi chú của gia quyến</label><textarea id="ord-notes" placeholder="Yêu cầu riêng về hoa, giờ cúng..."></textarea></div>
+      <div class="fc full"><label>Mộ phần *</label><select id="ord-grave-select"></select></div>
+      <div class="fc full"><label>Gói dịch vụ *</label><select id="ord-pkg-select"></select></div>
+      <div class="fc"><label>Ngày thực hiện</label><input id="ord-scheduled" type="date"></div>
+      <div class="fc"><label>Gia đình đã thanh toán bằng</label><select id="ord-pay"><option value="cash">Tiền mặt</option><option value="bank">Chuyển khoản</option><option value="qr">Quét mã QR</option></select></div>
+      <div class="fc full"><label>Yêu cầu của gia đình</label><textarea id="ord-notes" placeholder="Ví dụ: thích hoa cúc vàng, cúng trước 9 giờ sáng…"></textarea></div>
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeModal('modal-create-order')">Hủy</button>
-      <button class="btn primary" onclick="submitNewOrder()"><i class="fas fa-check"></i> Tạo đơn ngay</button>
+      <button class="btn primary" onclick="submitNewOrder()"><i class="fas fa-check"></i> Tạo đơn &amp; giao việc</button>
     </div>
   </div>
 </div>
@@ -607,7 +556,6 @@ tr:hover td{background:rgba(201,168,76,.03)}
 <script>
 const API = '';
 let currentPage = 1, totalPages = 1;
-let currentLogPage = 1, totalLogPages = 1;
 let editingGraveId = null;
 let editingPkgId = null;
 let currentCreatingPkgId = null;
@@ -621,39 +569,41 @@ let allGravesForSelect = [];
    NAVIGATION
 ═══════════════════════════════════════════ */
 function nav(el) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  el.classList.add('active');
-  const page = el.dataset.page;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page-' + page);
-  if (target) target.classList.add('active');
+  const page = typeof el === 'string' ? el : el.dataset.page;
+  const menuPage = page === 'import' ? 'graves' : page;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === menuPage));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+  closeSidebar();
+  history.replaceState(null, '', page === 'dashboard' ? location.pathname : '#' + page);
 
   const titles = {
-    dashboard: 'Dashboard Tổng Quan',
-    graves: 'Quản Lý Hồ Sơ Mộ Phần',
-    orders: 'Đơn Dịch Vụ & Chăm Sóc Mộ',
-    import: 'Nhập Dữ Liệu Hàng Loạt',
-    logs: 'Nhật Ký Hoạt Động Hệ Thống'
+    dashboard: 'Trang chủ – Tổng quan',
+    graves: 'Hồ sơ mộ phần',
+    orders: 'Đơn chăm sóc mộ & gói dịch vụ',
+    partners: 'Đối tác & điều phối',
+    import: 'Nhập hồ sơ mộ phần từ Excel'
   };
-  document.getElementById('page-title').textContent = titles[page] || 'SmartCem';
+  document.getElementById('page-title').textContent = titles[page] || 'MemoryLand AI';
 
-  // Topbar actions
+  // Nút trên thanh tiêu đề
   const act = document.getElementById('topbar-actions');
   act.innerHTML = '';
   if (page === 'graves') {
     act.innerHTML = `
+      <button class="btn ghost" onclick="nav('import')"><i class="fas fa-upload"></i> Nhập từ Excel</button>
       <button class="btn ghost" onclick="exportGravesExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
       <button class="btn primary" onclick="openAddModal()"><i class="fas fa-plus"></i> Thêm mộ phần</button>`;
   } else if (page === 'orders') {
-    act.innerHTML = `
-      <button class="btn ghost" onclick="exportOrdersExcel()"><i class="fas fa-file-excel"></i> Xuất Excel</button>`;
+    act.innerHTML = `<button class="btn primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Tạo đơn</button>`;
+  } else if (page === 'import') {
+    act.innerHTML = `<button class="btn ghost" onclick="nav('graves')"><i class="fas fa-arrow-left"></i> Về hồ sơ mộ phần</button>`;
   }
 
   if (page === 'dashboard') loadDashboard();
   if (page === 'graves') loadGraves();
   if (page === 'orders') { loadOrders(); loadSvcStats(); }
+  if (page === 'partners') loadPartners();
   if (page === 'import') loadJobs();
-  if (page === 'logs') loadLogs();
 }
 
 function toggleSidebar() {
@@ -674,7 +624,7 @@ async function loadDashboard() {
 
   // Stats
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card gold"><div class="stat-icon"><i class="fas fa-headstone"></i></div>
+    <div class="stat-card gold"><div class="stat-icon"><i class="fas fa-address-book"></i></div>
       <div class="stat-label">Tổng hồ sơ mộ</div>
       <div class="stat-value">${(data.totalGraves||0).toLocaleString('vi')}</div>
       <div class="stat-sub">Đã số hóa trong hệ thống</div></div>
@@ -700,34 +650,13 @@ async function loadDashboard() {
       <div class="alert-item">
         <div>
           <div style="font-weight:700;font-size:13px">${esc(a.fullName)} <span style="font-size:11px;color:var(--jade);font-weight:600">(${a.zone} · ${esc(a.lotCode)})</span></div>
-          <div style="font-size:11px;color:var(--muted)">Giỗ ÂL: <b>${esc(a.lunarDeathDate||'—')}</b> · DL: ${fmtDate(a.diedDate)}</div>
+          <div style="font-size:11px;color:var(--muted)">Giỗ <b>${esc(a.lunarDeathDate||'—')}</b> · nhằm ngày ${fmtDate(new Date(Date.now() + a.daysUntil * 864e5))}</div>
           <div style="font-size:11px;color:var(--muted)">Thân nhân: ${esc(a.contactName||'—')} (${esc(a.contactPhone||'—')})</div>
         </div>
         <div style="text-align:right">
           <span class="badge tag-anniv">${a.daysUntil === 0 ? 'HÔM NAY' : 'Còn ' + a.daysUntil + ' ngày'}</span>
           <div style="margin-top:4px">
-            <button class="btn jade" style="padding:3px 7px;font-size:10px" onclick="quickOrderForGrave(${a.graveId},'${esc(a.fullName)}')"><i class="fas fa-hands-praying"></i> Đặt cúng/hoa</button>
-          </div>
-        </div>
-      </div>`).join('');
-  }
-
-  // Expiring contracts alert list
-  const expireList = data.expiringContracts || [];
-  if (expireList.length === 0) {
-    document.getElementById('dash-contract-list').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px">Không có hợp đồng nào sắp hết hạn</div>';
-  } else {
-    document.getElementById('dash-contract-list').innerHTML = expireList.map(c => `
-      <div class="alert-item">
-        <div>
-          <div style="font-weight:700;font-size:13px">${esc(c.fullName)} <span style="font-size:11px;color:var(--rose);font-weight:600">(${c.zone} · ${esc(c.lotCode)})</span></div>
-          <div style="font-size:11px;color:var(--muted)">Loại HĐ: <b>${esc(c.contractType)}</b> · Hết hạn: ${fmtDate(c.contractEndDate)}</div>
-          <div style="font-size:11px;color:var(--muted)">Liên hệ: ${esc(c.contactName||'—')} (${esc(c.contactPhone||'—')})</div>
-        </div>
-        <div style="text-align:right">
-          <span class="badge tag-expire">${c.isExpired ? 'ĐÃ QUÁ HẠN' : 'Còn ' + c.daysRemaining + ' ngày'}</span>
-          <div style="margin-top:4px">
-            <button class="btn ghost" style="padding:3px 7px;font-size:10px" onclick="openDetail(${c.graveId})"><i class="fas fa-phone"></i> Chi tiết</button>
+            <button class="btn jade" style="padding:3px 7px;font-size:10px" onclick="quickOrderForGrave(${a.graveId})"><i class="fas fa-hands-praying"></i> Đặt cúng/hoa</button>
           </div>
         </div>
       </div>`).join('');
@@ -791,27 +720,19 @@ function filterAnniversaryGraves() {
   loadGraves(1);
 }
 
-function filterExpiringGraves() {
-  document.querySelector('.nav-item[data-page="graves"]').click();
-  document.getElementById('filter-smart').value = 'expire';
-  loadGraves(1);
-}
-
 async function loadGraves(page = 1) {
   currentPage = page;
   const q = document.getElementById('search-q').value;
   const zone = document.getElementById('filter-zone').value;
-  const contract = document.getElementById('filter-contract').value;
   const status = document.getElementById('filter-status').value;
   const smart = document.getElementById('filter-smart').value;
 
   const annivSoon = smart === 'anniv';
-  const expiringSoon = smart === 'expire';
 
   const tbody = document.getElementById('graves-tbody');
-  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
 
-  let url = `/api/graves?q=${encodeURIComponent(q)}&zone=${zone}&status=${status}&contractType=${encodeURIComponent(contract)}&anniversarySoon=${annivSoon}&expiringSoon=${expiringSoon}&page=${page}&pageSize=12`;
+  let url = `/api/graves?q=${encodeURIComponent(q)}&zone=${zone}&status=${status}&anniversarySoon=${annivSoon}&page=${page}&pageSize=12`;
   const data = await apiFetch(url);
   if (!data) return;
 
@@ -819,7 +740,7 @@ async function loadGraves(page = 1) {
   allGravesForSelect = data.items || [];
 
   if (!data.items.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)"><i class="fas fa-search" style="font-size:24px;display:block;margin-bottom:10px;opacity:.3"></i>Không tìm thấy hồ sơ mộ phần nào</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)"><i class="fas fa-search" style="font-size:24px;display:block;margin-bottom:10px;opacity:.3"></i>Không tìm thấy hồ sơ mộ phần nào</td></tr>`;
     document.getElementById('graves-pagination').innerHTML = '';
     return;
   }
@@ -831,7 +752,6 @@ async function loadGraves(page = 1) {
         <div style="font-weight:700;font-size:13px">${esc(g.fullName)}</div>
         ${g.alias ? `<div style="font-size:11px;color:var(--muted)">${esc(g.alias)}</div>` : ''}
         ${g.isAnniversarySoon ? `<span class="badge tag-anniv" style="margin-top:2px"><i class="fas fa-bell"></i> Sắp đến ngày giỗ</span>` : ''}
-        ${g.isContractExpiringSoon ? `<span class="badge tag-expire" style="margin-top:2px"><i class="fas fa-triangle-exclamation"></i> Sắp hết hạn HĐ</span>` : ''}
       </td>
       <td class="hide-mobile" style="font-family:'DM Mono',monospace;font-size:12px">${g.bornYear||'?'} – ${g.diedYear||'?'}</td>
       <td>
@@ -845,10 +765,6 @@ async function loadGraves(page = 1) {
       <td class="hide-mobile">
         <div style="font-size:12px">${esc(g.contactName||'—')}${g.contactRelation ? ` <span style="color:var(--muted)">(${esc(g.contactRelation)})</span>` : ''}</div>
         <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${esc(g.contactPhone||'')}</div>
-      </td>
-      <td>
-        <span style="font-size:11.5px;font-weight:600">${esc(g.contractType||'Vĩnh viễn')}</span>
-        ${g.contractEndDate ? `<div style="font-size:10px;color:var(--muted)">Hết hạn: ${fmtDate(g.contractEndDate)}</div>` : ''}
       </td>
       <td>
         <div style="display:flex;gap:4px">
@@ -897,9 +813,6 @@ function openAddModal() {
   document.getElementById('g-relation').value = '';
   document.getElementById('g-phone').value = '';
   document.getElementById('g-address').value = '';
-  document.getElementById('g-contract-type').value = 'Vĩnh viễn';
-  document.getElementById('g-contract-start').value = '';
-  document.getElementById('g-contract-end').value = '';
   document.getElementById('g-status').value = 'Active';
   document.getElementById('g-note').value = '';
   openModal('modal-grave');
@@ -926,9 +839,6 @@ async function openEditModal(id) {
   document.getElementById('g-relation').value = g.contactRelation || '';
   document.getElementById('g-phone').value = g.contactPhone || '';
   document.getElementById('g-address').value = g.contactAddress || '';
-  document.getElementById('g-contract-type').value = g.contractType || 'Vĩnh viễn';
-  document.getElementById('g-contract-start').value = g.contractStartDate ? g.contractStartDate.substring(0, 10) : '';
-  document.getElementById('g-contract-end').value = g.contractEndDate ? g.contractEndDate.substring(0, 10) : '';
   document.getElementById('g-status').value = g.status || 'Active';
   document.getElementById('g-note').value = g.notes || '';
 
@@ -961,9 +871,6 @@ async function saveGrave() {
     contactRelation: document.getElementById('g-relation').value.trim() || null,
     contactPhone: document.getElementById('g-phone').value.trim() || null,
     contactAddress: document.getElementById('g-address').value.trim() || null,
-    contractType: document.getElementById('g-contract-type').value,
-    contractStartDate: document.getElementById('g-contract-start').value || null,
-    contractEndDate: document.getElementById('g-contract-end').value || null,
     notes: document.getElementById('g-note').value.trim() || null,
     status: document.getElementById('g-status').value
   };
@@ -1017,11 +924,6 @@ async function openDetail(id) {
         <div style="font-size:11px;color:var(--muted)">Dương lịch: ${fmtDate(g.diedDate)}</div>
       </div>
       <div style="padding:10px;background:#f9f8f4;border-radius:8px">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Hợp đồng quản lý</div>
-        <div style="font-weight:600;margin-top:2px">${esc(g.contractType)}</div>
-        <div style="font-size:11px;color:var(--muted)">Hết hạn: ${fmtDate(g.contractEndDate)}</div>
-      </div>
-      <div style="padding:10px;background:#f9f8f4;border-radius:8px">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Thân nhân liên hệ</div>
         <div style="font-weight:600;margin-top:2px">${esc(g.contactName||'—')} (${esc(g.contactRelation||'Đại diện')})</div>
         <div style="font-size:11px;color:var(--muted)">SĐT: ${esc(g.contactPhone||'—')}</div>
@@ -1037,7 +939,7 @@ async function openDetail(id) {
   document.getElementById('detail-footer').innerHTML = `
     <button class="btn ghost" onclick="closeModal('modal-detail')">Đóng</button>
     <button class="btn sky" onclick="window.open('/lotmap.html?lot=${encodeURIComponent(g.lotCode)}','_blank')"><i class="fas fa-map-location-dot"></i> Xem trên bản đồ</button>
-    <button class="btn jade" onclick="quickOrderForGrave(${g.id},'${esc(g.fullName)}')"><i class="fas fa-concierge-bell"></i> Đặt dịch vụ</button>
+    <button class="btn jade" onclick="quickOrderForGrave(${g.id})"><i class="fas fa-concierge-bell"></i> Đặt dịch vụ</button>
     <button class="btn primary" onclick="closeModal('modal-detail');openEditModal(${g.id})"><i class="fas fa-pen"></i> Chỉnh sửa</button>`;
 
   openModal('modal-detail');
@@ -1111,44 +1013,52 @@ async function loadOrders(page = 1) {
     return;
   }
 
+  // Tiến độ thực tế lấy từ công việc của đối tác (nếu đơn đi qua luồng điều phối)
+  const jobs = await apiFetch('/api/ml/jobs') || [];
+  const jobOf = {}; jobs.forEach(j => { if (j.order) jobOf[j.order.id] = j; });
+
   const stMap = {
     Pending: { lbl:'Chờ xác nhận', cls:'pending' },
-    Confirmed: { lbl:'Đã xác nhận', cls:'active' },
+    Confirmed: { lbl:'Chờ thực hiện', cls:'pending' },
     InProgress: { lbl:'Đang làm', cls:'active' },
     Done: { lbl:'Hoàn thành', cls:'active' },
     Cancelled: { lbl:'Đã hủy', cls:'archived' }
   };
 
-  tbody.innerHTML = data.items.map(o => `
+  tbody.innerHTML = data.items.map(o => {
+    const j = jobOf[o.id];
+    const prog = o.status === 'Cancelled' ? `<span class="badge archived">Đã hủy${j && j.refunded ? ' · đã hoàn tiền' : ''}</span>`
+      : j ? `<span class="badge ${JOB_ST[j.status][1]}">${JOB_ST[j.status][0]}</span>${j.verifyScore != null ? `<div style="font-size:13px;color:var(--muted);margin-top:3px">Nghiệm thu ${j.verifyScore}/100</div>` : ''}`
+      : `<span class="badge ${stMap[o.status]?.cls||'pending'}">${stMap[o.status]?.lbl||o.status}</span>`;
+    // Đơn cũ nhập tay (không có việc giao đối tác) thì ban quản lý tự cập nhật trạng thái
+    const manual = !j && o.status !== 'Done' && o.status !== 'Cancelled';
+    const canCancel = o.status !== 'Done' && o.status !== 'Cancelled' && (!j || ['Dispatched', 'Unassigned'].includes(j.status));
+    return `
     <tr>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--sky);font-weight:700">${esc(o.orderCode)}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--sky);font-weight:700">${esc(o.orderCode)}</td>
       <td>
-        <div style="font-weight:700;font-size:13px">${esc(o.graveName)}</div>
-        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${esc(o.graveLot)}</div>
+        <div style="font-weight:700">${esc(o.graveName)}</div>
+        <div style="color:var(--muted);font-family:'DM Mono',monospace">${esc(o.graveLot)}</div>
       </td>
+      <td><div style="font-weight:600">${esc(o.serviceName)}</div></td>
+      <td><div style="font-weight:700">${fmtVnd(o.finalPrice)}đ</div></td>
+      <td class="hide-mobile">${o.scheduledAt ? fmtDate(o.scheduledAt) : '—'}</td>
+      <td class="hide-mobile">${esc(j?.partner?.name || o.assignedTo || '—')}</td>
+      <td>${prog}</td>
       <td>
-        <div style="font-weight:600;font-size:12.5px">${esc(o.serviceName)}</div>
-        ${o.packageName ? `<div style="font-size:10.5px;color:var(--muted)">Gói: ${esc(o.packageName)}</div>` : ''}
-      </td>
-      <td>
-        <div style="font-weight:700;font-size:13px">${fmtVnd(o.finalPrice)}đ</div>
-      </td>
-      <td class="hide-mobile" style="font-size:11px">${o.scheduledAt ? fmtDateTime(o.scheduledAt) : '—'}</td>
-      <td class="hide-mobile" style="font-size:12px">${esc(o.assignedTo||'—')}</td>
-      <td><span class="badge ${stMap[o.status]?.cls||'pending'}">${stMap[o.status]?.lbl||o.status}</span></td>
-      <td>
-        ${o.isPaid ? `<span style="color:var(--jade);font-weight:700;font-size:11px"><i class="fas fa-check-circle"></i> Đã TT (${(o.paymentMethod||'').toUpperCase()})</span>` : `<button class="btn jade" style="padding:3px 7px;font-size:10.5px" onclick="quickPay(${o.id})"><i class="fas fa-money-bill"></i> Thu tiền</button>`}
+        ${o.isPaid ? `<span style="color:var(--jade);font-weight:700"><i class="fas fa-check-circle"></i> Đã thu</span>` : o.status === 'Cancelled' ? '—' : `<button class="btn jade sm" onclick="quickPay(${o.id})"><i class="fas fa-money-bill"></i> Thu tiền</button>`}
       </td>
       <td>
         <div style="display:flex;gap:4px">
-          <button class="btn ghost" style="padding:4px 7px;font-size:11px" onclick="printReceipt(${o.id})" title="In phiếu thu"><i class="fas fa-print"></i></button>
-          ${o.status === 'Pending' ? `<button class="btn sky" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'Confirmed')" title="Xác nhận"><i class="fas fa-check"></i></button>` : ''}
-          ${o.status === 'Confirmed' ? `<button class="btn jade" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'InProgress')" title="Bắt đầu"><i class="fas fa-play"></i></button>` : ''}
-          ${o.status === 'InProgress' ? `<button class="btn jade" style="padding:4px 7px;font-size:11px" onclick="updateOrderStatus(${o.id},'Done')" title="Hoàn thành"><i class="fas fa-flag-checkered"></i></button>` : ''}
-          ${o.status !== 'Done' && o.status !== 'Cancelled' ? `<button class="btn danger" style="padding:4px 7px;font-size:11px" onclick="cancelOrder(${o.id})" title="Hủy đơn"><i class="fas fa-ban"></i></button>` : ''}
+          <button class="btn ghost sm" onclick="printReceipt(${o.id})" title="In phiếu thu"><i class="fas fa-print"></i></button>
+          ${manual && o.status === 'Pending' ? `<button class="btn sky sm" onclick="updateOrderStatus(${o.id},'Confirmed')" title="Xác nhận"><i class="fas fa-check"></i></button>` : ''}
+          ${manual && o.status === 'Confirmed' ? `<button class="btn jade sm" onclick="updateOrderStatus(${o.id},'InProgress')" title="Bắt đầu"><i class="fas fa-play"></i></button>` : ''}
+          ${manual && o.status === 'InProgress' ? `<button class="btn jade sm" onclick="updateOrderStatus(${o.id},'Done')" title="Hoàn thành"><i class="fas fa-flag-checkered"></i></button>` : ''}
+          ${canCancel ? `<button class="btn danger sm" onclick="cancelOrder(${o.id})" title="Hủy đơn"><i class="fas fa-ban"></i></button>` : ''}
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   renderOrdersPagination();
 }
@@ -1186,6 +1096,67 @@ async function cancelOrder(id) {
 }
 
 /* ═══════════════════════════════════════════
+   ĐỐI TÁC & ĐIỀU PHỐI
+═══════════════════════════════════════════ */
+const JOB_ST = {
+  Dispatched: ['Chờ đối tác nhận', 'pending'], Accepted: ['Đối tác đã nhận', 'active'], CheckedIn: ['Đã tới mộ', 'active'],
+  BeforeDone: ['Đang dọn dẹp', 'active'], Verified: ['Hoàn thành', 'active'], Rejected: ['Nghiệm thu không đạt', 'expired'], Unassigned: ['Chưa có người nhận', 'expired']
+};
+async function loadPartners() {
+  const [pl, jobs] = await Promise.all([apiFetch('/api/ml/partners'), apiFetch('/api/ml/jobs')]);
+  if (!pl || !jobs) return;
+  const active = jobs.filter(j => ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone'].includes(j.status));
+  const issues = jobs.filter(j => j.status === 'Unassigned' || (j.status === 'Rejected' && !j.refunded));
+  const done = jobs.filter(j => j.status === 'Verified').length;
+  document.getElementById('ptn-stats').innerHTML = [
+    ['Đối tác sẵn sàng', `${pl.filter(p => p.available).length}/${pl.length}`, 'Đang nhận việc'],
+    ['Việc đang làm', active.length, 'Đối tác đang thực hiện'],
+    ['Cần xử lý', issues.length, 'Chưa giao được / không đạt'],
+    ['Đã nghiệm thu đạt', done, 'Báo cáo đã gửi gia đình']
+  ].map(x => `<div class="stat-card"><div class="stat-label">${x[0]}</div><div class="stat-value">${x[1]}</div><div class="stat-sub">${x[2]}</div></div>`).join('');
+
+  const reason = j => j.status === 'Unassigned' ? 'Không có đối tác rảnh gần mộ'
+    : (j.verify?.layers || []).filter(l => !l.pass).map(l => esc(l.detail)).join('<br>') || 'Không đạt nghiệm thu';
+  document.getElementById('ptn-issues').innerHTML = issues.length ? issues.map(j => `<tr>
+      <td style="font-family:'DM Mono',monospace">${esc(j.jobCode)}</td>
+      <td><b>${esc(j.grave?.fullName)}</b><div style="color:var(--muted)">Lô ${esc(j.grave?.lotCode)}</div></td>
+      <td>${esc(j.order?.serviceName || '—')}</td><td>${esc(j.partner?.name || '—')}</td>
+      <td><span class="badge ${JOB_ST[j.status][1]}">${JOB_ST[j.status][0]}</span></td>
+      <td style="max-width:320px;color:var(--muted)">${reason(j)}</td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn jade sm" onclick="redispatch(${j.id})"><i class="fas fa-rotate"></i> Giao người khác</button>
+        ${j.status === 'Rejected' ? `<button class="btn danger sm" onclick="refundJob(${j.id})"><i class="fas fa-money-bill-transfer"></i> Hoàn tiền</button>` : ''}</div></td></tr>`).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Không có đơn nào cần xử lý</td></tr>';
+
+  const stepNo = { Dispatched: 1, Accepted: 2, CheckedIn: 3, BeforeDone: 4 };
+  document.getElementById('ptn-active').innerHTML = active.length ? active.map(j => `<tr>
+      <td style="font-family:'DM Mono',monospace">${esc(j.jobCode)}</td>
+      <td><b>${esc(j.grave?.fullName)}</b><div style="color:var(--muted)">Lô ${esc(j.grave?.lotCode)}</div></td>
+      <td>${esc(j.order?.serviceName || '—')}</td><td>${esc(j.partner?.name || '—')}</td>
+      <td>${j.etaMinutes ? Math.round(j.etaMinutes) + ' phút' : '—'}</td>
+      <td><span class="badge ${JOB_ST[j.status][1]}">Bước ${stepNo[j.status]}/5 · ${JOB_ST[j.status][0]}</span></td></tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Hiện không có việc nào đang thực hiện</td></tr>';
+
+  document.getElementById('ptn-list').innerHTML = pl.map(p => `<tr>
+      <td><b>${esc(p.name)}</b><div style="color:var(--muted)">${esc(p.phone)}</div></td><td>${esc(p.area)}</td>
+      <td>★ ${p.rating}</td><td>${p.completedJobs}</td><td>${p.activeJobs}</td>
+      <td><button class="btn ${p.available ? 'jade' : 'ghost'} sm" onclick="togglePartner(${p.id})">${p.available ? 'Đang nhận việc' : 'Tạm nghỉ'}</button></td></tr>`).join('');
+}
+async function togglePartner(id) { if (await apiFetch(`/api/ml/partners/${id}/toggle`, 'POST')) loadPartners(); }
+async function redispatch(id) {
+  const r = await apiFetch(`/api/ml/jobs/${id}/redispatch`, 'POST');
+  if (r) { toast(r.dispatch ? 'Đã giao cho ' + esc(r.dispatch.partner) : 'Vẫn chưa có đối tác rảnh', r.dispatch ? 'ok' : 'err'); loadPartners(); }
+}
+async function refundJob(id) {
+  if (!confirm('Hoàn tiền 100% cho gia đình và hủy đơn này?')) return;
+  const r = await apiFetch(`/api/ml/jobs/${id}/refund`, 'POST');
+  if (r) { toast('Đã hoàn ' + fmtVnd(r.refunded) + 'đ cho gia đình', 'ok'); loadPartners(); }
+}
+async function rebalance() {
+  const r = await apiFetch('/api/ml/dispatch/rebalance', 'POST');
+  if (r) { toast(`Đã giao ${r.assigned}/${r.reassigned} đơn đang chờ`, 'ok'); loadPartners(); }
+}
+
+/* ═══════════════════════════════════════════
    PRINT RECEIPT / INVOICE
 ═══════════════════════════════════════════ */
 async function printReceipt(orderId) {
@@ -1194,7 +1165,7 @@ async function printReceipt(orderId) {
 
   document.getElementById('receipt-content').innerHTML = `
     <div class="receipt-header">
-      <div style="font-size:14px;font-weight:700;color:var(--jade)">BAN QUẢN LÝ NGHĨA TRANG THÔNG MINH SMARTCEM</div>
+      <div style="font-size:14px;font-weight:700;color:var(--jade)">BAN QUẢN LÝ NGHĨA TRANG</div>
       <div style="font-size:11px;color:#555">Địa chỉ: Km 15 Đại Lộ Thăng Long, Hà Nội · Hotline: 1900 6868</div>
       <div class="receipt-title" style="margin-top:10px">PHIẾU THU DỊCH VỤ NGHĨA TRANG</div>
       <div style="font-family:'DM Mono',monospace;font-size:12px;color:#666">Số phiếu: <b>${esc(r.orderCode)}</b> · Ngày lập: ${fmtDateTime(r.orderedAt)}</div>
@@ -1262,7 +1233,7 @@ function doPrintReceipt() {
   w.document.write(`
     <html>
     <head>
-      <title>In Phiếu Thu SmartCem</title>
+      <title>In phiếu thu</title>
       <style>
         body{font-family:'Arial',sans-serif;padding:20px;color:#111}
         .receipt-header{text-align:center;border-bottom:2px dashed #888;padding-bottom:12px;margin-bottom:12px}
@@ -1305,7 +1276,7 @@ async function loadPackages() {
         </div>
         <div style="display:flex;gap:4px">
           <button class="btn ghost" style="padding:5px 8px;font-size:11px" onclick="openEditPackageModal(${p.id})"><i class="fas fa-pen"></i> Sửa</button>
-          <button class="btn jade" style="padding:5px 9px;font-size:11px" onclick="openOrderModalForPackage(${p.id},'${esc(p.name)}',${p.price})"><i class="fas fa-plus"></i> Đặt</button>
+          <button class="btn jade" style="padding:5px 9px;font-size:11px" onclick="openOrderModalForPackage(${p.id})"><i class="fas fa-plus"></i> Đặt</button>
         </div>
       </div>
     </div>`).join('');
@@ -1370,56 +1341,35 @@ async function savePackage() {
 /* ═══════════════════════════════════════════
    CREATE SERVICE ORDER MODAL
 ═══════════════════════════════════════════ */
-async function openOrderModalForPackage(pkgId, pkgName, price) {
-  currentCreatingPkgId = pkgId;
-  document.getElementById('ord-pkg-name').value = pkgName;
-  document.getElementById('ord-price').value = price;
-  document.getElementById('ord-discount').value = 0;
-  document.getElementById('ord-assigned').value = 'NV. Bảo';
-  document.getElementById('ord-scheduled').value = '';
+async function openOrderModal(graveId = null, pkgId = null) {
+  const [graves, pkgs] = await Promise.all([apiFetch('/api/graves?pageSize=500&status=Active'), apiFetch('/api/service-packages')]);
+  if (!graves || !pkgs) return;
+  document.getElementById('ord-grave-select').innerHTML = graves.items.map(g => `<option value="${g.id}">${esc(g.fullName)} – Lô ${esc(g.lotCode)}</option>`).join('');
+  document.getElementById('ord-pkg-select').innerHTML = pkgs.filter(p => p.isActive !== false).map(p => `<option value="${p.id}">${esc(p.name)} – ${fmtVnd(p.price)}đ/${esc(p.unit || 'lần')}</option>`).join('');
+  if (graveId) document.getElementById('ord-grave-select').value = graveId;
+  if (pkgId) document.getElementById('ord-pkg-select').value = pkgId;
+  const t = new Date(Date.now() + 864e5);
+  document.getElementById('ord-scheduled').value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
   document.getElementById('ord-notes').value = '';
-
-  // Load graves into select
-  const gSelect = document.getElementById('ord-grave-select');
-  const graves = await apiFetch('/api/graves?pageSize=100');
-  if (graves && graves.items) {
-    gSelect.innerHTML = graves.items.map(g => `<option value="${g.id}">#${g.id} - ${g.fullName} (${g.zone} · ${g.lotCode})</option>`).join('');
-  }
   openModal('modal-create-order');
 }
-
-async function quickOrderForGrave(graveId, graveName) {
-  closeModal('modal-detail');
-  document.querySelector('.nav-item[data-page="orders"]').click();
-  const pkgs = await apiFetch('/api/service-packages');
-  if (pkgs && pkgs.length > 0) {
-    const pkg = pkgs[0];
-    await openOrderModalForPackage(pkg.id, pkg.name, pkg.price);
-    document.getElementById('ord-grave-select').value = graveId;
-  }
-}
+function openOrderModalForPackage(pkgId) { openOrderModal(null, pkgId); }
+function quickOrderForGrave(graveId) { closeModal('modal-detail'); openOrderModal(graveId); }
 
 async function submitNewOrder() {
   const graveId = +document.getElementById('ord-grave-select').value;
-  if (!graveId) { toast('Vui lòng chọn hồ sơ mộ phần', 'err'); return; }
-
-  const payload = {
-    graveId: graveId,
-    packageId: currentCreatingPkgId,
-    serviceName: document.getElementById('ord-pkg-name').value,
-    price: +document.getElementById('ord-price').value || 0,
-    discount: +document.getElementById('ord-discount').value || 0,
-    assignedTo: document.getElementById('ord-assigned').value.trim() || null,
-    scheduledAt: document.getElementById('ord-scheduled').value || null,
-    notes: document.getElementById('ord-notes').value.trim() || null
-  };
-
-  const res = await apiFetch('/api/service-orders', 'POST', payload);
+  const packageId = +document.getElementById('ord-pkg-select').value;
+  if (!graveId || !packageId) { toast('Vui lòng chọn mộ phần và gói dịch vụ', 'err'); return; }
+  const d = document.getElementById('ord-scheduled').value;
+  const res = await apiFetch('/api/ml/app/book', 'POST', {
+    graveId, packageId, scheduledAt: d ? d + 'T08:00:00' : null,
+    note: document.getElementById('ord-notes').value.trim() || null,
+    paymentMethod: document.getElementById('ord-pay').value
+  });
   if (res) {
-    toast(`Tạo đơn ${res.orderCode} thành công ✓`, 'ok');
+    toast(`Đã tạo đơn ${res.orderCode}. ${res.dispatch ? 'Đã giao cho ' + esc(res.dispatch.partner) + '.' : 'Chưa có đối tác rảnh – vào “Đối tác & điều phối” để giao lại.'}`, 'ok');
     closeModal('modal-create-order');
-    loadOrders(1);
-    loadSvcStats();
+    if (document.getElementById('page-orders').classList.contains('active')) { loadOrders(1); loadSvcStats(); }
   }
 }
 
@@ -1462,62 +1412,7 @@ async function loadRevenueCharts() {
 }
 
 /* ═══════════════════════════════════════════
-   AUDIT LOGS
-═══════════════════════════════════════════ */
-async function loadLogs(page = 1) {
-  currentLogPage = page;
-  const search = document.getElementById('log-search')?.value || '';
-  const action = document.getElementById('log-filter-action')?.value || '';
-  const tbody = document.getElementById('logs-tbody');
-  if (!tbody) return;
-
-  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
-  const data = await apiFetch(`/api/audit-logs?search=${encodeURIComponent(search)}&action=${action}&page=${page}&pageSize=15`);
-  if (!data) return;
-  totalLogPages = data.totalPages || 1;
-
-  if (!data.items.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:36px;color:var(--muted)">Chưa có nhật ký hoạt động nào</td></tr>';
-    document.getElementById('logs-pagination').innerHTML = '';
-    return;
-  }
-
-  const actMap = {
-    add: { lbl:'Thêm mới', cls:'active' },
-    edit: { lbl:'Chỉnh sửa', cls:'pending' },
-    delete: { lbl:'Xóa bỏ', cls:'tag-expire' },
-    service: { lbl:'Dịch vụ', cls:'active' },
-    payment: { lbl:'Thanh toán', cls:'tag-anniv' },
-    import: { lbl:'Import', cls:'sky' },
-    qr: { lbl:'Mã QR', cls:'ghost' }
-  };
-
-  tbody.innerHTML = data.items.map(l => `
-    <tr>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap">${fmtDateTime(l.at)}</td>
-      <td><span class="badge ${actMap[l.action]?.cls||''}">${actMap[l.action]?.lbl||l.action}</span></td>
-      <td style="font-size:13px">${esc(l.content)}</td>
-      <td style="font-size:12px;font-weight:600;color:var(--ink-soft)">${esc(l.performedBy||'Admin')}</td>
-    </tr>`).join('');
-
-  renderLogsPagination();
-}
-
-function renderLogsPagination() {
-  const el = document.getElementById('logs-pagination');
-  if (totalLogPages <= 1) { el.innerHTML = ''; return; }
-  let html = `<div style="display:flex;gap:4px;align-items:center;justify-content:center">`;
-  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadLogs(${currentLogPage-1})" ${currentLogPage===1?'disabled':''}>‹</button>`;
-  for (let i = 1; i <= totalLogPages; i++) {
-    html += `<button class="btn ${i===currentLogPage?'primary':'ghost'}" style="padding:4px 10px;font-size:11px" onclick="loadLogs(${i})">${i}</button>`;
-  }
-  html += `<button class="btn ghost" style="padding:4px 8px;font-size:11px" onclick="loadLogs(${currentLogPage+1})" ${currentLogPage===totalLogPages?'disabled':''}>›</button>`;
-  html += `</div>`;
-  el.innerHTML = html;
-}
-
-/* ═══════════════════════════════════════════
-   IMPORT MODULE
+   IMPORT
 ═══════════════════════════════════════════ */
 function onFileSelected(input) {
   selectedFile = input.files[0];
@@ -1643,7 +1538,8 @@ document.querySelectorAll('.modal-ov').forEach(ov => {
 
 // INITIALIZE
 loadZoneDropdowns();
-loadDashboard();
+const startPage = location.hash.slice(1);
+nav(['graves', 'orders', 'partners', 'import'].includes(startPage) ? startPage : 'dashboard');
 </script>
 </body>
 </html>

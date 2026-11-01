@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quy hoạch nghĩa trang – MemoryLand AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Quy hoạch nghĩa trang</h1>
+  <p class="lead">Quản lý bản đồ phân lô, hồ sơ mộ phần và các dự án quy hoạch của nghĩa trang.</p>
+
+  <div class="tabs" id="tabs">
+    <button class="tab" data-t="map"><i class="fas fa-map"></i> Bản đồ phân lô</button>
+    <button class="tab" data-t="plan"><i class="fas fa-wand-magic-sparkles"></i> Phương án quy hoạch AI</button>
+    <button class="tab" data-t="proj"><i class="fas fa-diagram-project"></i> Dự án &amp; khảo sát Drone</button>
+    <button class="tab" data-t="graves"><i class="fas fa-address-book"></i> Hồ sơ mộ phần</button>
+  </div>
+
+  <!-- ═══ BẢN ĐỒ ═══ -->
+  <section class="pane" id="p-map">
+    <div class="grid g4" id="map-stats" style="margin-bottom:1rem"></div>
+    <div class="side">
+      <div class="card">
+        <div class="row" style="margin-bottom:.6rem">
+          <div><label style="margin:0">Xem khu</label><select id="zone-sel"></select></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#fff"></i>Ô trống</span>
+          <span><i style="background:var(--green)"></i>Đã có mộ</span>
+          <span><i style="background:var(--gold)"></i>Đã giữ chỗ</span>
+        </div>
+        <div class="map" id="map"></div>
+        <p class="small muted" style="margin:.6rem 0 0">Bấm vào một ô để xem hoặc thêm mộ phần.</p>
+      </div>
+      <div>
+        <div class="card" id="lot-panel"><h3>Chi tiết ô đất</h3><p class="muted">Chưa chọn ô nào.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Dự báo thời điểm hết đất</h2>
+      <p class="muted" style="margin-top:-.4rem">AI Forecast dựa trên số mộ an táng 36 tháng gần nhất.</p>
+      <div class="grid g3" id="forecast"></div>
+    </div>
+  </section>
+
+  <!-- ═══ PHƯƠNG ÁN AI ═══ -->
+  <section class="pane" id="p-plan">
+    <div class="note g"><b>AI Planner</b> đọc hiện trạng khu đất từ ảnh Drone (vị trí từng ngôi mộ, cây lớn, địa hình) rồi đề xuất các phương án phân lô khác nhau. Chọn một phương án để xem sơ đồ trước – sau.</div>
+    <div class="grid g3" id="plan-cards" style="margin-bottom:1rem"></div>
+    <div class="grid g2">
+      <div class="card"><h3>Hiện trạng <span class="muted small" id="before-note"></span></h3><canvas class="plan" id="cv-before" width="1200" height="800"></canvas>
+        <div class="legend"><span><i style="background:#cfc9b6"></i>Mộ hiện hữu</span><span><i style="background:#e8742a"></i>Cần di dời</span><span><i style="background:#2f7a35"></i>Cây lớn</span></div></div>
+      <div class="card"><h3>Sau quy hoạch <span class="muted small" id="after-note"></span></h3><canvas class="plan" id="cv-after" width="1200" height="800"></canvas>
+        <div class="legend"><span><i style="background:#8cc6b0"></i>Ô mộ mới</span><span><i style="background:#1f6b5a"></i>Mộ giữ nguyên</span><span><i style="background:#d8c99a"></i>Đường đi</span></div></div>
+    </div>
+    <div class="card"><h2>So sánh các phương án</h2><div class="tbl-wrap"><table id="plan-tbl"></table></div></div>
+  </section>
+
+  <!-- ═══ DỰ ÁN ═══ -->
+  <section class="pane" id="p-proj">
+    <div class="grid g4" id="proj-stats" style="margin-bottom:1rem"></div>
+    <div class="side">
+      <div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:.6rem"><h2 style="margin:0;flex:1">Dự án quy hoạch</h2><button class="btn pri sm" style="flex:none" onclick="openModal('m-proj')"><i class="fas fa-plus"></i> Thêm dự án</button></div>
+          <p class="muted small" style="margin-top:0">6 bước: Khảo sát Drone → AI nhận diện → AI phân lô → Họp dân (mô phỏng) → Cắm mốc → Bàn giao GIS</p>
+          <div id="proj-list"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Tính thời gian khảo sát Drone</h2>
+        <label>Diện tích khu đất (ha)</label>
+        <input type="number" id="drone-ha" value="1" min="0.2" max="20" step="0.1">
+        <div id="drone-out" style="margin-top:1rem"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ HỒ SƠ MỘ ═══ -->
+  <section class="pane" id="p-graves">
+    <div class="card">
+      <div class="row">
+        <div style="flex:2"><label style="margin-top:0">Tìm kiếm</label><input id="g-q" placeholder="Tên người mất, mã lô, thân nhân, số điện thoại…"></div>
+        <div><label style="margin-top:0">Khu</label><select id="g-zone"><option value="">Tất cả</option></select></div>
+      </div>
+      <div class="row fit" style="margin-top:1rem">
+        <button class="btn pri" onclick="newGrave()"><i class="fas fa-plus"></i> Thêm mộ phần</button>
+        <a class="btn" href="/api/graves/export-excel"><i class="fas fa-file-excel"></i> Xuất Excel</a>
+        <a class="btn" href="/api/import/template"><i class="fas fa-download"></i> Tải file mẫu</a>
+        <label class="btn" style="margin:0"><i class="fas fa-upload"></i> Nhập từ Excel/CSV<input type="file" id="imp" accept=".xlsx,.xls,.csv,.json" hidden></label>
+      </div>
+    </div>
+    <div class="card"><div class="tbl-wrap"><table id="g-tbl"></table></div>
+      <div class="row fit" style="margin-top:1rem;justify-content:center"><button class="btn sm" id="g-prev">‹ Trước</button><span id="g-page" class="muted"></span><button class="btn sm" id="g-next">Sau ›</button></div></div>
+  </section>
+</div>
+
+<!-- form mộ phần -->
+<div class="modal-bg" id="m-grave"><div class="modal">
+  <h2 id="mg-title">Thêm mộ phần</h2>
+  <form id="mg-form">
+    <label>Lô đất *</label><select id="mg-lot" required></select>
+    <label>Họ tên người đã khuất *</label><input id="mg-name" required>
+    <div class="row"><div><label>Năm sinh</label><input id="mg-born" type="number" min="1800" max="2100"></div><div><label>Năm mất</label><input id="mg-died" type="number" min="1800" max="2100"></div></div>
+    <div class="row"><div><label>Ngày giỗ (âm lịch) – ngày</label><input id="mg-ld" type="number" min="1" max="30" placeholder="vd: 15"></div><div><label>tháng</label><input id="mg-lm" type="number" min="1" max="12" placeholder="vd: 7"></div></div>
+    <div class="row"><div><label>Thân nhân liên hệ</label><input id="mg-cn"></div><div><label>Quan hệ</label><input id="mg-cr" placeholder="Con trưởng, Cháu…"></div></div>
+    <div class="row"><div><label>Số điện thoại</label><input id="mg-cp" type="tel"></div><div><label>Hợp đồng</label><select id="mg-ct"><option>Vĩnh viễn</option><option>Thuê 20 năm</option><option>Thuê 30 năm</option><option>Thuê 50 năm</option></select></div></div>
+    <label>Ghi chú</label><textarea id="mg-notes"></textarea>
+    <div class="row fit" style="margin-top:1.2rem"><button class="btn pri" type="submit">Lưu</button><button class="btn" type="button" onclick="closeModal('m-grave')">Hủy</button></div>
+  </form>
+</div></div>
+
+<!-- form dự án -->
+<div class="modal-bg" id="m-proj"><div class="modal">
+  <h2>Thêm dự án quy hoạch</h2>
+  <form id="mp-form">
+    <label>Tên nghĩa trang *</label><input id="mp-name" required>
+    <div class="row"><div><label>Xã/Phường</label><input id="mp-commune"></div><div><label>Tỉnh/Thành</label><input id="mp-prov"></div></div>
+    <div class="row"><div><label>Diện tích (ha)</label><input id="mp-ha" type="number" step="0.1" min="0.1" value="1"></div><div><label>Giá trị hợp đồng (đ)</label><input id="mp-fee" type="number" step="1000000" min="0" value="20000000"></div></div>
+    <div class="row fit" style="margin-top:1.2rem"><button class="btn pri" type="submit">Tạo dự án</button><button class="btn" type="button" onclick="closeModal('m-proj')">Hủy</button></div>
+  </form>
+</div></div>
+
+<script src="/site.js"></script>
+<script>
+topbar('qh');
+const ST = { Empty: 'Còn trống', Occupied: 'Đã có mộ', Reserved: 'Đã giữ chỗ', Unavailable: 'Không dùng' };
+let MAP = null, ZONE = '', SEL = null, editing = null, loaded = {};
+
+tabs($('#tabs'), id => { if (!loaded[id]) { loaded[id] = 1; ({ map: loadMap, plan: loadPlan, proj: loadProj, graves: loadGraves })[id](); } });
+
+/* ───────── Bản đồ ───────── */
+async function loadMap() {
+  MAP = await api('/lotmap/overview');
+  const z = $('#zone-sel');
+  z.innerHTML = '<option value="">Toàn bộ nghĩa trang</option>' + MAP.zones.map(x => `<option value="${x.code}">Khu ${x.code} – ${esc(x.label)}</option>`).join('');
+  z.onchange = () => { ZONE = z.value; SEL = null; drawMap(); lotPanel(); };
+  drawMap(); lotPanel();
+  const f = await api('/ml/forecast');
+  $('#forecast').innerHTML = f.map(x => {
+    const cls = x.risk === 'Cao' ? 'r' : x.risk === 'Trung bình' ? 'y' : 'g';
+    const pct = Math.round(x.used / x.capacity * 100);
+    return `<div class="stat"><h3>Khu ${x.zone} <span class="tag ${cls}">Nguy cơ ${x.risk.toLowerCase()}</span></h3>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <p style="margin:.5rem 0 0">Đã dùng <b>${x.used}/${x.capacity}</b> ô (${pct}%), còn <b>${x.remaining}</b> ô.<br>Dự kiến <b>hết đất: ${x.depletion}</b> (khoảng ${x.monthsLeft} tháng).</p></div>`;
+  }).join('');
+}
+function statsMap() {
+  const L = ZONE ? MAP.lots.filter(l => l.zoneCode === ZONE) : MAP.lots;
+  const c = s => L.filter(l => l.status === s).length;
+  $('#map-stats').innerHTML = [[L.length, 'tổng số ô'], [c('Occupied'), 'đã có mộ'], [c('Reserved'), 'đã giữ chỗ'], [c('Empty'), 'còn trống']]
+    .map(s => `<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+}
+function drawMap() {
+  statsMap();
+  const el = $('#map'), zs = ZONE ? MAP.zones.filter(z => z.code === ZONE) : MAP.zones;
+  const zoom = ZONE ? zs[0] : { x: 0, y: 0, w: 100, h: 100 };
+  el.style.aspectRatio = ZONE ? `${zoom.w * 1.6} / ${zoom.h}` : '16 / 10';
+  const P = (l) => `left:${(l.x - zoom.x) / zoom.w * 100}%;top:${(l.y - zoom.y) / zoom.h * 100}%;width:${l.w / zoom.w * 100}%;height:${l.h / zoom.h * 100}%`;
+  let h = zs.map(z => `<div class="zone" style="${P(z)};border-color:${z.color}"><span style="color:${z.color}">Khu ${z.code} · ${esc(z.label)}</span></div>`).join('');
+  h += MAP.lots.filter(l => !ZONE || l.zoneCode === ZONE).map(l =>
+    `<button class="lot ${l.status} ${SEL && SEL.id === l.id ? 'sel' : ''}" style="${P(l)}" data-id="${l.id}" title="${l.lotCode} – ${ST[l.status]}${l.graveName ? ' – ' + esc(l.graveName) : ''}">${ZONE ? l.lotCode.split('-').slice(1).join('-') : ''}</button>`).join('');
+  el.innerHTML = h;
+  $$('.lot', el).forEach(b => b.onclick = () => { SEL = MAP.lots.find(l => l.id == b.dataset.id); drawMap(); lotPanel(); });
+}
+async function lotPanel() {
+  const p = $('#lot-panel');
+  if (!SEL) { p.innerHTML = '<h3>Chi tiết ô đất</h3><p class="muted">Chưa chọn ô nào. Bấm vào một ô trên bản đồ.</p>'; return; }
+  const l = SEL;
+  let h = `<h3>Lô ${l.lotCode} <span class="tag ${l.status === 'Occupied' ? 'g' : l.status === 'Reserved' ? 'y' : ''}">${ST[l.status]}</span></h3>`;
+  if (l.graveId) {
+    const g = await api('/graves/' + l.graveId);
+    if (SEL !== l) return;
+    h += `<p style="margin:.3rem 0"><b style="font-size:1.2rem">${esc(g.fullName)}</b>${g.alias ? ' (' + esc(g.alias) + ')' : ''}<br>${g.bornYear || '?'} – ${g.diedYear || '?'}</p>
+      <p class="small" style="margin:.3rem 0">Giỗ: <b>${esc(g.lunarDeathDate || 'chưa có')}</b><br>Thân nhân: ${esc(g.contactName || '—')} ${g.contactRelation ? '(' + esc(g.contactRelation) + ')' : ''}<br>Điện thoại: ${esc(g.contactPhone || '—')}<br>Hợp đồng: ${esc(g.contractType)}${g.contractEndDate ? ' – hết hạn ' + fmtDate(g.contractEndDate) : ''}</p>
+      <div class="row fit" style="margin-top:.8rem"><button class="btn sm" onclick="editGrave(${g.id})"><i class="fas fa-pen"></i> Sửa</button><a class="btn sm pri" href="/cung-bai.html?grave=${g.id}">Đặt dịch vụ chăm sóc</a></div>`;
+  } else if (l.status === 'Reserved') {
+    h += `<p class="muted">Ô này đang được giữ chỗ.</p><div class="row fit"><button class="btn pri sm" onclick="newGrave('${l.lotCode}')"><i class="fas fa-plus"></i> Thêm mộ phần</button><button class="btn red sm" onclick="unreserve(${l.id})">Bỏ giữ chỗ</button></div>`;
+  } else {
+    h += `<p class="muted">Ô đất còn trống.</p><div class="row fit"><button class="btn pri sm" onclick="newGrave('${l.lotCode}')"><i class="fas fa-plus"></i> Thêm mộ phần</button><button class="btn sm" onclick="reserve(${l.id})">Giữ chỗ</button></div>`;
+  }
+  p.innerHTML = h;
+}
+async function reserve(id) { try { await api(`/lotmap/lots/${id}/assign`, { method: 'PATCH', body: { graveId: null, status: 'Reserved' } }); toast('Đã giữ chỗ', 'ok'); await refreshMap(); } catch (e) { toast(e.message, 'err'); } }
+async function unreserve(id) { try { await api(`/lotmap/lots/${id}/unassign`, { method: 'DELETE' }); toast('Đã bỏ giữ chỗ', 'ok'); await refreshMap(); } catch (e) { toast(e.message, 'err'); } }
+async function refreshMap() {
+  const id = SEL?.id; MAP = await api('/lotmap/overview'); SEL = MAP.lots.find(l => l.id === id) || null; drawMap(); lotPanel(); loaded.graves = 0;
+}
+
+/* ───────── Phương án AI ───────── */
+let PLAN = null, SITE = null, planSel = 0;
+async function loadPlan() {
+  [PLAN, SITE] = await Promise.all([api('/ml/planner'), api('/ml/site')]);
+  $('#plan-cards').innerHTML = PLAN.plans.map((p, i) => `<label class="pick ${i === 0 ? 'on' : ''}" data-i="${i}">
+      <h3>Phương án ${p.code}: ${esc(p.name)}</h3><p class="muted small" style="margin:0 0 .5rem">${esc(p.description)}</p>
+      <div class="price">+${p.gainPct}% số ô mộ</div>
+      <div class="small">${p.capacity.toLocaleString('vi-VN')} ô · di dời ${p.relocations} mộ · cây xanh ${p.greenPct}%</div></label>`).join('');
+  $$('#plan-cards .pick').forEach(c => c.onclick = () => { planSel = +c.dataset.i; $$('#plan-cards .pick').forEach(x => x.classList.toggle('on', x === c)); drawPlan(); });
+  $('#plan-tbl').innerHTML = `<tr><th>Tiêu chí</th><th>Hiện trạng</th>${PLAN.plans.map(p => `<th>PA ${p.code}</th>`).join('')}</tr>` + [
+    ['Số ô mộ tối đa', PLAN.baseline.toLocaleString('vi-VN'), p => p.capacity.toLocaleString('vi-VN')],
+    ['Tăng so với hiện trạng', '—', p => `+${p.gain} ô (+${p.gainPct}%)`],
+    ['Mộ phải di dời', '—', p => `${p.relocations} (${p.relocationPct}%)`],
+    ['Tỷ lệ cây xanh', '—', p => p.greenPct + '%'],
+    ['Chiều dài đường nội bộ', '—', p => p.roadLengthM.toLocaleString('vi-VN') + ' m'],
+    ['Cây lớn giữ lại', '—', p => p.treesKept + '/' + (p.treesKept + p.treesRemoved)],
+  ].map(r => `<tr><td><b>${r[0]}</b></td><td>${r[1]}</td>${PLAN.plans.map(p => `<td>${r[2](p)}</td>`).join('')}</tr>`).join('');
+  drawPlan();
+}
+function drawPlan() {
+  const p = PLAN.plans[planSel], S = 1200 / PLAN.width;
+  const base = (c, bg) => { const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); return g; };
+  const trees = (g, list) => list.forEach(t => { const [x, y, r] = Array.isArray(t) ? t : [t.x, t.y, t.r]; g.fillStyle = 'rgba(47,122,53,.85)'; g.beginPath(); g.arc(x * S, y * S, r * S, 0, 7); g.fill(); });
+  const rect = (g, x, y, w, d, a, fill, stroke) => { g.save(); g.translate(x * S, y * S); g.rotate((a || 0) * Math.PI / 180); g.fillStyle = fill; g.fillRect(-w * S / 2, -d * S / 2, w * S, d * S); if (stroke) { g.strokeStyle = stroke; g.lineWidth = 1; g.strokeRect(-w * S / 2, -d * S / 2, w * S, d * S); } g.restore(); };
+  // trước
+  let g = base($('#cv-before'), '#e6ecd9');
+  SITE.graves.forEach(x => rect(g, x.x, x.y, Math.max(x.w, 1) * 1.1, Math.max(x.d, 1) * 1.1, x.a, '#cfc9b6', '#8d8672'));
+  p.moved.forEach(m => { g.fillStyle = '#e8742a'; g.beginPath(); g.arc(m[0] * S, m[1] * S, 5, 0, 7); g.fill(); });
+  trees(g, SITE.trees);
+  $('#before-note').textContent = `– ${SITE.graves.length} mộ hiện hữu`;
+  // sau
+  g = base($('#cv-after'), '#e6ecd9');
+  p.roads.forEach(r => { g.fillStyle = '#d8c99a'; g.fillRect(r[0] * S, r[1] * S, r[2] * S, r[3] * S); });
+  p.greens.forEach(r => { g.fillStyle = '#9bc58a'; g.fillRect(r[0] * S, r[1] * S, r[2] * S, r[3] * S); });
+  p.cells.forEach(c => { g.fillStyle = '#8cc6b0'; g.fillRect(c[0] * S, c[1] * S, p.lot[0] * S - 1, p.lot[1] * S - 1); });
+  p.kept.forEach(k => rect(g, k[0], k[1], k[2], k[3], k[4], '#1f6b5a'));
+  trees(g, p.trees);
+  $('#after-note').textContent = `– ${p.capacity.toLocaleString('vi-VN')} ô (+${p.gainPct}%)`;
+}
+
+/* ───────── Dự án & Drone ───────── */
+async function loadProj() { await refreshProj(); calcDrone(); }
+async function refreshProj() {
+  const [list, b] = await Promise.all([api('/ml/projects'), api('/ml/business')]);
+  $('#proj-stats').innerHTML = [[list.length, 'dự án'], [list.filter(p => p.done).length, 'đã bàn giao'], [b.slotsGained.toLocaleString('vi-VN'), 'ô mộ tăng thêm'], [(b.b2gRevenue / 1e6).toLocaleString('vi-VN') + ' tr', 'giá trị hợp đồng']]
+    .map(s => `<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+  const names = ['Khảo sát Drone', 'AI nhận diện', 'AI phân lô', 'Họp dân', 'Cắm mốc', 'Bàn giao GIS'];
+  $('#proj-list').innerHTML = list.map(p => `<div style="padding:1rem 0;border-top:1px solid var(--line)">
+    <div class="row" style="justify-content:space-between"><div style="flex:3"><b style="font-size:1.1rem">${esc(p.cemetery)}</b><br><span class="muted small">${esc(p.commune)}, ${esc(p.province)} · ${p.areaHa} ha · ${money(p.fee)}</span></div>
+      <div style="flex:none">${p.done ? '<span class="tag g">Đã bàn giao</span>' : `<span class="tag y">Bước ${p.step}/6</span>`}</div></div>
+    <div class="bar" style="margin:.6rem 0 .3rem"><i style="width:${p.step / 6 * 100}%"></i></div>
+    <div class="row" style="justify-content:space-between"><span class="small">${p.done ? 'Hoàn tất – tăng ' + p.slotsGained + ' ô mộ' : 'Đang ở: <b>' + esc(names[p.step - 1]) + '</b>' + (p.slotsGained ? ' · dự kiến +' + p.slotsGained + ' ô' : '')}</span>
+      ${p.done ? '' : `<button class="btn sm" style="flex:none" onclick="advance(${p.id})">Hoàn thành bước này <i class="fas fa-arrow-right"></i></button>`}</div></div>`).join('');
+}
+async function advance(id) { try { await api(`/ml/projects/${id}/advance`, { method: 'POST' }); await refreshProj(); } catch (e) { toast(e.message, 'err'); } }
+$('#mp-form').onsubmit = async e => {
+  e.preventDefault();
+  try {
+    await api('/ml/projects', { method: 'POST', body: { cemetery: $('#mp-name').value, commune: $('#mp-commune').value, province: $('#mp-prov').value, areaHa: +$('#mp-ha').value, fee: +$('#mp-fee').value } });
+    closeModal('m-proj'); e.target.reset(); toast('Đã tạo dự án', 'ok'); refreshProj();
+  } catch (x) { toast(x.message, 'err'); }
+};
+async function calcDrone() {
+  const ha = Math.min(20, Math.max(0.2, +$('#drone-ha').value || 1));
+  const d = await api('/ml/drone/plan?areaHa=' + ha);
+  const hrs = m => m >= 60 ? (m / 60).toFixed(1).replace('.', ',') + ' giờ' : m + ' phút';
+  $('#drone-out').innerHTML = `<div class="note g" style="margin:0"><b>Drone RTK + AI:</b> ${hrs(d.totalMin)}<br><b>Đo thủ công:</b> ~${d.manualDays} ngày công<br><span class="price">Rút ngắn khoảng ${d.savedPct}%</span></div>
+    <table style="margin-top:.6rem"><tr><td>Bay quét</td><td><b>${hrs(d.flightMin)}</b></td></tr><tr><td>Số ảnh chụp</td><td><b>${d.photos}</b></td></tr><tr><td>Độ phân giải</td><td><b>${d.gsdCm} cm/pixel</b></td></tr><tr><td>Mốc khống chế (GCP)</td><td><b>${d.gcp} mốc</b></td></tr><tr><td>Sai số RTK</td><td><b>~${d.rtkAccuracyCm} cm</b></td></tr></table>`;
+}
+$('#drone-ha').oninput = calcDrone;
+
+/* ───────── Hồ sơ mộ phần ───────── */
+let gPage = 1, gTimer;
+async function loadGraves() {
+  if (!$('#g-zone').dataset.ok) {
+    const z = await api('/zones'); $('#g-zone').innerHTML = '<option value="">Tất cả</option>' + z.map(x => `<option value="${x.code}">Khu ${x.code}</option>`).join(''); $('#g-zone').dataset.ok = 1;
+  }
+  const qs = new URLSearchParams({ q: $('#g-q').value, zone: $('#g-zone').value, page: gPage, pageSize: 12 });
+  const r = await api('/graves?' + qs);
+  $('#g-tbl').innerHTML = '<tr><th>Người đã khuất</th><th>Lô</th><th>Năm</th><th>Giỗ (âm)</th><th>Thân nhân</th><th>Hợp đồng</th><th></th></tr>' +
+    (r.items.length ? r.items.map(g => `<tr><td><b>${esc(g.fullName)}</b>${g.alias ? '<br><span class="small muted">' + esc(g.alias) + '</span>' : ''}</td><td>${esc(g.lotCode)}</td><td>${g.bornYear || '?'}–${g.diedYear || '?'}</td><td>${esc(g.lunarDeathDate || '—')}</td>
+      <td>${esc(g.contactName || '—')}<br><span class="small muted">${esc(g.contactPhone || '')}</span></td><td>${esc(g.contractType)}${g.isContractExpiringSoon ? '<br><span class="tag r">Sắp hết hạn</span>' : ''}</td>
+      <td style="white-space:nowrap"><button class="btn sm" onclick="editGrave(${g.id})">Sửa</button> <button class="btn sm red" onclick="delGrave(${g.id},'${esc(g.fullName).replace(/'/g, '')}')">Xóa</button></td></tr>`).join('') : '<tr><td colspan="7" class="muted">Không tìm thấy mộ phần nào.</td></tr>');
+  $('#g-page').textContent = `Trang ${r.page}/${Math.max(1, r.totalPages)} · ${r.total} mộ`;
+  $('#g-prev').disabled = r.page <= 1; $('#g-next').disabled = r.page >= r.totalPages;
+}
+$('#g-q').oninput = () => { clearTimeout(gTimer); gTimer = setTimeout(() => { gPage = 1; loadGraves(); }, 300); };
+$('#g-zone').onchange = () => { gPage = 1; loadGraves(); };
+$('#g-prev').onclick = () => { gPage--; loadGraves(); };
+$('#g-next').onclick = () => { gPage++; loadGraves(); };
+$('#imp').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const fd = new FormData(); fd.append('file', f);
+  try { const r = await api('/import/upload', { method: 'POST', body: fd }); toast(r.message || 'Đã nhập dữ liệu xong', 'ok'); loadGraves(); if (MAP) refreshMap(); }
+  catch (x) { toast(x.message, 'err'); }
+  e.target.value = '';
+};
+async function delGrave(id, name) {
+  if (!confirm(`Xóa hồ sơ mộ phần "${name}"?`)) return;
+  try { await api('/graves/' + id, { method: 'DELETE' }); toast('Đã xóa', 'ok'); loadGraves(); if (MAP) refreshMap(); } catch (e) { toast(e.message, 'err'); }
+}
+
+/* ───────── Form mộ phần ───────── */
+async function fillLots(current) {
+  const lots = MAP ? MAP.lots : (await api('/lotmap/overview')).lots;
+  const free = lots.filter(l => l.status !== 'Occupied' || l.lotCode === current);
+  $('#mg-lot').innerHTML = free.map(l => `<option value="${l.lotCode}" data-zone="${l.zoneCode}">${l.lotCode}${l.status === 'Reserved' ? ' (đã giữ chỗ)' : ''}</option>`).join('');
+  if (current) $('#mg-lot').value = current;
+}
+async function newGrave(lot) {
+  editing = null; $('#mg-title').textContent = 'Thêm mộ phần'; $('#mg-form').reset();
+  await fillLots(lot); $('#mg-lot').disabled = false; openModal('m-grave');
+}
+async function editGrave(id) {
+  const g = await api('/graves/' + id); editing = g;
+  $('#mg-title').textContent = 'Sửa hồ sơ: ' + g.fullName;
+  await fillLots(g.lotCode); $('#mg-lot').disabled = true;
+  $('#mg-name').value = g.fullName; $('#mg-born').value = g.bornYear || ''; $('#mg-died').value = g.diedYear || '';
+  const m = /(\d+)\/(\d+)/.exec(g.lunarDeathDate || ''); $('#mg-ld').value = m ? +m[1] : ''; $('#mg-lm').value = m ? +m[2] : '';
+  $('#mg-cn').value = g.contactName || ''; $('#mg-cr').value = g.contactRelation || ''; $('#mg-cp').value = g.contactPhone || '';
+  $('#mg-ct').value = g.contractType; $('#mg-notes').value = g.notes || '';
+  openModal('m-grave');
+}
+$('#mg-form').onsubmit = async e => {
+  e.preventDefault();
+  const ld = +$('#mg-ld').value, lm = +$('#mg-lm').value, opt = $('#mg-lot').selectedOptions[0];
+  const body = {
+    ...(editing || {}),
+    fullName: $('#mg-name').value.trim(), bornYear: +$('#mg-born').value || null, diedYear: +$('#mg-died').value || null,
+    lunarDeathDate: ld && lm ? `${String(ld).padStart(2, '0')}/${String(lm).padStart(2, '0')} Âm lịch` : null,
+    zone: opt.dataset.zone, lotCode: $('#mg-lot').value,
+    contactName: $('#mg-cn').value, contactRelation: $('#mg-cr').value, contactPhone: $('#mg-cp').value, contractType: $('#mg-ct').value, notes: $('#mg-notes').value,
+    status: editing ? editing.status : 'Active'
+  };
+  try {
+    await api(editing ? '/graves/' + editing.id : '/graves', { method: editing ? 'PUT' : 'POST', body });
+    closeModal('m-grave'); toast('Đã lưu hồ sơ', 'ok');
+    if (MAP) await refreshMap(); if (loaded.graves) loadGraves();
+  } catch (x) { toast(x.message, 'err'); }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLand – Chăm sóc mộ người thân từ xa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/ml.css">
+<style>
+.wrap{max-width:980px}
+.hero{background:linear-gradient(135deg,#1f6b5a,#2e7d6b 60%,#3d9a82);color:#fff;border-radius:16px;padding:26px;margin-bottom:18px}
+.hero h1{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:6px}
+.hero p{opacity:.9}
+.search{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.search input{flex:1;min-width:220px;border:none;border-radius:10px;padding:14px 16px;font:17px 'DM Sans',sans-serif;outline:none}
+.res{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px dashed var(--border);cursor:pointer}
+.res:hover{background:#fcfaf4}
+.res .av{width:46px;height:46px;border-radius:12px;background:var(--jade-pale);color:var(--jade);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.grave-head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.grave-head h2{font-family:'Playfair Display',serif;font-size:26px}
+.anniv{background:linear-gradient(135deg,#fff7e0,#fdf0c8);border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;margin-top:14px}
+.pkg{display:flex;gap:14px;align-items:center;border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;background:#fff;transition:.15s}
+.pkg:hover{border-color:var(--gold)}
+.pkg.on{border-color:var(--jade);background:#f1faf7}
+.pkg .pi{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0}
+.pkg .pp{font:700 18px 'Playfair Display',serif;color:var(--jade);margin-left:auto;white-space:nowrap;text-align:right}
+.step{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.step:not(:last-child)::before{content:'';position:absolute;left:10px;top:22px;bottom:0;width:2px;background:#dcd9cd}
+.step.ok:not(:last-child)::before{background:var(--jade)}
+.step .dot{width:22px;height:22px;border-radius:50%;background:#dcd9cd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.step.ok .dot{background:var(--jade)}.step.run .dot{background:var(--gold)}.step.bad .dot{background:var(--rose)}
+.step b{display:block}.step small{color:var(--muted)}
+.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.photo-pair figure{position:relative}
+.photo-pair img{width:100%;border-radius:10px;display:block}
+.photo-pair figcaption{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:2px 8px;border-radius:6px}
+.vl{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed #e5e2d8}.vl.ok i{color:var(--jade)}.vl.bad i{color:var(--rose)}
+.chat{display:flex;flex-direction:column;gap:10px;max-height:440px;overflow-y:auto;padding:4px}
+.msg{max-width:85%;padding:11px 14px;border-radius:14px;line-height:1.55;white-space:pre-wrap}
+.msg.u{align-self:flex-end;background:var(--jade);color:#fff}
+.msg.b{align-self:flex-start;background:var(--cream);border:1px solid var(--border)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips span{padding:7px 13px;border-radius:99px;background:var(--jade-pale);color:#1c5e4f;cursor:pointer;font-weight:600}
+.qrbox{display:flex;justify-content:center;margin:12px 0}
+</style>
+<link rel="stylesheet" href="/big.css">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ═══ BƯỚC 1: TRA CỨU MỘ ═══ -->
+  <section id="v-search">
+    <div class="hero">
+      <h1>Chăm sóc mộ người thân từ xa</h1>
+      <p>Ở xa không về được? Người địa phương sẽ dọn mộ, dâng hương thay gia đình và gửi ảnh trước – sau ngay khi xong.</p>
+      <div class="search">
+        <input id="q" placeholder="Nhập tên người đã khuất, ví dụ: Nguyễn Văn A" autocomplete="off">
+        <button class="btn primary" id="btn-q"><i class="fas fa-search"></i> Tìm mộ</button>
+      </div>
+    </div>
+    <div class="card" id="results" style="display:none"></div>
+    <div class="grid g3">
+      <div class="card"><h3><span class="l"><i class="fas fa-location-dot"></i> Đúng mộ</span></h3><p class="muted">Người làm phải đứng tại mộ, quét mã QR trên bia và khớp vị trí GPS mới được bắt đầu.</p></div>
+      <div class="card"><h3><span class="l"><i class="fas fa-broom"></i> Đúng việc</span></h3><p class="muted">Ảnh trước và sau khi dọn được hệ thống kiểm tra tự động trước khi gửi cho gia đình.</p></div>
+      <div class="card"><h3><span class="l"><i class="fas fa-shield-halved"></i> Đúng hẹn</span></h3><p class="muted">Nhắc ngày giỗ theo lịch âm. Không đạt yêu cầu thì làm lại miễn phí hoặc hoàn tiền 100%.</p></div>
+    </div>
+  </section>
+
+  <!-- ═══ BƯỚC 2: MỘ ĐÃ CHỌN ═══ -->
+  <section id="v-grave" style="display:none">
+    <button class="btn ghost sm mb" onclick="backToSearch()"><i class="fas fa-arrow-left"></i> Tìm mộ khác</button>
+    <div class="card" id="grave-card"></div>
+    <div class="tabs" id="tabs">
+      <div class="tab on" data-p="book"><i class="fas fa-calendar-plus"></i> Đặt dịch vụ</div>
+      <div class="tab" data-p="orders"><i class="fas fa-clipboard-list"></i> Đơn đã đặt</div>
+      <div class="tab" data-p="chat"><i class="fas fa-book-open"></i> Văn khấn &amp; lễ vật</div>
+    </div>
+
+    <section class="pane on" id="p-book">
+      <div class="card"><h3><span class="l"><i class="fas fa-list"></i> 1. Chọn dịch vụ</span></h3><div id="pkgs"></div></div>
+      <div class="card"><h3><span class="l"><i class="fas fa-calendar-day"></i> 2. Ngày thực hiện và lời nhắn</span></h3>
+        <div class="grid g2">
+          <div><label class="f">Ngày thực hiện</label><input class="i" type="date" id="b-date"></div>
+          <div><label class="f">Thanh toán</label><select class="i" id="b-pay"><option value="qr">Quét mã QR ngân hàng</option><option value="wallet">Ví điện tử</option><option value="card">Thẻ quốc tế (cho kiều bào)</option></select></div>
+        </div>
+        <label class="f">Lời nhắn cho người thực hiện</label><input class="i" id="b-note" placeholder="Ví dụ: Gia đình muốn dâng hoa cúc vàng">
+        <div class="row mt"><div class="sp">Tổng tiền: <b id="b-total" style="font:700 22px 'Playfair Display',serif;color:var(--jade)"></b></div>
+          <button class="btn primary" onclick="checkout()"><i class="fas fa-lock"></i> Thanh toán &amp; đặt</button></div>
+      </div>
+    </section>
+
+    <section class="pane" id="p-orders"><div id="orders"></div></section>
+
+    <section class="pane" id="p-chat">
+      <div class="card">
+        <div class="chat" id="chat"></div>
+        <div class="row mt"><input class="i sp" id="chat-q" placeholder="Hỏi về văn khấn, lễ vật, ngày giỗ, giá dịch vụ…"><button class="btn jade" id="chat-send"><i class="fas fa-paper-plane"></i> Gửi</button></div>
+      </div>
+    </section>
+  </section>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal" id="modal-box"></div></div>
+
+<script src="/ml.js"></script>
+<script>
+userNav('Dành cho gia đình', '<a class="btn ghost sm" style="color:#fff;border-color:rgba(255,255,255,.3)" href="tel:19006868"><i class="fas fa-phone"></i> 1900 6868</a>');
+const ST = { Dispatched: ['Đang chờ người nhận việc', 'gold'], Accepted: ['Đã có người nhận việc', 'sky'], CheckedIn: ['Đã tới mộ', 'sky'], BeforeDone: ['Đang dọn dẹp, dâng lễ', 'sky'], Verified: ['Hoàn thành', 'jade'], Rejected: ['Chưa đạt yêu cầu', 'rose'], Unassigned: ['Đang tìm người làm', 'gray'] };
+const SHOW_PKGS = ['ML-01', 'ML-02', 'ML-03', 'SVC-02', 'SVC-06'];
+const G = { graves: [], catalog: [], g: null, pkg: null, chat: [], timer: null };
+const fold = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const showModal = h => { $('#modal-box').innerHTML = h; $('#modal').classList.add('on'); };
+const closeModal = () => $('#modal').classList.remove('on');
+$('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+
+(async function init() {
+  try {
+    [G.graves, G.catalog] = await Promise.all([api('/app/graves'), api('/app/catalog')]);
+    G.catalog = SHOW_PKGS.map(c => G.catalog.find(p => p.code === c)).filter(Boolean);
+    const id = +new URLSearchParams(location.search).get('grave') || +localStorage.getItem('ml_family_grave');
+    if (id && G.graves.find(g => g.id === id)) openGrave(id);
+  } catch (e) { toast('Không tải được dữ liệu: ' + e.message, 'err'); }
+})();
+
+/* ───────── Tra cứu ───────── */
+function search() {
+  const raw = $('#q').value.trim(), q = fold(raw);
+  const box = $('#results'); box.style.display = '';
+  if (raw.length < 2) { box.innerHTML = '<p class="muted">Vui lòng nhập ít nhất 2 ký tự.</p>'; return; }
+  const list = G.graves.filter(g => fold(g.fullName).includes(q) || fold(g.alias).includes(q));
+  box.innerHTML = list.length
+    ? `<h3><span class="l"><i class="fas fa-list"></i> Tìm thấy ${list.length} mộ phần</span></h3>` + list.map(g => `<div class="res" onclick="openGrave(${g.id})"><div class="av"><i class="fas fa-monument"></i></div>
+        <div class="sp"><b>${esc(g.fullName)}</b> ${g.alias ? '<span class="muted">(' + esc(g.alias) + ')</span>' : ''}<br><span class="muted">${g.bornYear || '?'} – ${g.diedYear || '?'} · Khu ${g.zone}, lô ${g.lotCode}</span></div>
+        <span class="btn jade sm">Chọn <i class="fas fa-arrow-right"></i></span></div>`).join('')
+    : '<p class="muted">Không tìm thấy mộ phần phù hợp. Hãy thử tên khác hoặc gọi 1900 6868 để được hỗ trợ.</p>';
+}
+$('#btn-q').onclick = search;
+$('#q').onkeydown = e => { if (e.key === 'Enter') search(); };
+function backToSearch() { clearInterval(G.timer); localStorage.removeItem('ml_family_grave'); $('#v-grave').style.display = 'none'; $('#v-search').style.display = ''; history.replaceState(null, '', location.pathname); }
+
+/* ───────── Mộ đã chọn ───────── */
+function openGrave(id) {
+  G.g = G.graves.find(g => g.id === id); G.chat = [];
+  localStorage.setItem('ml_family_grave', id);
+  history.replaceState(null, '', '?grave=' + id);
+  $('#v-search').style.display = 'none'; $('#v-grave').style.display = '';
+  const g = G.g, d = g.daysUntil;
+  $('#grave-card').innerHTML = `<div class="grave-head"><div class="sp"><h2>${esc(g.fullName)}</h2>
+      <div class="muted">${g.alias ? esc(g.alias) + ' · ' : ''}${g.bornYear || '?'} – ${g.diedYear || '?'}</div>
+      <div class="mt"><i class="fas fa-location-dot" style="color:var(--gold)"></i> Khu ${g.zone}, lô <b>${g.lotCode}</b> · Thân nhân: ${esc(g.contactName || '—')}</div></div></div>
+    ${g.nextAnniversary ? `<div class="anniv row"><div class="sp"><b><i class="fas fa-calendar-day" style="color:var(--gold)"></i> Ngày giỗ ${esc(g.lunarDeathDate)}</b><br>
+      ${d === 0 ? 'Hôm nay là ngày giỗ' : `Còn <b>${d} ngày</b> – nhằm ngày ${fmtDate(g.nextAnniversary)} dương lịch`}</div>
+      ${d <= 60 ? `<button class="btn primary" onclick="bookForAnniv()"><i class="fas fa-gift"></i> Đặt lễ cho ngày giỗ</button>` : ''}</div>` : ''}`;
+  G.pkg = G.catalog[0]?.id;
+  const t = new Date(Date.now() + 864e5); $('#b-date').min = isoDay(new Date()); $('#b-date').value = isoDay(t);
+  renderPkgs(); openTab('book');
+}
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function bookForAnniv() {
+  const p = G.catalog.find(x => x.code === 'SVC-06') || G.catalog.find(x => x.code === 'ML-02');
+  if (p) G.pkg = p.id; $('#b-date').value = G.g.nextAnniversary; renderPkgs(); openTab('book');
+}
+function openTab(p) {
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p)); $$('.pane').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
+  clearInterval(G.timer);
+  if (p === 'orders') { loadOrders(); G.timer = setInterval(() => { if (!document.hidden) loadOrders(); }, 5000); }
+  if (p === 'chat') renderChat();
+}
+$$('.tab').forEach(t => t.onclick = () => openTab(t.dataset.p));
+
+/* ───────── Đặt dịch vụ ───────── */
+function renderPkgs() {
+  $('#pkgs').innerHTML = G.catalog.map(p => `<div class="pkg ${G.pkg === p.id ? 'on' : ''}" onclick="G.pkg=${p.id};renderPkgs()">
+    <div class="pi" style="background:${p.color || '#2e7d6b'}"><i class="fas ${p.iconClass || 'fa-leaf'}"></i></div>
+    <div><b>${esc(p.name)}</b><div class="muted">${esc((p.description || '').replace(/\s*\(.*?\)\s*$/, ''))}</div></div>
+    <div class="pp">${money(p.price)}<div class="muted" style="font:13px 'DM Sans'">/${esc(p.unit || 'lần')}</div></div></div>`).join('');
+  const pk = G.catalog.find(p => p.id === G.pkg); $('#b-total').textContent = pk ? money(pk.price) : '—';
+}
+function fakeQr(canvas, seed) {
+  const g = canvas.getContext('2d'), n = 29, s = canvas.width / n, R = rng(seed);
+  g.fillStyle = '#fff'; g.fillRect(0, 0, canvas.width, canvas.width); g.fillStyle = '#111';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const f = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9); if (!f && R() < .5) g.fillRect(x * s, y * s, s, s); }
+  [[0, 0], [n - 7, 0], [0, n - 7]].forEach(([x, y]) => { g.fillStyle = '#111'; g.fillRect(x * s, y * s, 7 * s, 7 * s); g.fillStyle = '#fff'; g.fillRect((x + 1) * s, (y + 1) * s, 5 * s, 5 * s); g.fillStyle = '#111'; g.fillRect((x + 2) * s, (y + 2) * s, 3 * s, 3 * s); });
+}
+async function checkout() {
+  const pk = G.catalog.find(p => p.id === G.pkg), g = G.g, method = $('#b-pay').value, date = $('#b-date').value, note = $('#b-note').value;
+  if (!pk) return toast('Vui lòng chọn dịch vụ', 'err');
+  const label = { qr: 'Mở ứng dụng ngân hàng và quét mã', wallet: 'Xác nhận thanh toán trên ví điện tử', card: 'Thanh toán bằng thẻ quốc tế' }[method];
+  showModal(`<h3>Thanh toán ${money(pk.price)}</h3><div class="muted">${esc(pk.name)} · mộ ${esc(g.fullName)} · ngày ${fmtDate(date)}</div>
+    <div class="qrbox"><canvas id="qr" width="200" height="200"></canvas></div><div style="text-align:center">${label}</div>
+    <div class="row mt" style="justify-content:center"><button class="btn primary" id="paid"><i class="fas fa-check"></i> Tôi đã thanh toán</button><button class="btn ghost" onclick="closeModal()">Hủy</button></div>
+    <p class="small muted mt" style="text-align:center">Bản thử nghiệm: chưa kết nối cổng thanh toán thật.</p>`);
+  fakeQr($('#qr'), pk.id * 7 + g.id);
+  $('#paid').onclick = async () => {
+    $('#paid').disabled = true; $('#paid').innerHTML = '<span class="spin"></span> Đang xác nhận…';
+    try {
+      const r = await api('/app/book', { method: 'POST', body: { graveId: g.id, packageId: pk.id, scheduledAt: date ? date + 'T08:00:00' : null, note, paymentMethod: method } });
+      showModal(`<h3 style="color:var(--jade)"><i class="fas fa-circle-check"></i> Đặt thành công</h3><p>Mã đơn <b>${r.orderCode}</b></p>
+        <div class="info-box mt" style="min-height:0">${r.dispatch ? `Người nhận việc: <b>${esc(r.dispatch.partner)}</b>, ở cách mộ khoảng ${r.dispatch.distanceKm} km.` : 'Hệ thống đang tìm người làm gần mộ nhất, gia đình sẽ được báo ngay khi có người nhận.'}
+        <br>Gia đình sẽ nhận ảnh trước – sau khi công việc hoàn thành.</div>
+        <button class="btn primary block mt" onclick="closeModal();openTab('orders')">Theo dõi đơn</button>`);
+      $('#b-note').value = '';
+    } catch (e) { closeModal(); toast(e.message, 'err'); }
+  };
+}
+
+/* ───────── Đơn đã đặt ───────── */
+function steps(j) {
+  const s = j.status, rej = s === 'Rejected', order = ['Dispatched', 'Accepted', 'CheckedIn', 'BeforeDone', 'Verified'], i = order.indexOf(s);
+  const rows = [
+    ['Đã thanh toán, đặt đơn', fmtTime(j.createdAt), true],
+    ['Có người nhận việc', j.partner && j.acceptedAt ? `${esc(j.partner.name)} · ${fmtTime(j.acceptedAt)}` : j.partner ? `Đã giao cho ${esc(j.partner.name)}, chờ xác nhận` : 'Đang tìm người làm…', i >= 1 || rej],
+    ['Tới đúng mộ (quét QR + GPS)', j.checkinAt ? `Cách mộ ${j.checkinDistanceM?.toFixed(1)} m · ${fmtTime(j.checkinAt)}` : '', i >= 2 || rej],
+    ['Chụp ảnh trước, dọn dẹp, dâng lễ', j.beforeAt ? fmtTime(j.beforeAt) : '', i >= 3 || rej],
+    ['Kiểm tra ảnh & gửi báo cáo', s === 'Verified' ? fmtTime(j.reportSentAt) : rej ? 'Không đạt yêu cầu' : '', s === 'Verified']];
+  const cur = rows.findIndex(r => !r[2]);
+  return rows.map((r, k) => { const bad = rej && k === 4; return `<div class="step ${bad ? 'bad' : r[2] ? 'ok' : k === cur ? 'run' : ''}"><div class="dot">${bad ? '<i class="fas fa-xmark"></i>' : r[2] ? '<i class="fas fa-check"></i>' : ''}</div><div><b>${r[0]}</b><small>${r[1] || ''}</small></div></div>`; }).join('');
+}
+async function loadOrders() {
+  if (!G.g) return;
+  const jobs = await api('/jobs?graveId=' + G.g.id);
+  $('#orders').innerHTML = jobs.length ? jobs.map(j => `<div class="card"><h3><span class="l">${esc(j.order?.serviceName || 'Chăm sóc mộ')}</span><span class="chip ${ST[j.status][1]}">${ST[j.status][0]}</span></h3>
+    <div class="muted mb">${j.order ? 'Mã đơn ' + esc(j.order.orderCode) + ' · ' + money(j.order.price) + ' · ngày ' + fmtDate(j.order.scheduledAt) : esc(j.jobCode)}</div>
+    ${steps(j)}
+    ${j.beforeThumb ? `<div class="photo-pair mt"><figure><img src="${j.beforeThumb}" alt="Ảnh trước"><figcaption>TRƯỚC</figcaption></figure>${j.afterThumb ? `<figure><img src="${j.afterThumb}" alt="Ảnh sau"><figcaption>SAU</figcaption></figure>` : ''}</div>` : ''}
+    ${j.status === 'Rejected' && !j.refunded ? `<div class="info-box mt" style="min-height:0;background:#fdf0f3;border-color:var(--rose-light)">Kết quả chưa đạt yêu cầu: ${(j.verify?.layers || []).filter(l => !l.pass).map(l => esc(l.detail)).join('; ')}.<br>Gia đình có thể chọn:</div>
+      <div class="row mt"><button class="btn jade" onclick="redo(${j.id})"><i class="fas fa-rotate"></i> Làm lại miễn phí</button><button class="btn rose" onclick="refund(${j.id})"><i class="fas fa-money-bill-transfer"></i> Hoàn tiền 100%</button></div>` : ''}
+    ${j.refunded ? `<div class="info-box mt" style="min-height:0">Đã hoàn tiền ${money(j.order?.price)} vào phương thức thanh toán ban đầu.</div>` : ''}
+  </div>`).join('') : '<div class="card" style="text-align:center"><p class="muted">Chưa có đơn nào cho mộ này.</p><button class="btn jade mt" onclick="openTab(\'book\')">Đặt dịch vụ</button></div>';
+}
+async function redo(id) { try { const r = await api(`/jobs/${id}/redispatch`, { method: 'POST' }); toast(r.dispatch ? 'Đã giao cho người khác làm lại miễn phí.' : 'Đang tìm người làm lại.', 'ok'); loadOrders(); } catch (e) { toast(e.message, 'err'); } }
+async function refund(id) { if (!confirm('Xác nhận hoàn tiền 100% và hủy đơn?')) return; try { const r = await api(`/jobs/${id}/refund`, { method: 'POST' }); toast('Đã hoàn ' + money(r.refunded), 'ok'); loadOrders(); } catch (e) { toast(e.message, 'err'); } }
+
+/* ───────── Văn khấn & lễ vật ───────── */
+function renderChat() {
+  if (!G.chat.length) G.chat.push({ r: 'b', t: `Xin chào! Tôi có thể hướng dẫn văn khấn, lễ vật, ngày giỗ của ${G.g.fullName} và giá các dịch vụ.`, chips: ['Ngày giỗ năm nay là ngày nào?', 'Văn khấn tại mộ', 'Lễ vật cần chuẩn bị', 'Giá các gói dịch vụ'] });
+  $('#chat').innerHTML = G.chat.map(m => `<div class="msg ${m.r}">${m.typing ? '<span class="spin"></span>' : esc(m.t)}${m.chips ? `<div class="chips">${m.chips.map(c => `<span onclick="ask(this.textContent)">${esc(c)}</span>`).join('')}</div>` : ''}</div>`).join('');
+  $('#chat').scrollTop = 1e6;
+}
+async function ask(q) {
+  q = (q || '').trim(); if (!q) return; $('#chat-q').value = '';
+  G.chat.push({ r: 'u', t: q }, { r: 'b', typing: true }); renderChat();
+  try { const a = await api('/assistant', { method: 'POST', body: { message: q, graveId: G.g.id } }); G.chat.pop(); G.chat.push({ r: 'b', t: a.answer, chips: a.suggestions }); }
+  catch (e) { G.chat.pop(); G.chat.push({ r: 'b', t: 'Xin lỗi, chưa trả lời được: ' + e.message }); }
+  renderChat();
+}
+$('#chat-send').onclick = () => ask($('#chat-q').value);
+$('#chat-q').onkeydown = e => { if (e.key === 'Enter') ask($('#chat-q').value); };
+</script>
+</body>
+</html>

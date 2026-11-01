@@ -1,7 +1,17 @@
-# SmartCem 4.0 – ASP.NET Core
+# MemoryLand AI (SmartCem) – ASP.NET Core
 
-Hệ thống Quản lý Nghĩa trang Thông minh được viết bằng **C# ASP.NET Core 8**  
-(Code lại từ bản HTML thuần + nâng cấp tính năng Import dữ liệu hàng loạt)
+Hệ thống quản lý nghĩa trang và chăm sóc mộ từ xa, viết bằng **C# ASP.NET Core**.
+
+## Ai dùng trang nào
+
+| Người dùng | Trang | Việc chính |
+|---|---|---|
+| Ban quản lý nghĩa trang | `/` | Hồ sơ mộ, bản đồ phân lô, quy hoạch & dự báo hết đất, đơn chăm sóc, đối tác & điều phối |
+| Gia đình (con cháu xa quê) | `/gia-dinh.html` | Tra cứu mộ, đặt dịch vụ, theo dõi đơn + ảnh trước/sau, hỏi văn khấn |
+| Đối tác dọn mộ địa phương | `/doi-tac.html` | Nhận việc, check-in QR + GPS tại mộ, chụp ảnh trước/sau để nghiệm thu |
+| Người quét QR trên bia | `/grave-detail.html?id=…` | Xem thông tin công khai của mộ, đặt dịch vụ |
+
+Luồng một đơn: gia đình đặt (hoặc ban quản lý tạo hộ) → hệ thống giao cho đối tác gần nhất → đối tác nhận việc, check-in, chụp ảnh → hệ thống kiểm tra ảnh/vị trí → gửi báo cáo cho gia đình. Không đạt thì ban quản lý giao người khác hoặc hoàn tiền.
 
 ---
 
@@ -133,3 +143,17 @@ SmartCem/
 3. **Bỏ qua trùng LotCode** – không rollback toàn bộ, log lỗi từng dòng
 4. **Job tracking** – mỗi lần import tạo 1 `ImportJob` lưu kết quả, xem lại bất kỳ lúc nào
 5. **Audit log** – mọi hành động đều ghi vào `AuditLogs`
+
+---
+
+## 🕊️ MemoryLand AI (bản mô phỏng theo `vippro.docx`)
+
+Chạy xong mở các trang (không cần dịch vụ trả phí, dữ liệu Drone/thanh toán/GPS đều mô phỏng):
+
+| Trang | Nội dung |
+|-------|----------|
+| `/ai.html` | **AI Core Studio** – 8 module AI, quy trình 6 bước: Drone RTK → AI Vision → AI Terrain (D8) → AI Planner (3 phương án) → 3D trước/sau → cắm mốc & bàn giao GIS (CSV/GeoJSON) + AI Forecast |
+| `/app.html` | **MemoryLand App** (khách) ⇄ **Partner App** (đối tác) chạy song song + AI Assistant (lịch Âm, văn khấn) + AI Dispatch (Hungarian) + **AI Verify 3 lớp** (thử 5 kịch bản gian lận); tab **Điều phối** có bản đồ, nhắc giỗ theo lịch Âm |
+| `/business.html` | Dashboard kinh doanh: TAM/SAM/SOM, doanh thu, tài chính 3 năm, mô phỏng hòa vốn, dự án B2G 6 bước, BMC, lộ trình, rủi ro |
+
+API mới: `/api/ml/*` (modules, drone/plan, site, terrain, planner, forecast, assistant, lunar, reminders, app/*, jobs/*, partners, dispatch/*, projects, business). Bảng mới (`Partners`, `CareJobs`, `PlanningProjects`) tự tạo trên DB cũ.

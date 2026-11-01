@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MemoryLand AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>MemoryLand AI</h1>
+  <p class="lead">Quy hoạch bằng trí tuệ – Gìn giữ bằng tâm hiếu. Hai dịch vụ bổ trợ cho nhau: quản lý nghĩa trang và chăm sóc mộ phần từ xa.</p>
+
+  <div class="hero">
+    <a class="big" href="/quy-hoach.html">
+      <i class="ic fas fa-map-location-dot"></i>
+      <h2>1. Quy hoạch nghĩa trang</h2>
+      <p class="muted">Dành cho Ban quản lý nghĩa trang, UBND xã/phường.</p>
+      <ul>
+        <li>Bản đồ phân lô và hồ sơ từng mộ phần</li>
+        <li>AI đề xuất 3 phương án phân lô, tăng số ô mộ</li>
+        <li>Theo dõi dự án quy hoạch và khảo sát Drone</li>
+        <li>Dự báo thời điểm hết đất theo từng khu</li>
+      </ul>
+      <span class="btn pri">Vào trang quy hoạch <i class="fas fa-arrow-right"></i></span>
+    </a>
+    <a class="big" href="/cung-bai.html">
+      <i class="ic fas fa-hands-praying"></i>
+      <h2>2. Chăm sóc mộ từ xa</h2>
+      <p class="muted">Dành cho con cháu xa quê, đối tác địa phương và quản lý.</p>
+      <ul>
+        <li>Đặt dịch vụ dọn mộ, dâng hương, lễ Tết</li>
+        <li>Hệ thống chọn người làm gần mộ nhất</li>
+        <li>Nghiệm thu bằng GPS, mã QR và ảnh trước/sau</li>
+        <li>Nhắc ngày giỗ theo lịch âm</li>
+      </ul>
+      <span class="btn pri">Vào trang chăm sóc <i class="fas fa-arrow-right"></i></span>
+    </a>
+  </div>
+
+  <div class="grid g4" id="stats" style="margin-bottom:1.4rem"></div>
+
+  <div class="card">
+    <h2><i class="fas fa-calendar-days"></i> Ngày giỗ sắp tới <span class="muted small" id="lunar"></span></h2>
+    <div class="tbl-wrap"><table id="rem"></table></div>
+  </div>
+</div>
+
+<script src="/site.js"></script>
+<script>
+topbar('home');
+(async () => {
+  try {
+    const [d, b, rem, lunar] = await Promise.all([api('/dashboard'), api('/ml/business'), api('/ml/reminders?withinDays=60'), api('/ml/lunar')]);
+    const total = d.occupiedLots + d.emptyLots;
+    $('#stats').innerHTML = [
+      [d.totalGraves, 'mộ phần đã số hóa'],
+      [d.emptyLots, 'ô đất còn trống (trên ' + total + ' ô)'],
+      [b.projects, 'dự án quy hoạch (' + b.projectsDone + ' đã bàn giao)'],
+      [b.orders, 'đơn chăm sóc (' + b.verified + ' đã nghiệm thu)'],
+    ].map(s => `<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+    $('#lunar').textContent = '· hôm nay ' + lunar.text;
+    $('#rem').innerHTML = rem.length
+      ? '<tr><th>Người đã khuất</th><th>Lô</th><th>Giỗ (âm lịch)</th><th>Ngày dương</th><th>Còn</th><th>Thân nhân</th><th></th></tr>' +
+        rem.map(r => `<tr><td><b>${esc(r.fullName)}</b></td><td>${esc(r.lotCode)}</td><td>${esc(r.lunarDeathDate)}</td><td>${fmtDate(r.solar)}</td>
+          <td><span class="tag ${r.daysUntil <= 7 ? 'r' : 'y'}">${r.daysUntil} ngày</span></td><td>${esc(r.contactName)}<br><span class="small muted">${esc(r.contactPhone)}</span></td>
+          <td><a class="btn sm" href="/cung-bai.html?grave=${r.id}">Đặt dịch vụ</a></td></tr>`).join('')
+      : '<tr><td class="muted">Không có ngày giỗ nào trong 60 ngày tới.</td></tr>';
+  } catch (e) { toast(e.message, 'err'); }
+})();
+</script>
+</body>
+</html>

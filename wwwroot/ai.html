@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLand AI – AI Core Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/ml.css">
+<style>
+.mod{cursor:pointer;transition:.18s;position:relative}
+.mod:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.mod .ic{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--ink),var(--ink-soft));color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.mod .no{position:absolute;right:14px;top:12px;font:700 26px 'Playfair Display',serif;color:rgba(201,168,76,.28)}
+.mod h4{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px}
+.mod .tech{font-size:11.5px;color:var(--sky);font-weight:600;margin-bottom:8px}
+.mod .io{font-size:12px;color:#555;line-height:1.55}
+.mod .st{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:baseline;gap:8px}
+.mod .st b{font:700 18px 'Playfair Display',serif;color:var(--jade)}
+.mod .st span{font-size:11px;color:var(--muted)}
+.flow{display:flex;gap:0;overflow-x:auto;padding:4px 0 8px}
+.flow .s{flex:1;min-width:150px;position:relative;padding:12px 14px;background:#fff;border:1px solid var(--border);border-right:none;cursor:pointer;transition:.15s}
+.flow .s:first-child{border-radius:10px 0 0 10px}.flow .s:last-child{border-radius:0 10px 10px 0;border-right:1px solid var(--border)}
+.flow .s:hover{background:var(--gold-pale)}
+.flow .s b{display:block;font-size:12.5px}.flow .s small{color:var(--muted);font-size:11px}
+.flow .s .nn{font:700 18px 'Playfair Display',serif;color:var(--gold)}
+.plan-card{border:2px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:.15s;margin-bottom:10px;background:#fff}
+.plan-card:hover{border-color:var(--gold-light)}
+.plan-card.on{border-color:var(--jade);background:#f3fbf8;box-shadow:0 4px 16px rgba(46,125,107,.15)}
+.plan-card .hd{display:flex;align-items:center;gap:10px}
+.plan-card .code{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-weight:700}
+.plan-card .big{font:700 22px 'Playfair Display',serif;color:var(--jade);margin-left:auto}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px;font-size:11px;color:var(--muted)}
+.mini b{display:block;color:var(--ink);font-size:13px}
+.stage{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.stage .it{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#888}
+.stage .it i{width:18px;text-align:center}
+.stage .it.run{color:var(--sky);font-weight:600}.stage .it.ok{color:var(--jade)}
+.cmp{display:flex;gap:10px;align-items:center;margin:6px 0;font-size:12px}
+.cmp .lbl{width:92px;color:#555}.cmp .bar{flex:1;height:14px}.cmp .val{width:84px;text-align:right;font-weight:700}
+.info-box{background:var(--cream);border:1px dashed rgba(201,168,76,.6);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.6;min-height:80px}
+.ctl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ctl .btn.on{background:var(--ink);color:var(--gold-light);border-color:var(--ink)}
+.zone-chip{padding:7px 14px;border-radius:99px;border:1.5px solid var(--border);cursor:pointer;font-weight:700;font-size:13px;background:#fff}
+.zone-chip.on{background:var(--ink);color:var(--gold-light);border-color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/big.css">
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page-title">Quy hoạch &amp; dự báo</h1>
+  <p class="sub">Từ ảnh khảo sát Drone hiện trạng (120 × 80 m), AI đề xuất phương án sắp xếp lại ô mộ để tăng chỗ, và dự báo khi nào từng khu hết đất.</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-p="planner"><i class="fas fa-wand-magic-sparkles"></i> Phương án phân lô</div>
+    <div class="tab" data-p="forecast"><i class="fas fa-chart-line"></i> Dự báo hết đất</div>
+  </div>
+
+  <!-- ═══ TỔNG QUAN ═══ -->
+  <section class="pane" id="p-overview">
+    <div class="flow" id="flow"></div>
+    <div class="grid g4 mt" id="modules"></div>
+  </section>
+
+  <!-- ═══ 1. DRONE ═══ -->
+  <section class="pane" id="p-drone">
+    <div class="grid g-side">
+      <div>
+        <div class="cv"><canvas id="cv-drone" width="960" height="640"></canvas><div class="hud" id="hud-drone"></div></div>
+        <div class="card mt"><h3><span class="l"><i class="fas fa-list-check"></i> Tiến trình hiện trường & xử lý ảnh</span></h3>
+          <div class="stage" id="drone-stages"></div></div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-helicopter"></i> Kế hoạch bay RTK</span></h3>
+          <label class="f">Diện tích khảo sát: <b id="v-area">1.0</b> ha</label><input type="range" id="in-area" min="0.5" max="10" step="0.5" value="1">
+          <label class="f">Độ cao bay: <b id="v-alt">80</b> m</label><input type="range" id="in-alt" min="50" max="120" step="5" value="80">
+          <label class="f">Phủ dọc: <b id="v-of">80</b>% · phủ ngang: <b id="v-os">70</b>%</label>
+          <input type="range" id="in-of" min="60" max="90" value="80"><input type="range" id="in-os" min="50" max="85" value="70" style="margin-top:6px">
+          <button class="btn primary block mt" id="btn-fly"><i class="fas fa-play"></i> Bắt đầu bay khảo sát</button>
+          <div id="drone-metrics" class="mt small"></div>
+        </div>
+        <div class="card"><h3><span class="l"><i class="fas fa-stopwatch"></i> Drone RTK vs đo thủ công</span></h3><div id="drone-cmp"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 2a. VISION ═══ -->
+  <section class="pane" id="p-vision">
+    <div class="grid g-side">
+      <div>
+        <div class="cv"><canvas id="cv-vision" width="960" height="640" style="cursor:crosshair"></canvas><div class="hud" id="hud-vision"></div></div>
+        <div class="legend" id="vision-legend"></div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-eye"></i> AI Vision · YOLOv8-seg</span></h3>
+          <div class="row"><button class="btn primary" id="btn-vision"><i class="fas fa-wand-magic-sparkles"></i> Chạy nhận diện</button>
+          <button class="btn ghost sm" id="btn-vision-csv"><i class="fas fa-file-csv"></i> Xuất CSV</button></div>
+          <label class="f" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:12.5px"><input type="checkbox" id="chk-labels"> Hiện độ tin cậy trên từng mộ</label>
+          <div id="vision-stats" class="mt"></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-circle-info"></i> Chi tiết ngôi mộ</span></h3>
+          <div class="info-box" id="vision-info">Bấm vào một ngôi mộ trên ảnh để xem toạ độ, kích thước, phân loại.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 2b. TERRAIN ═══ -->
+  <section class="pane" id="p-terrain">
+    <div class="grid g-side">
+      <div>
+        <div class="ctl" id="terrain-ctl">
+          <button class="btn ghost sm on" data-l="elev"><i class="fas fa-mountain"></i> Cao độ DSM</button>
+          <button class="btn ghost sm" data-l="slope"><i class="fas fa-angle-down"></i> Độ dốc</button>
+          <button class="btn ghost sm" data-l="flow"><i class="fas fa-water"></i> Dòng chảy D8</button>
+          <button class="btn ghost sm" data-l="flood"><i class="fas fa-house-flood-water"></i> Ngập úng &amp; rãnh</button>
+        </div>
+        <div class="cv"><canvas id="cv-terrain" width="960" height="640"></canvas><div class="hud" id="hud-terrain"></div></div>
+        <div class="legend" id="terrain-legend"></div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-mountain"></i> AI Terrain</span></h3><div id="terrain-stats"></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-lightbulb"></i> Khuyến nghị thoát nước</span></h3>
+          <div class="info-box" id="terrain-reco"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 3. PLANNER ═══ -->
+  <section class="pane on" id="p-planner">
+    <div class="grid g-side">
+      <div>
+        <div class="cv"><canvas id="cv-plan" width="960" height="640"></canvas><div class="hud" id="hud-plan"></div></div>
+        <div class="card mt" style="padding:12px 16px"><div class="row"><span class="small muted">Hiện trạng</span><input type="range" id="wipe" min="0" max="100" value="50" style="flex:1"><span class="small muted">Phương án</span></div></div>
+        <div class="card"><h3><span class="l"><i class="fas fa-table"></i> So sánh 3 phương án</span></h3><div class="tw"><table class="t" id="plan-table"></table></div></div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="l"><i class="fas fa-draw-polygon"></i> AI Planner · tối ưu ràng buộc</span></h3>
+          <div class="small muted mb">Ràng buộc: ô 1,3 × 2,6 m · lối đi · rãnh thoát nước · giữ cây · hạn chế di dời.</div>
+          <div id="plan-cards"></div>
+          <button class="btn jade block" id="btn-choose" style="display:none"></button>
+        </div>
+        <div class="card"><h3><span class="l"><i class="fas fa-ranking-star"></i> Điểm tổng hợp</span></h3>
+          <div class="small muted">45% quỹ đất · 30% ít di dời · 25% cây xanh</div><div id="plan-score" class="mt"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4. 3D ═══ -->
+  <section class="pane" id="p-viewer3d">
+    <div class="ctl" id="v3-ctl"></div>
+    <div class="cv" style="background:linear-gradient(#27394a,#1b2733)"><canvas id="cv-3d" width="1100" height="600" style="cursor:grab"></canvas><div class="hud" id="hud-3d"></div></div>
+    <div class="row mt">
+      <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="chk-rotate" checked> Tự xoay</label>
+      <button class="btn ghost sm" id="btn-meeting"><i class="fas fa-people-roof"></i> Chế độ họp dân (tự chuyển trước ↔ sau)</button>
+      <span class="small muted">Kéo chuột để xoay / nghiêng · cuộn để phóng to</span>
+    </div>
+  </section>
+
+  <!-- ═══ 5-6. BÀN GIAO ═══ -->
+  <section class="pane" id="p-handover">
+    <div class="grid g2">
+      <div class="card"><h3><span class="l"><i class="fas fa-location-crosshairs"></i> Bước 5 – Cắm mốc thực địa</span></h3>
+        <div class="small muted mb">Xuất toạ độ chuẩn cho máy RTK cầm tay, sau đó Drone bay kiểm định lại độ lệch mốc bê tông so với thiết kế.</div>
+        <div class="row"><button class="btn primary" id="btn-mocs"><i class="fas fa-file-csv"></i> Tải toạ độ mốc (CSV)</button>
+          <button class="btn ghost" id="btn-audit"><i class="fas fa-plane-up"></i> Drone kiểm định mốc</button></div>
+        <div id="audit-out" class="mt"></div></div>
+      <div class="card"><h3><span class="l"><i class="fas fa-database"></i> Bước 6 – Số hóa &amp; Bàn giao</span></h3>
+        <div class="small muted mb">Cấp mã định danh GIS cho từng ô mộ và bàn giao phần mềm quản lý cho ban quản lý xã.</div>
+        <div class="row"><button class="btn primary" id="btn-gis-csv"><i class="fas fa-file-csv"></i> Danh sách ô mộ (CSV)</button>
+          <button class="btn ghost" id="btn-geojson"><i class="fas fa-globe"></i> Xuất GeoJSON</button>
+          <a class="btn jade" href="/lotmap.html"><i class="fas fa-map-location-dot"></i> Mở Bản đồ GIS</a></div>
+        <div id="gis-out" class="mt"></div></div>
+    </div>
+    <div class="card"><h3><span class="l"><i class="fas fa-clipboard-check"></i> Tóm tắt dự án quy hoạch</span></h3><div id="handover-sum"></div></div>
+  </section>
+
+  <!-- ═══ FORECAST ═══ -->
+  <section class="pane" id="p-forecast">
+    <div class="row mb" id="zone-chips"></div>
+    <div class="grid g-side">
+      <div class="card"><h3><span class="l"><i class="fas fa-chart-line"></i> An táng theo tháng · lịch sử &amp; dự báo</span><span class="chip gray" id="fc-model"></span></h3><div style="height:340px"><canvas id="fc-chart"></canvas></div></div>
+      <div class="card"><h3><span class="l"><i class="fas fa-hourglass-half"></i> Thời điểm hết đất</span></h3><div id="fc-kpi"></div></div>
+    </div>
+    <div class="card"><h3><span class="l"><i class="fas fa-list"></i> Tổng hợp các khu</span></h3><div class="tw"><table class="t" id="fc-table"></table></div></div>
+  </section>
+</div>
+
+<script src="/ml.js"></script>
+<script>
+mlNav('ai');
+const S = { site: null, terrain: null, plan: null, ortho: null, modules: [], sel: 'A', chosen: null };
+const TYPE_COL = { 'Mộ đơn': '#4caf91', 'Mộ đôi': '#4a90d9', 'Mộ gia tộc': '#e8c97a', 'Cải táng': '#c45e78' };
+
+/* ───────── Tabs ───────── */
+function openTab(p) {
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.p === p));
+  $$('.pane').forEach(x => x.classList.toggle('on', x.id === 'p-' + p));
+  history.replaceState(null, '', '#' + p);
+  if (!S.site) return;
+  if (p === 'drone') drawDroneIdle();
+  if (p === 'vision') drawVision();
+  if (p === 'terrain') drawTerrain();
+  if (p === 'planner') drawPlan();
+  if (p === 'viewer3d') { v3.dirty = true; v3.start(); } else v3.stop();
+  if (p === 'handover') renderHandover();
+  if (p === 'forecast') loadForecast();
+}
+$$('.tab').forEach(t => t.onclick = () => openTab(t.dataset.p));
+
+/* ───────── Khởi tạo ───────── */
+(async function init() {
+  try {
+    const [site, terrain, plan, mods] = await Promise.all([api('/site'), api('/terrain'), api('/planner'), api('/modules')]);
+    Object.assign(S, { site, terrain, plan, modules: mods });
+    S.ortho = buildOrtho(site, 8);
+    S.chosen = null;
+    renderOverview(); renderPlanCards(); renderV3Ctl(); renderVisionStats(true); renderTerrainPanel(); renderDroneCmp();
+    const h = (location.hash || '').slice(1); openTab(h === 'forecast' ? 'forecast' : 'planner');
+  } catch (e) { toast('Không tải được dữ liệu: ' + e.message, 'err'); }
+})();
+
+/* ───────── Tổng quan ───────── */
+function renderOverview() {
+  const steps = [['1', 'Khảo sát Drone RTK', 'GCP · bay lưới 80%', 'drone'], ['2', 'AI nhận diện hiện trạng', 'Vision + Terrain', 'vision'], ['3', 'AI tối ưu phân lô', '2–3 phương án', 'planner'],
+    ['4', 'Mô phỏng 3D trước–sau', 'Họp dân', 'viewer3d'], ['5', 'Cắm mốc thực địa', 'RTK cầm tay', 'handover'], ['6', 'Số hóa & bàn giao', 'Mã định danh GIS', 'handover']];
+  $('#flow').innerHTML = steps.map(s => `<div class="s" onclick="openTab('${s[3]}')"><span class="nn">${s[0]}</span><b>${s[1]}</b><small>${s[2]}</small></div>`).join('');
+  $('#modules').innerHTML = S.modules.map(m => `
+    <div class="card mod" onclick="modClick('${m.page}')"><span class="no">${m.n}</span><div class="ic"><i class="fas ${m.icon}"></i></div>
+      <h4>${m.name}</h4><div class="tech">${m.tech}</div>
+      <div class="io"><b>Vào:</b> ${m.input}<br><b>Ra:</b> ${m.output}</div>
+      <div class="st"><b>${m.stat}</b><span>${m.statLabel}</span></div></div>`).join('');
+}
+function modClick(page) { if (page.startsWith('ai.html#')) openTab(page.split('#')[1]); else location.href = '/' + page; }
+
+/* ───────── 1. Drone ───────── */
+const dc = $('#cv-drone'), dg = dc.getContext('2d'), PPM = 8;
+let droneState = { run: false, reveal: 0, plan: null };
+['area', 'alt', 'of', 'os'].forEach(k => $('#in-' + k).oninput = () => { $('#v-' + (k === 'of' ? 'of' : k === 'os' ? 'os' : k)).textContent = $('#in-' + k).value; });
+function drawDroneBase() {
+  dg.fillStyle = '#0f1a14'; dg.fillRect(0, 0, 960, 640);
+  dg.strokeStyle = 'rgba(120,200,150,.08)'; dg.lineWidth = 1;
+  for (let x = 0; x <= 960; x += 80) { dg.beginPath(); dg.moveTo(x, 0); dg.lineTo(x, 640); dg.stroke(); }
+  for (let y = 0; y <= 640; y += 80) { dg.beginPath(); dg.moveTo(0, y); dg.lineTo(960, y); dg.stroke(); }
+}
+function drawDroneIdle() {
+  drawDroneBase();
+  dg.fillStyle = 'rgba(232,201,122,.9)'; dg.font = '600 15px DM Sans'; dg.textAlign = 'center';
+  dg.fillText('Nhấn "Bắt đầu bay khảo sát" để Drone quét lưới tự động', 480, 320);
+  dg.strokeStyle = 'rgba(232,201,122,.5)'; dg.setLineDash([8, 6]); dg.strokeRect(1, 1, 958, 638); dg.setLineDash([]);
+  $('#hud-drone').innerHTML = '<span>Ranh giới 120 × 80 m</span><span>RTK ±2 cm</span>';
+}
+async function planFlight() {
+  const q = `areaHa=${$('#in-area').value}&altitude=${$('#in-alt').value}&overlapFront=${$('#in-of').value}&overlapSide=${$('#in-os').value}`;
+  const p = await api('/drone/plan?' + q); droneState.plan = p;
+  $('#drone-metrics').innerHTML = `
+    <table class="t"><tr><td>GSD</td><td><b>${p.gsdCm} cm/px</b></td></tr><tr><td>Số tuyến bay</td><td><b>${p.lines}</b></td></tr><tr><td>Số ảnh dự kiến</td><td><b>${p.photos}</b></td></tr>
+    <tr><td>Quãng đường bay</td><td><b>${p.pathKm} km</b></td></tr><tr><td>Thời gian bay</td><td><b>${p.flightMin} phút</b></td></tr>
+    <tr><td>Mốc khống chế GCP</td><td><b>${p.gcp} mốc</b></td></tr><tr><td>Tổng hiện trường + xử lý</td><td><b>${p.totalMin} phút</b></td></tr></table>`;
+  renderDroneCmp(); return p;
+}
+function renderDroneCmp() {
+  const p = droneState.plan, ha = +$('#in-area').value, manualMin = (p ? p.manualDays : ha * 6) * 8 * 60, droneMin = p ? p.totalMin : 75;
+  $('#drone-cmp').innerHTML = `
+    <div class="cmp"><span class="lbl">Thủ công</span><div class="bar rose"><i style="width:100%"></i></div><span class="val">${(manualMin / 480).toFixed(1)} ngày</span></div>
+    <div class="cmp"><span class="lbl">Drone RTK + AI</span><div class="bar"><i style="width:${Math.max(3, droneMin / manualMin * 100)}%"></i></div><span class="val">${droneMin} phút</span></div>
+    <div class="small muted mt">Tài liệu dự án: rút ngắn <b>85%</b> thời gian (7 ngày → 1 ngày), độ phân giải ảnh 1–2 cm/pixel.</div>`;
+}
+const STAGES = ['Thiết lập 4–6 mốc khống chế mặt đất (GCP)', 'Drone cất cánh – bay quét lưới tự động', 'Chụp & ghi toạ độ RTK từng ảnh', 'WebODM: dựng mây điểm 3D', 'Sinh DSM / DTM', 'Ghép ảnh trực giao 1–2 cm/px'];
+function setStages(i, done) {
+  $('#drone-stages').innerHTML = STAGES.map((s, k) => `<div class="it ${k < i || done ? 'ok' : k === i ? 'run' : ''}"><i class="fas ${k < i || done ? 'fa-circle-check' : k === i ? 'fa-spinner fa-spin' : 'fa-circle'}"></i>${s}</div>`).join('');
+}
+setStages(-1);
+$('#btn-fly').onclick = async () => {
+  if (droneState.run) return; droneState.run = true; $('#btn-fly').disabled = true;
+  const p = await planFlight(); const lines = Math.min(p.lines, 14);
+  const mx = 40, my = 40, w = 960 - 2 * mx, h = 640 - 2 * my, step = w / (lines - 1);
+  setStages(0); await sleep(900);
+  for (let i = 0; i < 4; i++) { const gx = i % 2 ? 960 - mx : mx, gy = i < 2 ? my : 640 - my; drawDroneBase(); dg.fillStyle = '#e8c97a'; dg.fillRect(gx - 7, gy - 7, 14, 14); }
+  setStages(1);
+  let total = 0, path = [];
+  for (let i = 0; i < lines; i++) { const x = mx + i * step; if (i % 2 === 0) { path.push([x, my], [x, my + h]); } else { path.push([x, my + h], [x, my]); } }
+  const segs = []; for (let i = 0; i < path.length - 1; i++) { const l = Math.hypot(path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1]); segs.push(l); total += l; }
+  const dur = 4800, t0 = performance.now(); let shots = 0;
+  await new Promise(res => {
+    (function frame(now) {
+      const t = Math.min(1, (now - t0) / dur); let d = t * total, k = 0; while (k < segs.length && d > segs[k]) { d -= segs[k]; k++; }
+      k = Math.min(k, segs.length - 1); const f = segs[k] ? d / segs[k] : 0;
+      const px = path[k][0] + (path[k + 1][0] - path[k][0]) * f, py = path[k][1] + (path[k + 1][1] - path[k][1]) * f;
+      drawDroneBase();
+      // ảnh trực giao lộ dần theo phương X
+      const revealW = Math.max(0, px - mx + step * .5); const sx = revealW / (2 * 1) ;
+      dg.save(); dg.beginPath(); dg.rect(0, 0, Math.min(960, mx + (k >> 1) * step + step * .6), 640); dg.clip(); dg.globalAlpha = .96; dg.drawImage(S.ortho, 0, 0, 960, 640); dg.restore();
+      dg.strokeStyle = 'rgba(232,201,122,.9)'; dg.lineWidth = 1.5; dg.beginPath(); dg.moveTo(path[0][0], path[0][1]);
+      for (let i = 1; i <= k; i++) dg.lineTo(path[i][0], path[i][1]); dg.lineTo(px, py); dg.stroke();
+      dg.strokeStyle = 'rgba(255,255,255,.18)'; dg.lineWidth = 1; dg.strokeRect(px - 26, py - 18, 52, 36);
+      dg.fillStyle = '#fff'; dg.beginPath(); dg.arc(px, py, 5, 0, 7); dg.fill();
+      [[-9, -9], [9, -9], [-9, 9], [9, 9]].forEach(o => { dg.strokeStyle = 'rgba(255,255,255,.85)'; dg.beginPath(); dg.arc(px + o[0], py + o[1], 4, 0, 7); dg.stroke(); });
+      shots = Math.floor(t * p.photos);
+      $('#hud-drone').innerHTML = `<span>Ảnh ${shots}/${p.photos}</span><span>Tuyến ${Math.min(lines, (k >> 1) + 1)}/${lines}</span><span>Cao ${p.altitude} m</span><span>${(t * 100).toFixed(0)}%</span>`;
+      if (t < 1) requestAnimationFrame(frame); else res();
+    })(performance.now());
+  });
+  for (let s = 2; s < STAGES.length; s++) { setStages(s); await sleep(800); }
+  setStages(STAGES.length, true);
+  dg.drawImage(S.ortho, 0, 0, 960, 640);
+  $('#hud-drone').innerHTML = `<span>✔ Ảnh trực giao ${p.gsdCm} cm/px</span><span>${p.photos} ảnh</span><span>DSM · DTM sẵn sàng</span>`;
+  toast('Drone hoàn tất – ảnh trực giao, DSM/DTM đã sẵn sàng. Sang bước <b>AI Vision</b>.', 'ok');
+  S.surveyed = true; droneState.run = false; $('#btn-fly').disabled = false;
+};
+planFlight();
+
+/* ───────── 2a. Vision ───────── */
+const vc = $('#cv-vision'), vg = vc.getContext('2d');
+let vis = { n: 0, scan: -1, running: false, done: false };
+function gravePoly(gr) { return { x: gr.x * 8, y: gr.y * 8, w: gr.w * 8, d: gr.d * 8, a: gr.a * Math.PI / 180 }; }
+function drawVision() {
+  vg.drawImage(S.ortho, 0, 0, 960, 640);
+  const labels = $('#chk-labels').checked;
+  S.site.graves.forEach((gr, i) => {
+    const seen = vis.done || (vis.running && gr.x * 8 < vis.scan);
+    if (!seen) return;
+    const p = gravePoly(gr), col = TYPE_COL[gr.type];
+    vg.save(); vg.translate(p.x, p.y); vg.rotate(p.a);
+    vg.fillStyle = col + '55'; vg.fillRect(-p.w / 2 - 2, -p.d / 2 - 2, p.w + 4, p.d + 4);
+    vg.strokeStyle = gr.conf < .8 ? '#ff6b6b' : col; vg.lineWidth = gr.conf < .8 ? 2 : 1.4; vg.setLineDash(gr.conf < .8 ? [4, 3] : []);
+    vg.strokeRect(-p.w / 2 - 2, -p.d / 2 - 2, p.w + 4, p.d + 4); vg.restore(); vg.setLineDash([]);
+    if (labels) { vg.fillStyle = '#fff'; vg.font = '600 9px DM Mono'; vg.textAlign = 'center'; vg.fillText((gr.conf * 100).toFixed(0), p.x, p.y - p.d / 2 - 5); }
+  });
+  if (vis.running) {
+    const g = vg.createLinearGradient(vis.scan - 30, 0, vis.scan, 0); g.addColorStop(0, 'rgba(76,175,145,0)'); g.addColorStop(1, 'rgba(76,175,145,.45)');
+    vg.fillStyle = g; vg.fillRect(vis.scan - 30, 0, 30, 640); vg.fillStyle = '#9ff0cf'; vg.fillRect(vis.scan - 1, 0, 2, 640);
+  }
+  const n = S.site.graves.filter(g => vis.done || (vis.running && g.x * 8 < vis.scan)).length;
+  $('#hud-vision').innerHTML = `<span>${vis.running ? 'Đang quét…' : vis.done ? '✔ Hoàn tất' : 'Sẵn sàng'}</span><span>Phát hiện: ${n}/${S.site.graves.length}</span>`;
+}
+function renderVisionStats(initial) {
+  const gs = S.site.graves, byType = {}; gs.forEach(g => byType[g.type] = (byType[g.type] || 0) + 1);
+  const low = gs.filter(g => g.conf < .8), avg = gs.reduce((a, g) => a + g.conf, 0) / gs.length;
+  $('#vision-legend').innerHTML = Object.entries(TYPE_COL).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join('') + '<span><i style="border:2px dashed #ff6b6b;background:none"></i>Độ tin cậy &lt; 80% – cần kiểm tra</span>';
+  $('#vision-stats').innerHTML = `
+    <div class="grid g2" style="gap:8px"><div class="kpi jade"><div class="lb">Tổng số mộ</div><div class="v">${gs.length}</div></div><div class="kpi"><div class="lb">Độ tin cậy TB</div><div class="v">${(avg * 100).toFixed(1)}%</div></div></div>
+    ${Object.entries(byType).map(([k, v]) => `<div class="cmp"><span class="lbl">${k}</span><div class="bar"><i style="width:${v / gs.length * 100}%;background:${TYPE_COL[k]}"></i></div><span class="val">${v}</span></div>`).join('')}
+    <div class="small mt"><span class="chip rose">${low.length} mộ</span> bị cây che / độ tin cậy thấp → chuyển kỹ thuật viên kiểm tra thủ công.</div>
+    <div class="small muted mt">Mô hình: YOLOv8-seg + SAM · độ chính xác mục tiêu &gt; 91% (dữ liệu mô phỏng).</div>`;
+}
+$('#btn-vision').onclick = async () => {
+  if (vis.running) return; vis = { n: 0, scan: 0, running: true, done: false }; $('#btn-vision').disabled = true;
+  const t0 = performance.now(), dur = 3600;
+  await new Promise(r => (function f(now) { vis.scan = Math.min(1, (now - t0) / dur) * 990; drawVision(); if (vis.scan < 990) requestAnimationFrame(f); else r(); })(performance.now()));
+  vis.running = false; vis.done = true; drawVision(); $('#btn-vision').disabled = false;
+  toast(`AI Vision nhận diện <b>${S.site.graves.length}</b> ngôi mộ, đã gắn toạ độ GIS.`, 'ok');
+};
+$('#chk-labels').onchange = drawVision;
+vc.onclick = e => {
+  const r = vc.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 960 / 8, y = (e.clientY - r.top) / r.height * 640 / 8;
+  let best = null, bd = 3; S.site.graves.forEach(g => { const d = Math.hypot(g.x - x, g.y - y); if (d < bd) { bd = d; best = g; } });
+  if (!best) { $('#vision-info').textContent = 'Không có ngôi mộ tại vị trí này.'; return; }
+  const gps = siteToGps(best.x, best.y);
+  $('#vision-info').innerHTML = `<b>Mộ #${best.id}</b> <span class="chip jade">${best.type}</span><br>Kích thước: ${best.w} × ${best.d} m (${(best.w * best.d).toFixed(1)} m²)<br>Hướng: ${best.a.toFixed(0)}° · Độ tin cậy: <b>${(best.conf * 100).toFixed(1)}%</b><br>Cỏ/rác: ${(best.weed * 100).toFixed(0)}%<br><span class="mono">${gps.lat.toFixed(7)}, ${gps.lng.toFixed(7)}</span>`;
+};
+$('#btn-vision-csv').onclick = () => {
+  const rows = ['id,loai,x_m,y_m,rong_m,dai_m,huong_do,do_tin_cay,lat,lng'];
+  S.site.graves.forEach(g => { const p = siteToGps(g.x, g.y); rows.push([g.id, g.type, g.x, g.y, g.w, g.d, g.a, g.conf, p.lat.toFixed(7), p.lng.toFixed(7)].join(',')); });
+  download('ai_vision_mo_phan.csv', rows.join('\n'), 'text/csv');
+};
+
+/* ───────── 2b. Terrain ───────── */
+const tc = $('#cv-terrain'), tg = tc.getContext('2d'); let tLayer = 'elev';
+$$('#terrain-ctl .btn').forEach(b => b.onclick = () => { tLayer = b.dataset.l; $$('#terrain-ctl .btn').forEach(x => x.classList.toggle('on', x === b)); drawTerrain(); });
+const lerpCol = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+function ramp(t, stops) { t = Math.max(0, Math.min(1, t)); const k = Math.min(stops.length - 2, Math.floor(t * (stops.length - 1))); return lerpCol(stops[k], stops[k + 1], t * (stops.length - 1) - k); }
+function drawTerrain() {
+  const s = S.site, t = S.terrain, C = s.cols, cs = s.cell * 8;
+  tg.drawImage(S.ortho, 0, 0, 960, 640);
+  const minZ = s.minZ, maxZ = s.maxZ;
+  const accMax = Math.log(Math.max(...t.acc) + 1);
+  tg.globalAlpha = tLayer === 'flood' ? 1 : .78;
+  for (let j = 0; j < s.rows; j++) for (let i = 0; i < C; i++) {
+    const k = j * C + i; let c;
+    if (tLayer === 'elev') c = ramp((s.dem[k] - minZ) / (maxZ - minZ), [[44, 110, 150], [78, 160, 110], [200, 200, 100], [190, 130, 70], [250, 245, 235]]);
+    else if (tLayer === 'slope') c = ramp(t.slope[k] / 8, [[240, 248, 232], [250, 220, 120], [235, 120, 70], [160, 30, 40]]);
+    else if (tLayer === 'flow') c = ramp(Math.log(t.acc[k] + 1) / accMax, [[20, 30, 70], [40, 90, 180], [90, 180, 240], [240, 250, 255]]);
+    else continue;
+    tg.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; tg.fillRect(i * cs, j * cs, cs + 1, cs + 1);
+  }
+  tg.globalAlpha = 1;
+  if (tLayer === 'flood') {
+    tg.fillStyle = 'rgba(10,25,10,.35)'; tg.fillRect(0, 0, 960, 640);
+    t.flood.forEach(f => { tg.fillStyle = 'rgba(220,60,70,.5)'; tg.fillRect(f[0] * cs, f[1] * cs, cs, cs); });
+    t.channels.forEach(f => { tg.fillStyle = 'rgba(70,200,255,.9)'; tg.beginPath(); tg.arc(f[0] * cs + cs / 2, f[1] * cs + cs / 2, 5, 0, 7); tg.fill(); });
+  }
+  if (tLayer === 'flow') t.channels.forEach(f => { tg.fillStyle = 'rgba(255,255,255,.55)'; tg.fillRect(f[0] * cs + 5, f[1] * cs + 5, 6, 6); });
+  $('#hud-terrain').innerHTML = `<span>${{ elev: 'Cao độ ' + minZ.toFixed(1) + '–' + maxZ.toFixed(1) + ' m', slope: 'Độ dốc TB ' + t.avgSlope + '°', flow: 'Tích lũy dòng chảy D8', flood: 'Ngập úng & rãnh đề xuất' }[tLayer]}</span>`;
+  $('#terrain-legend').innerHTML = {
+    elev: '<span><i style="background:#2c6e96"></i>Thấp</span><span><i style="background:#c8c864"></i>Trung bình</span><span><i style="background:#faf5eb"></i>Cao</span>',
+    slope: '<span><i style="background:#f0f8e8"></i>0°</span><span><i style="background:#fadc78"></i>~3°</span><span><i style="background:#a01e28"></i>≥ 8°</span>',
+    flow: '<span><i style="background:#142046"></i>Ít nước</span><span><i style="background:#5ab4f0"></i>Dòng nhánh</span><span><i style="background:#f0faff"></i>Dòng chính</span>',
+    flood: '<span><i style="background:#dc3c46"></i>Nguy cơ ngập úng</span><span><i style="background:#46c8ff"></i>Rãnh thoát nước sinh thái đề xuất</span>'
+  }[tLayer];
+}
+function renderTerrainPanel() {
+  const t = S.terrain;
+  $('#terrain-stats').innerHTML = `<div class="grid g2" style="gap:8px">
+    <div class="kpi sky"><div class="lb">Độ dốc TB</div><div class="v">${t.avgSlope}°</div></div><div class="kpi rose"><div class="lb">Dốc tối đa</div><div class="v">${t.maxSlope}°</div></div>
+    <div class="kpi jade"><div class="lb">Ô rãnh thoát nước</div><div class="v">${t.channels.length}</div><div class="s">× 4 m² (lưới 2 m)</div></div><div class="kpi"><div class="lb">Ô nguy cơ ngập</div><div class="v">${t.flood.length}</div><div class="s">${t.pits} điểm trũng đọng nước</div></div></div>`;
+  const pct = (t.flood.length * 4 / (S.site.width * S.site.height) * 100).toFixed(1);
+  $('#terrain-reco').innerHTML = `Khoảng <b>${pct}%</b> diện tích có nguy cơ ngập úng mùa mưa (góc đông-nam trũng).<br>• Bố trí <b>rãnh thoát nước sinh thái</b> theo tuyến cyan, rộng ≥ 1 m.<br>• <b>Không phân lô</b> trên ô ngập – AI Planner đã tự loại các vị trí này.<br>• Hố thu nước + hồ điều hoà ở điểm trũng thấp nhất.`;
+}
+
+/* ───────── 3. Planner ───────── */
+const pc = $('#cv-plan'), pg = pc.getContext('2d');
+function bestPlan() { return S.plan.plans.reduce((a, b) => b.score > a.score ? b : a); }
+function curPlan() { return S.plan.plans.find(p => p.code === S.sel); }
+function renderPlanCards() {
+  const best = bestPlan();
+  $('#plan-cards').innerHTML = S.plan.plans.map(p => `
+    <div class="plan-card ${p.code === S.sel ? 'on' : ''}" onclick="selPlan('${p.code}')">
+      <div class="hd"><span class="code">${p.code}</span><div><b>${p.name}</b>${p.code === best.code ? ' <span class="chip gold"><i class="fas fa-star"></i> AI đề xuất</span>' : ''}${S.chosen === p.code ? ' <span class="chip jade">Đã chọn</span>' : ''}<div class="small muted">${p.description}</div></div><span class="big">${p.gainPct > 0 ? '+' : ''}${p.gainPct}%</span></div>
+      <div class="mini"><div><b>${p.capacity}</b>tổng số ô</div><div><b>${p.relocations}</b>mộ cần di dời</div><div><b>${p.greenPct}%</b>cây xanh</div></div></div>`).join('');
+  $('#plan-table').innerHTML = `<tr><th>Tiêu chí</th>${S.plan.plans.map(p => `<th>PA ${p.code}</th>`).join('')}<th>Hiện trạng</th></tr>
+    <tr><td>Tổng số ô mộ</td>${S.plan.plans.map(p => `<td><b>${p.capacity}</b></td>`).join('')}<td>${S.plan.baseline}</td></tr>
+    <tr><td>Ô trống mới tạo ra</td>${S.plan.plans.map(p => `<td>${p.newSlots}</td>`).join('')}<td>—</td></tr>
+    <tr><td>Tăng so với hiện trạng</td>${S.plan.plans.map(p => `<td class="${p.gainPct > 0 ? '' : 'muted'}"><b style="color:var(--jade)">${p.gainPct > 0 ? '+' : ''}${p.gainPct}%</b></td>`).join('')}<td>—</td></tr>
+    <tr><td>Mộ phải di dời</td>${S.plan.plans.map(p => `<td>${p.relocations} <span class="muted small">(${p.relocationPct}%)</span></td>`).join('')}<td>0</td></tr>
+    <tr><td>Diện tích cây xanh</td>${S.plan.plans.map(p => `<td>${p.greenPct}%</td>`).join('')}<td>—</td></tr>
+    <tr><td>Cây giữ lại / loại bỏ</td>${S.plan.plans.map(p => `<td>${p.treesKept} / ${p.treesRemoved}</td>`).join('')}<td>${S.site.trees.length} / 0</td></tr>
+    <tr><td>Chiều dài đường nội bộ</td>${S.plan.plans.map(p => `<td>${p.roadLengthM} m</td>`).join('')}<td>—</td></tr>`;
+  $('#plan-score').innerHTML = S.plan.plans.map(p => `<div class="cmp"><span class="lbl">PA ${p.code}</span><div class="bar gold"><i style="width:${p.score}%"></i></div><span class="val">${p.score}</span></div>`).join('');
+}
+function selPlan(c) { S.sel = c; renderPlanCards(); drawPlan(); v3.dirty = true; renderV3Ctl(); }
+function drawPlanLayer(g, p, ppm) {
+  const lw = p.lot[0] * ppm, ld = p.lot[1] * ppm, W = S.site.width * ppm, H = S.site.height * ppm;
+  g.fillStyle = 'rgba(30,60,30,.55)'; g.fillRect(0, 0, W, H);
+  g.fillStyle = 'rgba(76,175,110,.45)'; const b = p.belt * ppm;
+  g.fillRect(0, 0, W, b); g.fillRect(0, H - b, W, b); g.fillRect(0, 0, b, H); g.fillRect(W - b, 0, b, H);
+  p.greens.forEach(r => { g.fillStyle = 'rgba(76,175,110,.55)'; g.fillRect(r[0] * ppm, r[1] * ppm, r[2] * ppm, r[3] * ppm); });
+  p.roads.forEach(r => { g.fillStyle = 'rgba(200,170,120,.88)'; g.fillRect(r[0] * ppm, r[1] * ppm, r[2] * ppm, r[3] * ppm); });
+  g.fillStyle = 'rgba(235,245,225,.30)'; g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = .6;
+  p.cells.forEach(c => { g.fillRect(c[0] * ppm + .5, c[1] * ppm + .5, lw - 1, ld - 1); g.strokeRect(c[0] * ppm + .5, c[1] * ppm + .5, lw - 1, ld - 1); });
+  g.fillStyle = 'rgba(232,201,122,.95)'; p.moved.forEach(c => g.fillRect(c[0] * ppm + 1, c[1] * ppm + 1, lw - 2, ld - 2));
+  p.kept.forEach(k => { g.save(); g.translate(k[0] * ppm, k[1] * ppm); g.rotate(k[4] * Math.PI / 180); g.fillStyle = '#e8e1cf'; g.fillRect(-k[2] * ppm / 2, -k[3] * ppm / 2, k[2] * ppm, k[3] * ppm); g.restore(); });
+  p.trees.forEach(t => { g.fillStyle = 'rgba(25,80,30,.92)'; g.beginPath(); g.arc(t[0] * ppm, t[1] * ppm, t[2] * ppm, 0, 7); g.fill(); });
+  S.terrain.channels.forEach(f => { g.fillStyle = 'rgba(70,200,255,.7)'; g.beginPath(); g.arc(f[0] * 16 + 8, f[1] * 16 + 8, 3, 0, 7); g.fill(); });
+}
+function drawPlan() {
+  const p = curPlan(), w = (1 - $('#wipe').value / 100) * 960;   // kéo sang phải = xem phương án nhiều hơn
+  pg.drawImage(S.ortho, 0, 0, 960, 640);
+  if (w < 960) { pg.save(); pg.beginPath(); pg.rect(w, 0, 960 - w, 640); pg.clip(); drawPlanLayer(pg, p, 8); pg.restore(); }
+  pg.fillStyle = '#fff'; pg.fillRect(w - 1.5, 0, 3, 640);
+  pg.fillStyle = 'rgba(0,0,0,.6)'; pg.fillRect(w - 18, 300, 36, 40); pg.fillStyle = '#fff'; pg.font = '700 16px DM Sans'; pg.textAlign = 'center'; pg.fillText('⇆', w, 326);
+  $('#hud-plan').innerHTML = `<span>Phương án ${p.code} – ${p.name}</span><span>${p.capacity} ô · ${p.gainPct > 0 ? '+' : ''}${p.gainPct}%</span>`;
+}
+$('#wipe').oninput = drawPlan;
+$('#btn-choose').onclick = () => { S.chosen = S.sel; localStorage.setItem('ml_plan', S.sel); renderPlanCards(); toast(`Đã chọn <b>Phương án ${S.sel}</b> để trình bày với dân.`, 'ok'); };
+
+/* ───────── 4. 3D trước – sau (canvas tự dựng) ───────── */
+const v3 = {
+  c: $('#cv-3d'), yaw: .6, pitch: .85, zoom: 1, dirty: true, raf: 0, mode: 'before', morph: 0, target: 0, drag: null, meeting: false, mt: 0,
+  start() { if (this.raf) return; const loop = t => { this.raf = requestAnimationFrame(loop); this.tick(t); }; this.raf = requestAnimationFrame(loop); },
+  stop() { cancelAnimationFrame(this.raf); this.raf = 0; },
+  tick() {
+    if ($('#chk-rotate').checked && !this.drag) { this.yaw += .0035; this.dirty = true; }
+    if (this.meeting) { this.mt++; if (this.mt % 260 === 0) { this.target = this.target ? 0 : 1; } }
+    if (Math.abs(this.morph - this.target) > .003) { this.morph += (this.target - this.morph) * .06; this.dirty = true; } else this.morph = this.target;
+    if (this.dirty) { this.dirty = false; this.draw(); }
+  },
+  P(x, y, z) {
+    const cx = x - S.site.width / 2, cy = y - S.site.height / 2, c = Math.cos(this.yaw), s = Math.sin(this.yaw);
+    const rx = cx * c - cy * s, ry = cx * s + cy * c, sc = 4.5 * this.zoom * (this.c.width / 1100);
+    return [this.c.width / 2 + rx * sc, this.c.height / 2 + 30 + (ry * Math.sin(this.pitch) - z * Math.cos(this.pitch)) * sc, ry];
+  },
+  poly(g, pts, fill, stroke) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); if (stroke) { g.strokeStyle = stroke; g.lineWidth = .6; g.stroke(); } },
+  box(g, cx, cy, w, d, ang, h, top, side) {
+    const a = ang * Math.PI / 180, co = Math.cos(a), si = Math.sin(a), hw = w / 2, hd = d / 2;
+    const cr = [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(([x, y]) => [cx + x * co - y * si, cy + x * si + y * co]);
+    const b = cr.map(p => this.P(p[0], p[1], 0)), t = cr.map(p => this.P(p[0], p[1], h));
+    for (let i = 0; i < 4; i++) {
+      const j = (i + 1) % 4, mx = (b[i][2] + b[j][2]) / 2, cz = (b[0][2] + b[1][2] + b[2][2] + b[3][2]) / 4;
+      if (mx > cz) this.poly(g, [b[i], b[j], t[j], t[i]], side(i), null);
+    }
+    this.poly(g, t, top, 'rgba(0,0,0,.25)');
+  },
+  scene(mode) {
+    const items = [], p = S.plan.plans.find(x => x.code === S.sel), L = p.lot;
+    if (mode === 'before') {
+      S.site.graves.forEach(gr => items.push({ y: this.P(gr.x, gr.y, 0)[2], f: g => this.box(g, gr.x, gr.y, gr.w, gr.d, gr.a, gr.type === 'Mộ gia tộc' ? .9 : .5, '#cfc9b6', i => i % 2 ? '#8d8878' : '#a9a392') }));
+      S.site.trees.forEach(t => items.push({ y: this.P(t.x, t.y, 0)[2] + .1, f: g => this.tree(g, t.x, t.y, t.r) }));
+    } else {
+      p.cells.forEach(c => items.push({ y: this.P(c[0] + L[0] / 2, c[1] + L[1] / 2, 0)[2], f: g => this.box(g, c[0] + L[0] / 2, c[1] + L[1] / 2, L[0] - .25, L[1] - .3, 0, .32, '#e3e8dc', i => i % 2 ? '#98a392' : '#b7c0b0') }));
+      p.moved.forEach(c => items.push({ y: this.P(c[0] + L[0] / 2, c[1] + L[1] / 2, 0)[2], f: g => this.box(g, c[0] + L[0] / 2, c[1] + L[1] / 2, L[0] - .25, L[1] - .3, 0, .55, '#e8c97a', i => i % 2 ? '#a58a3c' : '#c4a64f') }));
+      p.kept.forEach(k => items.push({ y: this.P(k[0], k[1], 0)[2], f: g => this.box(g, k[0], k[1], k[2], k[3], k[4], .55, '#e8c97a', i => i % 2 ? '#a58a3c' : '#c4a64f') }));
+      p.trees.forEach(t => items.push({ y: this.P(t[0], t[1], 0)[2] + .1, f: g => this.tree(g, t[0], t[1], t[2]) }));
+    }
+    return { items: items.sort((a, b) => a.y - b.y), p };
+  },
+  tree(g, x, y, r) {
+    const b = this.P(x, y, 0), t = this.P(x, y, 3.2 + r), sc = 4.5 * this.zoom * (this.c.width / 1100);
+    g.strokeStyle = '#5a3f26'; g.lineWidth = Math.max(2, r * sc * .35); g.beginPath(); g.moveTo(b[0], b[1]); g.lineTo(t[0], t[1] + r * sc * .5); g.stroke();
+    const gr = g.createRadialGradient(t[0] - r * sc * .3, t[1] - r * sc * .3, 1, t[0], t[1], r * sc * 1.15); gr.addColorStop(0, '#6fb04f'); gr.addColorStop(1, '#2a5c26');
+    g.fillStyle = gr; g.beginPath(); g.arc(t[0], t[1], r * sc * 1.1, 0, 7); g.fill();
+  },
+  ground(g, alpha, mode, p) {
+    const W = S.site.width, H = S.site.height, q = (x, y) => this.P(x, y, 0);
+    this.poly(g, [q(-8, -8), q(W + 8, -8), q(W + 8, H + 8), q(-8, H + 8)], '#6c8c4c', null);
+    this.poly(g, [q(0, 0), q(W, 0), q(W, H), q(0, H)], '#7a9a58', 'rgba(255,255,255,.4)');
+    if (mode === 'after') {
+      p.greens.forEach(r => this.poly(g, [q(r[0], r[1]), q(r[0] + r[2], r[1]), q(r[0] + r[2], r[1] + r[3]), q(r[0], r[1] + r[3])], '#4f9a45', null));
+      p.roads.forEach(r => this.poly(g, [q(r[0], r[1]), q(r[0] + r[2], r[1]), q(r[0] + r[2], r[1] + r[3]), q(r[0], r[1] + r[3])], '#c8aa78', null));
+      S.terrain.channels.forEach(f => { const x = f[0] * 2 + 1, y = f[1] * 2 + 1; this.poly(g, [q(x - 1, y - 1), q(x + 1, y - 1), q(x + 1, y + 1), q(x - 1, y + 1)], 'rgba(60,170,230,.75)', null); });
+    } else {
+      this.poly(g, [q(W / 2 - 1, 0), q(W / 2 + 1, 0), q(W / 2 + 1, H), q(W / 2 - 1, H)], '#b09a6c', null);
+    }
+  },
+  draw() {
+    const g = this.c.getContext('2d'); g.clearRect(0, 0, this.c.width, this.c.height);
+    const layers = []; if (this.morph < .999) layers.push(['before', 1 - this.morph]); if (this.morph > .001) layers.push(['after', this.morph]);
+    layers.forEach(([m, a]) => { const sc = this.scene(m); g.save(); g.globalAlpha = a; this.ground(g, a, m, sc.p); sc.items.forEach(i => i.f(g)); g.restore(); });
+    const p = curPlan();
+    $('#hud-3d').innerHTML = this.morph < .5 ? `<span>HIỆN TRẠNG · ${S.site.graves.length} mộ lộn xộn, nhiều hướng</span>` : `<span>SAU QUY HOẠCH · PA ${p.code}: ${p.capacity} ô (${p.gainPct > 0 ? '+' : ''}${p.gainPct}%)</span>`;
+  }
+};
+function renderV3Ctl() {
+  $('#v3-ctl').innerHTML = `<button class="btn ghost sm ${v3.target === 0 ? 'on' : ''}" onclick="v3set(0)"><i class="fas fa-clock-rotate-left"></i> Hiện trạng</button>` +
+    S.plan.plans.map(p => `<button class="btn ghost sm ${v3.target === 1 && S.sel === p.code ? 'on' : ''}" onclick="S.sel='${p.code}';renderPlanCards();v3set(1)"><i class="fas fa-draw-polygon"></i> PA ${p.code} · ${p.name}</button>`).join('');
+}
+function v3set(t) { v3.target = t; v3.meeting = false; v3.dirty = true; renderV3Ctl(); }
+$('#btn-meeting').onclick = () => { v3.meeting = !v3.meeting; v3.mt = 0; toast(v3.meeting ? 'Chế độ họp dân: tự chuyển Trước ↔ Sau' : 'Đã tắt chế độ họp dân'); };
+const cv3 = v3.c;
+cv3.onmousedown = e => { v3.drag = [e.clientX, e.clientY]; cv3.style.cursor = 'grabbing'; };
+window.addEventListener('mouseup', () => { v3.drag = null; cv3.style.cursor = 'grab'; });
+window.addEventListener('mousemove', e => { if (!v3.drag) return; v3.yaw += (e.clientX - v3.drag[0]) * .008; v3.pitch = Math.max(.25, Math.min(1.45, v3.pitch + (e.clientY - v3.drag[1]) * .006)); v3.drag = [e.clientX, e.clientY]; v3.dirty = true; });
+cv3.addEventListener('wheel', e => { e.preventDefault(); v3.zoom = Math.max(.5, Math.min(3, v3.zoom * (e.deltaY < 0 ? 1.1 : .91))); v3.dirty = true; }, { passive: false });
+
+/* ───────── 5-6. Bàn giao ───────── */
+function renderHandover() {
+  const p = curPlan();
+  $('#handover-sum').innerHTML = `<div class="grid g4">
+    <div class="kpi jade"><div class="lb">Phương án</div><div class="v">${p.code}</div><div class="s">${p.name}${S.chosen === p.code ? ' · đã duyệt họp dân' : ' · chưa duyệt'}</div></div>
+    <div class="kpi"><div class="lb">Tổng số ô mộ</div><div class="v">${p.capacity}</div><div class="s up">${p.gainPct > 0 ? '+' : ''}${p.gainPct}% so với hiện trạng</div></div>
+    <div class="kpi sky"><div class="lb">Ô trống mới</div><div class="v">${p.newSlots}</div><div class="s">≈ ${(p.newSlots * 3.4 / 10000).toFixed(2)} ha quỹ đất sử dụng</div></div>
+    <div class="kpi rose"><div class="lb">Mộ di dời</div><div class="v">${p.relocations}</div><div class="s">${p.relocationPct}% mộ hiện hữu</div></div></div>`;
+}
+function plotCells() {
+  const p = curPlan(), L = p.lot, out = [];
+  let n = 1; const code = i => `VN-HN-BV-TL-${String(i).padStart(4, '0')}`;
+  p.moved.forEach(c => out.push({ id: code(n++), x: c[0], y: c[1], st: 'Đã có mộ (di dời về)' }));
+  p.kept.forEach(k => out.push({ id: code(n++), x: k[0] - L[0] / 2, y: k[1] - L[1] / 2, st: 'Đã có mộ (giữ nguyên)' }));
+  p.cells.forEach(c => out.push({ id: code(n++), x: c[0], y: c[1], st: 'Trống' }));
+  return { cells: out, L };
+}
+$('#btn-gis-csv').onclick = () => {
+  const { cells, L } = plotCells(), rows = ['ma_dinh_danh_gis,trang_thai,x_m,y_m,lat,lng'];
+  cells.forEach(c => { const g = siteToGps(c.x + L[0] / 2, c.y + L[1] / 2); rows.push([c.id, c.st, c.x.toFixed(2), c.y.toFixed(2), g.lat.toFixed(7), g.lng.toFixed(7)].join(',')); });
+  download(`gis_phan_lo_PA${S.sel}.csv`, rows.join('\n'), 'text/csv');
+  $('#gis-out').innerHTML = `<span class="chip jade"><i class="fas fa-check"></i> Đã cấp ${cells.length} mã định danh</span> <span class="small muted">VD: ${cells[0].id}, ${cells[1].id}…</span>`;
+  toast(`Đã xuất ${cells.length} ô mộ kèm mã định danh GIS.`, 'ok');
+};
+$('#btn-geojson').onclick = () => {
+  const { cells, L } = plotCells();
+  const fc = { type: 'FeatureCollection', features: cells.map(c => { const a = siteToGps(c.x, c.y), b = siteToGps(c.x + L[0], c.y + L[1]); return { type: 'Feature', properties: { id: c.id, status: c.st }, geometry: { type: 'Polygon', coordinates: [[[a.lng, a.lat], [b.lng, a.lat], [b.lng, b.lat], [a.lng, b.lat], [a.lng, a.lat]]] } }; }) };
+  download(`gis_phan_lo_PA${S.sel}.geojson`, JSON.stringify(fc), 'application/geo+json');
+  toast('Đã xuất GeoJSON – có thể mở bằng QGIS / Google Earth.', 'ok');
+};
+function markers() {
+  const W = S.site.width, H = S.site.height, p = curPlan(), m = [['Góc TB', 0, 0], ['Góc ĐB', W, 0], ['Góc ĐN', W, H], ['Góc TN', 0, H], ['Cổng chính', W / 2, H]];
+  p.greens.forEach((r, i) => m.push([`Dải xanh ${i + 1}`, r[0], r[1]]));
+  m.push(['Hố thu nước', 92, 58]); return m.map((x, i) => ({ id: 'MOC-' + String(i + 1).padStart(2, '0'), name: x[0], x: x[1], y: x[2] }));
+}
+$('#btn-mocs').onclick = () => {
+  const rows = ['ma_moc,ten,x_m,y_m,lat,lng'];
+  markers().forEach(m => { const g = siteToGps(m.x, m.y); rows.push([m.id, m.name, m.x, m.y, g.lat.toFixed(8), g.lng.toFixed(8)].join(',')); });
+  download('toa_do_moc_RTK.csv', rows.join('\n'), 'text/csv'); toast('Đã xuất toạ độ mốc cho máy RTK cầm tay.', 'ok');
+};
+$('#btn-audit').onclick = async () => {
+  $('#audit-out').innerHTML = '<span class="spin"></span> Drone đang bay kiểm định…'; await sleep(1600);
+  const R = rng(5), ms = markers().map(m => ({ ...m, dx: (R() - .5) * 6, dy: (R() - .5) * 6 }));
+  const ok = ms.filter(m => Math.hypot(m.dx, m.dy) <= 3.5).length, mean = ms.reduce((a, m) => a + Math.hypot(m.dx, m.dy), 0) / ms.length;
+  $('#audit-out').innerHTML = `<div class="small mb"><span class="chip ${ok === ms.length ? 'jade' : 'gold'}">${ok}/${ms.length} mốc đạt (≤ 3,5 cm)</span> độ lệch TB <b>${mean.toFixed(1)} cm</b></div>
+    <div class="tw" style="max-height:200px;overflow:auto"><table class="t"><tr><th>Mốc</th><th>ΔX</th><th>ΔY</th><th>Lệch</th></tr>${ms.map(m => { const d = Math.hypot(m.dx, m.dy); return `<tr><td>${m.id} · ${m.name}</td><td>${m.dx.toFixed(1)}</td><td>${m.dy.toFixed(1)}</td><td><span class="chip ${d <= 3.5 ? 'jade' : 'rose'}">${d.toFixed(1)} cm</span></td></tr>`; }).join('')}</table></div>`;
+};
+
+/* ───────── Forecast ───────── */
+let fcData = null, fcZone = 'A', fcChart = null;
+async function loadForecast() {
+  if (!fcData) fcData = await api('/forecast');
+  $('#zone-chips').innerHTML = fcData.map(z => `<span class="zone-chip ${z.zone === fcZone ? 'on' : ''}" onclick="fcZone='${z.zone}';loadForecast()">Khu ${z.zone}</span>`).join('');
+  const z = fcData.find(x => x.zone === fcZone);
+  $('#fc-model').textContent = z.model.split('(')[0].trim();
+  const labels = [...z.historyLabels, ...z.forecastLabels];
+  const hist = [...z.history, ...Array(24).fill(null)];
+  const fc = [...Array(35).fill(null), z.history[35], ...z.forecast];
+  const up = fc.map(v => v == null ? null : v + z.band), lo = fc.map(v => v == null ? null : Math.max(0, v - z.band));
+  if (fcChart) fcChart.destroy();
+  fcChart = new Chart($('#fc-chart'), { type: 'line', data: { labels, datasets: [
+    { label: 'Thực tế', data: hist, borderColor: '#1a1a2e', backgroundColor: '#1a1a2e', borderWidth: 2, pointRadius: 0, tension: .3 },
+    { label: 'Dự báo', data: fc, borderColor: '#2e7d6b', borderDash: [6, 4], borderWidth: 2.5, pointRadius: 0, tension: .3 },
+    { label: 'Cận trên', data: up, borderColor: 'transparent', backgroundColor: 'rgba(46,125,107,.14)', pointRadius: 0, fill: '+1', tension: .3 },
+    { label: 'Cận dưới', data: lo, borderColor: 'transparent', pointRadius: 0, tension: .3 }] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { filter: i => i.datasetIndex < 2 } } }, scales: { x: { ticks: { maxTicksLimit: 12 } }, y: { title: { display: true, text: 'Số ca an táng / tháng' } } } } });
+  const rc = z.risk === 'Cao' ? 'rose' : z.risk === 'Trung bình' ? 'gold' : 'jade';
+  $('#fc-kpi').innerHTML = `<div class="kpi ${rc === 'rose' ? 'rose' : 'jade'}"><div class="lb">Dự báo hết đất</div><div class="v">${z.depletion}</div><div class="s">${z.monthsLeft != null ? 'còn khoảng ' + z.monthsLeft + ' tháng' : 'hơn 10 năm'}</div></div>
+    <div class="mt"><div class="cmp"><span class="lbl">Sức chứa</span><span class="val" style="flex:1;text-align:left">${z.capacity} ô</span></div>
+    <div class="cmp"><span class="lbl">Đã sử dụng</span><div class="bar gold"><i style="width:${z.used / z.capacity * 100}%"></i></div><span class="val">${z.used}</span></div>
+    <div class="cmp"><span class="lbl">Còn trống</span><div class="bar"><i style="width:${z.remaining / z.capacity * 100}%"></i></div><span class="val">${z.remaining}</span></div>
+    <div class="cmp"><span class="lbl">TB/tháng</span><span class="val" style="flex:1;text-align:left">${z.avgPerMonth} ca</span></div>
+    <div class="cmp"><span class="lbl">Rủi ro</span><span class="chip ${rc}">${z.risk}</span></div>
+    <div class="cmp"><span class="lbl">Sai số MAPE</span><span class="val" style="flex:1;text-align:left">${z.mape}%</span></div></div>
+    <div class="info-box mt">${z.risk === 'Cao' ? `⚠ Khu ${z.zone} sẽ hết ô trống vào <b>${z.depletion}</b>. Khuyến nghị chạy <b>AI Planner</b> để tối ưu quỹ đất (+20–30%) hoặc lập kế hoạch mở rộng trước 12 tháng.` : `Khu ${z.zone} còn đủ quỹ đất. Có thể kéo dài thêm ~${Math.round(z.remaining * .25 / z.avgPerMonth / 12 * 10) / 10} năm nếu quy hoạch tối ưu bằng AI Planner.`}</div>`;
+  $('#fc-table').innerHTML = `<tr><th>Khu</th><th>Sức chứa</th><th>Còn trống</th><th>TB/tháng</th><th>Hết đất dự kiến</th><th>Rủi ro</th></tr>` + fcData.map(x => `<tr style="cursor:pointer" onclick="fcZone='${x.zone}';loadForecast()"><td><b>Khu ${x.zone}</b></td><td>${x.capacity}</td><td>${x.remaining}</td><td>${x.avgPerMonth}</td><td>${x.depletion}</td><td><span class="chip ${x.risk === 'Cao' ? 'rose' : x.risk === 'Trung bình' ? 'gold' : 'jade'}">${x.risk}</span></td></tr>`).join('');
+}
+</script>
+</body>
+</html>

@@ -15,6 +15,9 @@ public class SmartCemDb : DbContext
     public DbSet<ZoneMap> ZoneMaps => Set<ZoneMap>();
     public DbSet<ServicePackage> ServicePackages => Set<ServicePackage>();
     public DbSet<ServiceOrderFull> ServiceOrdersFull => Set<ServiceOrderFull>();
+    public DbSet<Partner> Partners => Set<Partner>();
+    public DbSet<CareJob> CareJobs => Set<CareJob>();
+    public DbSet<PlanningProject> PlanningProjects => Set<PlanningProject>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -25,6 +28,7 @@ public class SmartCemDb : DbContext
         mb.Entity<ZoneMap>().HasIndex(z => z.Code).IsUnique();
         mb.Entity<ServiceOrderFull>().HasIndex(o => o.OrderCode).IsUnique();
         mb.Entity<ServicePackage>().HasIndex(p => p.Code).IsUnique();
+        mb.Entity<CareJob>().HasIndex(j => j.JobCode).IsUnique();
     }
 }
 
@@ -48,82 +52,82 @@ public static class DbSeeder
         var graves = new List<Grave>
         {
             new() {
-                FullName="Nguyễn Văn An", Alias="Cụ Ba",
+                FullName="Nguyễn Văn A", Alias="Cụ Ba",
                 BornYear=1940, DiedYear=2018,
                 DiedDate=new DateTime(2018, 11, 5), LunarDeathDate="28/09 Âm lịch",
                 Zone="A", LotCode="A-01-01", GraveType="Mộ đơn", AreaM2=4.0,
                 Hometown="Hà Nội",
-                ContactName="Nguyễn Thế Bình", ContactRelation="Con trưởng", ContactPhone="0912.345.001", ContactAddress="Số 12 Quán Thánh, Ba Đình, Hà Nội",
+                ContactName="Nguyễn Văn M", ContactRelation="Con trưởng", ContactPhone="0877xxxxxx", ContactAddress="Hà Nội",
                 ContractType="Thuê 20 năm", ContractStartDate=new DateTime(2018, 11, 10), ContractEndDate=today.AddDays(25), // Sắp hết hạn trong 25 ngày!
                 Status=GraveStatus.Active, Notes="Gia đình thường cúng rằm tháng 7 và tiết Thanh minh"
             },
             new() {
-                FullName="Trần Thị Bích", Alias="Bà Hai",
+                FullName="Trần Thị B", Alias="Bà Hai",
                 BornYear=1955, DiedYear=2020,
                 DiedDate=new DateTime(2020, 10, 31), LunarDeathDate="15/09 Âm lịch", // Ngày giỗ sắp tới trong vài ngày!
                 Zone="A", LotCode="A-01-02", GraveType="Mộ đôi", AreaM2=7.0,
                 Hometown="Nam Định",
-                ContactName="Trần Văn Cường", ContactRelation="Con trai", ContactPhone="0983.111.002", ContactAddress="Phường Lộc Vượng, TP. Nam Định",
+                ContactName="Trần Văn N", ContactRelation="Con trai", ContactPhone="0877xxxxxx", ContactAddress="Nam Định",
                 ContractType="Vĩnh viễn", ContractStartDate=new DateTime(2020, 11, 1),
                 Status=GraveStatus.Active, Notes="Đã làm lễ tạ mộ năm 2023"
             },
             new() {
-                FullName="Lê Văn Hùng", Alias="",
+                FullName="Lê Văn C", Alias="",
                 BornYear=1948, DiedYear=2019,
                 DiedDate=new DateTime(2019, 11, 12), LunarDeathDate="16/10 Âm lịch", // Giỗ sắp tới trong 2 tuần!
                 Zone="B", LotCode="B-02-01", GraveType="Mộ đơn", AreaM2=3.5,
                 Hometown="Thanh Hóa",
-                ContactName="Lê Thu Hà", ContactRelation="Con gái", ContactPhone="0904.555.003", ContactAddress="P402 Chung cư Sunrise, Cầu Giấy, Hà Nội",
+                ContactName="Lê Thị P", ContactRelation="Con gái", ContactPhone="0877xxxxxx", ContactAddress="Hà Nội",
                 ContractType="Thuê 20 năm", ContractStartDate=new DateTime(2019, 11, 15), ContractEndDate=today.AddDays(-10), // Đã hết hạn cách đây 10 ngày!
                 Status=GraveStatus.Active, Notes="Cần liên hệ gia đình gia hạn phí quản lý"
             },
             new() {
-                FullName="Phạm Thị Lan", Alias="Cụ bà Lan",
+                FullName="Phạm Thị D", Alias="Cụ bà",
                 BornYear=1960, DiedYear=2022,
                 DiedDate=new DateTime(2022, 5, 20), LunarDeathDate="20/04 Âm lịch",
                 Zone="B", LotCode="B-02-02", GraveType="Mộ đơn", AreaM2=3.5,
                 Hometown="Hải Phòng",
-                ContactName="Phạm Văn Dũng", ContactRelation="Cháu đích tôn", ContactPhone="0977.888.004", ContactAddress="Lê Chân, TP. Hải Phòng",
+                ContactName="Phạm Văn Q", ContactRelation="Cháu đích tôn", ContactPhone="0877xxxxxx", ContactAddress="Hải Phòng",
                 ContractType="Vĩnh viễn", ContractStartDate=new DateTime(2022, 5, 25),
                 Status=GraveStatus.Active, Notes="Gói chăm sóc dâng hoa hàng tháng"
             },
             new() {
-                FullName="Hoàng Văn Thắng", Alias="",
+                FullName="Hoàng Văn E", Alias="",
                 BornYear=1935, DiedYear=2015,
                 DiedDate=new DateTime(2015, 11, 8), LunarDeathDate="27/09 Âm lịch", // Giỗ sắp tới!
                 Zone="C", LotCode="C-01-01", GraveType="Mộ gia tộc", AreaM2=15.0,
                 Hometown="Thừa Thiên Huế",
-                ContactName="Hoàng Tuấn Minh", ContactRelation="Trưởng tộc", ContactPhone="0913.999.005", ContactAddress="TP. Huế",
+                ContactName="Hoàng Văn R", ContactRelation="Trưởng tộc", ContactPhone="0877xxxxxx", ContactAddress="TP. Huế",
                 ContractType="Vĩnh viễn", ContractStartDate=new DateTime(2015, 11, 10),
                 Status=GraveStatus.Active, Notes="Khuôn viên gia tộc họ Hoàng"
             },
             new() {
-                FullName="Vũ Thị Hoa", Alias="",
+                FullName="Vũ Thị G", Alias="",
                 BornYear=1970, DiedYear=2023,
                 DiedDate=new DateTime(2023, 8, 14), LunarDeathDate="28/06 Âm lịch",
                 Zone="A", LotCode="A-02-01", GraveType="Mộ đơn", AreaM2=3.5,
                 Hometown="Hà Nội",
-                ContactName="Vũ Mạnh Tuấn", ContactRelation="Chồng", ContactPhone="0915.222.006", ContactAddress="Đống Đa, Hà Nội",
+                ContactName="Vũ Văn S", ContactRelation="Chồng", ContactPhone="0877xxxxxx", ContactAddress="Hà Nội",
                 ContractType="Thuê 30 năm", ContractStartDate=new DateTime(2023, 8, 20), ContractEndDate=new DateTime(2053, 8, 20),
                 Status=GraveStatus.Pending, Notes="Đang chờ hoàn thiện ốp đá hoa cương"
             },
             new() {
-                FullName="Đặng Văn Long", Alias="",
+                FullName="Đặng Văn H", Alias="",
                 BornYear=1952, DiedYear=2021,
                 DiedDate=new DateTime(2021, 12, 1), LunarDeathDate="27/10 Âm lịch",
                 Zone="E", LotCode="E-01-01", GraveType="Mộ đơn", AreaM2=4.0,
                 Hometown="Bắc Giang",
-                ContactName="Đặng Thị Nga", ContactRelation="Con gái", ContactPhone="0966.777.007", ContactAddress="TP. Bắc Giang",
+                ContactName="Đặng Thị T", ContactRelation="Con gái", ContactPhone="0877xxxxxx", ContactAddress="TP. Bắc Giang",
                 ContractType="Thuê 20 năm", ContractStartDate=new DateTime(2021, 12, 5), ContractEndDate=today.AddDays(45), // Sắp hết hạn trong 45 ngày
                 Status=GraveStatus.Active, Notes="Đăng ký dịch vụ thắp hương ngày rằm và mùng 1"
             },
             new() {
-                FullName="Bùi Thị Tuyết", Alias="",
+                FullName="Bùi Thị K", Alias="",
                 BornYear=1945, DiedYear=2016,
                 DiedDate=new DateTime(2016, 4, 18), LunarDeathDate="12/03 Âm lịch",
                 Zone="C", LotCode="C-02-01", GraveType="Mộ đơn", AreaM2=3.5,
                 Hometown="Hà Nam",
-                ContactName="Bùi Văn Sang", ContactRelation="Em trai", ContactPhone="0903.444.008", ContactAddress="Phủ Lý, Hà Nam",
+                ContactName="Bùi Văn U", ContactRelation="Em trai", ContactPhone="0877xxxxxx", ContactAddress="Phủ Lý, Hà Nam",
                 ContractType="Vĩnh viễn", ContractStartDate=new DateTime(2016, 4, 25),
                 Status=GraveStatus.Active, Notes="Cụ bà thích hoa cúc vàng"
             },
@@ -131,12 +135,12 @@ public static class DbSeeder
         db.Graves.AddRange(graves);
 
         db.AuditLogs.AddRange(
-            new AuditLog { Action="add",     Content="Thêm hồ sơ: Nguyễn Văn An (A-01-01)", PerformedBy="Admin", At=DateTime.UtcNow.AddDays(-10) },
+            new AuditLog { Action="add",     Content="Thêm hồ sơ: Nguyễn Văn A (A-01-01)", PerformedBy="Admin", At=DateTime.UtcNow.AddDays(-10) },
             new AuditLog { Action="import",  Content="Import 50 hồ sơ từ Excel – Khu Vĩnh Phúc", PerformedBy="Admin", At=DateTime.UtcNow.AddDays(-7) },
-            new AuditLog { Action="qr",      Content="Xuất QR: Trần Thị Bích (A-01-02)", PerformedBy="Staff", At=DateTime.UtcNow.AddDays(-3) },
+            new AuditLog { Action="qr",      Content="Xuất QR: Trần Thị B (A-01-02)", PerformedBy="Staff", At=DateTime.UtcNow.AddDays(-3) },
             new AuditLog { Action="service", Content="Tạo đơn dịch vụ SVO-2024-00001: Vệ sinh định kỳ", PerformedBy="Staff", At=DateTime.UtcNow.AddDays(-2) },
             new AuditLog { Action="payment", Content="Thanh toán đơn SVO-2024-00001: 350,000 VND (bank)", PerformedBy="Admin", At=DateTime.UtcNow.AddDays(-1) },
-            new AuditLog { Action="edit",    Content="Cập nhật thời hạn hợp đồng: Lê Văn Hùng (B-02-01)", PerformedBy="Admin", At=DateTime.UtcNow.AddHours(-12) }
+            new AuditLog { Action="edit",    Content="Cập nhật hồ sơ: Lê Văn C (B-02-01)", PerformedBy="Admin", At=DateTime.UtcNow.AddHours(-12) }
         );
         db.SaveChanges();
 
@@ -208,12 +212,12 @@ public static class DbSeeder
         var svGraves   = db.Graves.ToList();
         var orderSeed  = new List<ServiceOrderFull>
         {
-            new() { OrderCode="SVO-2024-00001", GraveId=svGraves[0].Id, PackageId=svPackages[0].Id, ServiceName=svPackages[0].Name, Price=350000, Status=ServiceOrderFullStatus.Done, AssignedTo="NV. Bảo", ScheduledAt=DateTime.UtcNow.AddDays(-2), CompletedAt=DateTime.UtcNow.AddDays(-2), CompletionNote="Đã dọn sạch cỏ, lau bóng lư hương, gửi ảnh Zalo cho anh Bình", IsPaid=true, PaymentMethod="bank", PaidAt=DateTime.UtcNow.AddDays(-2) },
-            new() { OrderCode="SVO-2024-00002", GraveId=svGraves[1].Id, PackageId=svPackages[1].Id, ServiceName=svPackages[1].Name, Price=150000, Status=ServiceOrderFullStatus.InProgress, AssignedTo="NV. Lan", ScheduledAt=DateTime.UtcNow.AddDays(1), Notes="Cắm hoa cúc vàng đại đóa chuẩn bị ngày giỗ", IsPaid=true, PaymentMethod="cash", PaidAt=DateTime.UtcNow.AddDays(-1) },
-            new() { OrderCode="SVO-2024-00003", GraveId=svGraves[2].Id, PackageId=svPackages[2].Id, ServiceName=svPackages[2].Name, Price=1200000, Status=ServiceOrderFullStatus.Confirmed, AssignedTo="NV. Nam", ScheduledAt=DateTime.UtcNow.AddDays(3), Notes="Gói chăm sóc tháng – Chị Hà đăng ký", IsPaid=false },
+            new() { OrderCode="SVO-2024-00001", GraveId=svGraves[0].Id, PackageId=svPackages[0].Id, ServiceName=svPackages[0].Name, Price=350000, Status=ServiceOrderFullStatus.Done, AssignedTo="NV. A", ScheduledAt=DateTime.UtcNow.AddDays(-2), CompletedAt=DateTime.UtcNow.AddDays(-2), CompletionNote="Đã dọn sạch cỏ, lau bóng lư hương, gửi ảnh Zalo cho anh M", IsPaid=true, PaymentMethod="bank", PaidAt=DateTime.UtcNow.AddDays(-2) },
+            new() { OrderCode="SVO-2024-00002", GraveId=svGraves[1].Id, PackageId=svPackages[1].Id, ServiceName=svPackages[1].Name, Price=150000, Status=ServiceOrderFullStatus.InProgress, AssignedTo="NV. B", ScheduledAt=DateTime.UtcNow.AddDays(1), Notes="Cắm hoa cúc vàng đại đóa chuẩn bị ngày giỗ", IsPaid=true, PaymentMethod="cash", PaidAt=DateTime.UtcNow.AddDays(-1) },
+            new() { OrderCode="SVO-2024-00003", GraveId=svGraves[2].Id, PackageId=svPackages[2].Id, ServiceName=svPackages[2].Name, Price=1200000, Status=ServiceOrderFullStatus.Confirmed, AssignedTo="NV. C", ScheduledAt=DateTime.UtcNow.AddDays(3), Notes="Gói chăm sóc tháng – chị P đăng ký", IsPaid=false },
             new() { OrderCode="SVO-2024-00004", GraveId=svGraves[3].Id, PackageId=svPackages[4].Id, ServiceName=svPackages[4].Name, Price=200000, Status=ServiceOrderFullStatus.Pending, ScheduledAt=DateTime.UtcNow.AddDays(4), Notes="Yêu cầu cắt tỉa lại cây tùng trước mộ" },
-            new() { OrderCode="SVO-2024-00005", GraveId=svGraves[4].Id, PackageId=svPackages[5].Id, ServiceName=svPackages[5].Name, Price=2500000, Status=ServiceOrderFullStatus.Confirmed, AssignedTo="NV. Toàn", ScheduledAt=DateTime.UtcNow.AddDays(6), Notes="Lễ cúng giỗ lần thứ 10 – Gia đình đặt mâm cỗ chay đặc biệt", IsPaid=true, PaymentMethod="qr", PaidAt=DateTime.UtcNow },
-            new() { OrderCode="SVO-2024-00006", GraveId=svGraves[6].Id, PackageId=svPackages[3].Id, ServiceName=svPackages[3].Name, Price=12000000, Discount=1000000, Status=ServiceOrderFullStatus.InProgress, AssignedTo="NV. Bảo", ScheduledAt=DateTime.UtcNow.AddDays(2), Notes="Gói chăm sóc năm trọn gói cho cụ Long", IsPaid=true, PaymentMethod="bank", PaidAt=DateTime.UtcNow.AddDays(-15) },
+            new() { OrderCode="SVO-2024-00005", GraveId=svGraves[4].Id, PackageId=svPackages[5].Id, ServiceName=svPackages[5].Name, Price=2500000, Status=ServiceOrderFullStatus.Confirmed, AssignedTo="NV. D", ScheduledAt=DateTime.UtcNow.AddDays(6), Notes="Lễ cúng giỗ lần thứ 10 – Gia đình đặt mâm cỗ chay đặc biệt", IsPaid=true, PaymentMethod="qr", PaidAt=DateTime.UtcNow },
+            new() { OrderCode="SVO-2024-00006", GraveId=svGraves[6].Id, PackageId=svPackages[3].Id, ServiceName=svPackages[3].Name, Price=12000000, Discount=1000000, Status=ServiceOrderFullStatus.InProgress, AssignedTo="NV. A", ScheduledAt=DateTime.UtcNow.AddDays(2), Notes="Gói chăm sóc năm trọn gói cho cụ H", IsPaid=true, PaymentMethod="bank", PaidAt=DateTime.UtcNow.AddDays(-15) },
             new() { OrderCode="SVO-2024-00007", GraveId=svGraves[7].Id, PackageId=svPackages[0].Id, ServiceName=svPackages[0].Name, Price=350000, Status=ServiceOrderFullStatus.Cancelled, Notes="Thân nhân hoãn lại do có việc đột xuất", IsPaid=false },
         };
         db.ServiceOrdersFull.AddRange(orderSeed);

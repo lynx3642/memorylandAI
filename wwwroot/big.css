@@ -49,3 +49,82 @@ table.t td{padding:12px 10px!important}
 .modal{max-width:520px}
 .modal h3{font-size:22px}
 .ml-brand small{font-size:12.5px!important;display:block}
+
+/* ===== TỐI ƯU ĐIỆN THOẠI ===== */
+html{-webkit-text-size-adjust:100%}
+img,canvas,svg,video{max-width:100%}
+.table-wrap,.tw{-webkit-overflow-scrolling:touch}
+@media(max-width:768px){
+  body{font-size:15.5px!important}
+  /* sidebar trượt ẩn hoàn toàn (ghi đè width:290px) */
+  .sidebar{position:fixed!important;left:-310px!important;top:0;bottom:0;width:285px!important;max-width:85vw;transition:left .28s ease!important;box-shadow:none}
+  .sidebar.open{left:0!important;box-shadow:8px 0 40px rgba(0,0,0,.5)}
+  #app{height:100dvh}
+  .topbar{padding:0 12px!important;gap:8px!important}
+  .topbar-title{font-size:18px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sidebar-toggle{display:flex!important;align-items:center;justify-content:center;width:44px;height:44px;font-size:20px!important}
+  .content{padding:12px!important}
+  .card{padding:14px!important}
+  .card-title,.card h3{font-size:17px!important}
+  .stats-grid{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  .stat-card{padding:13px!important}
+  .stat-value,.kpi .v{font-size:24px!important}
+  .stat-label,.kpi .lb{font-size:11.5px!important}
+  .stat-sub,.kpi .s{font-size:12.5px!important}
+  .btn{padding:10px 14px!important;font-size:14.5px!important}
+  .search-bar{flex-direction:column}
+  .search-input-wrap{min-width:0!important;width:100%}
+  .filter-select{width:100%}
+  .form-grid{grid-template-columns:1fr!important}
+  .alert-item{flex-wrap:wrap;gap:6px}
+  table{font-size:14px!important}
+  th,td{padding:10px 9px!important}
+  th{font-size:11.5px!important}
+  .table-wrap table,.tw table{min-width:560px}
+  /* modal gần như toàn màn hình */
+  .modal-ov,.modal-bg{align-items:flex-end!important;padding:0!important}
+  .modal{width:100%!important;max-width:100%!important;border-radius:18px 18px 0 0!important;padding:18px!important;max-height:92dvh!important}
+  .modal-h h3,.modal h3{font-size:19px!important}
+  .modal-foot{flex-wrap:wrap}
+  .modal-foot .btn{flex:1;justify-content:center}
+  #toast-container,.toast-box{left:12px!important;right:12px!important;bottom:12px!important}
+  .toast{max-width:none}
+  /* các trang gia đình / đối tác / công cụ (ml.css) */
+  .ml-top{padding:0 10px!important;height:56px!important;gap:4px}
+  .ml-brand{margin-right:6px}
+  .ml-brand small,.ml-badge-sim{display:none!important}
+  .ml-brand b{font-size:16px!important}
+  .ml-nav a{font-size:14px!important;padding:8px 11px!important}
+  h1.page-title{font-size:22px!important}
+  .hero{padding:18px!important}
+  .hero h1{font-size:22px!important}
+  .search input{min-width:0!important;width:100%}
+  .search .btn{width:100%;justify-content:center}
+  .pkg{padding:11px!important;gap:10px!important}
+  .pkg .pp{font-size:15px!important}
+  .earn{gap:14px!important;padding:14px!important}
+  .earn b{font-size:21px!important}
+  .tabs{margin-left:-2px;margin-right:-2px}
+  .tab{padding:10px 13px!important;font-size:14.5px!important}
+  .msg{max-width:92%}
+  .chat{max-height:55dvh}
+  .row{gap:8px}
+  .photo-pair{gap:6px}
+}
+@media(max-width:420px){
+  .stats-grid{grid-template-columns:1fr!important}
+  .stat-value,.kpi .v{font-size:22px!important}
+  .grave-head h2{font-size:21px!important}
+  .tb-brand span{display:none}
+}
+/* Bản đồ phân lô: cuộn dọc được trên điện thoại */
+@media(max-width:768px){
+  body.lotmap-page,body:has(.layout){height:100dvh}
+  .tb-actions{gap:5px;flex-wrap:nowrap;overflow-x:auto}
+  .tb-actions .btn{padding:8px 10px!important;font-size:13px!important;white-space:nowrap}
+  .tb-title{display:none}
+  .layout{overflow-y:auto!important}
+  .left-panel{max-height:none!important;height:auto!important}
+  .map-area{min-height:55dvh!important;flex:none!important}
+  .right-panel{max-height:none!important}
+}
